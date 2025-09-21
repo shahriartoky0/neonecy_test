@@ -7,4 +7,7 @@ class AppRoutes {
   //splash screen
   static const String firstSplashScreen = "/splash-screen";
 
- }
+
+  //home screen
+  static const String homeScreen = "/home";
+}

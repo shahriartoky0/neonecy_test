@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       theme: AppTheme.defaultThemeData,
       navigatorKey: navigatorKey,
-      initialRoute: AppRoutes.firstSplashScreen,
+      initialRoute: AppRoutes.homeScreen,
       getPages: AppNavigation.routes,
 
       initialBinding: ControllerBinder(),
