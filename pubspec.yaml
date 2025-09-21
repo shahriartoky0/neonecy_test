@@ -1,0 +1,65 @@
+name: neonecy_test
+description: "A new Flutter project."
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  #http package
+  http: ^1.4.0
+  get: ^4.7.2
+  #for icon SVG
+  flutter_svg: ^2.0.17
+  #for caching image
+  cached_network_image: ^3.4.1
+  #for date time:
+  intl: ^0.20.2
+  #for loader :
+  flutter_spinkit:
+  #for internet connection:
+  connectivity_plus:
+  #for logging the error:
+  logger:
+  #for icon :
+  flutter_launcher_icons: ^0.14.4
+  #for the device ID :
+  device_info_plus: ^10.1.0
+  get_storage: ^2.1.1
+  lottie: ^3.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/fonts/
+    - assets/images/
+    - assets/icons/
+
+
+  fonts:
+    - family: inter
+      fonts:
+        - asset: assets/fonts/satoshi/inter_black.ttf
+        - asset: assets/fonts/satoshi/inter_bold.ttf
+        - asset: assets/fonts/satoshi/inter_italic.ttf
+        - asset: assets/fonts/satoshi/inter_light.ttf
+        - asset: assets/fonts/satoshi/inter_medium.ttf
+        - asset: assets/fonts/satoshi/inter_regular.ttf
+
+
+

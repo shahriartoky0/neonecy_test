@@ -1,0 +1,42 @@
+class AppIcons {
+  AppIcons._();
+
+  static String baseUrl = "assets/icons";
+
+// Appbar Icons
+  static String appbarCoin = "$baseUrl/appbar_coin.svg";
+  static String appbarHeadphone = "$baseUrl/appbar_headphone.svg";
+  static String appbarLeft = "$baseUrl/appbar_left.svg";
+
+// Asset & History Icons
+  static String assetHistory = "$baseUrl/asset_history.svg";
+  static String assetsGraph = "$baseUrl/assets_graph.svg";
+
+// Filter Icon
+  static String filter = "$baseUrl/filter.svg";
+
+// Gift & Future Icons
+  static String futureGift = "$baseUrl/future_gift.svg";
+  static String futurePlusMinus = "$baseUrl/future_plus_minus.svg";
+
+// Home Icons
+  static String homeMore = "$baseUrl/home_more.svg";
+  static String homeReferral = "$baseUrl/home_referral.svg";
+  static String homeReward = "$baseUrl/home_reward.svg";
+  static String homeSharia = "$baseUrl/home_sharia.svg";
+  static String homeSimpleEarn = "$baseUrl/home_simple_earn.svg";
+
+// Navigation Icons
+  static String navAsset = "$baseUrl/nav_asset.svg";
+  static String navFuture = "$baseUrl/nav_future.svg";
+  static String navHome = "$baseUrl/nav_home.svg";
+  static String navMarkets = "$baseUrl/nav_markets.svg";
+  static String navTrade = "$baseUrl/nav_trade.svg";
+
+// Search Icon
+  static String search = "$baseUrl/search.svg";
+
+// Setting Icon
+  static String setting = "$baseUrl/setting.svg";
+
+}
