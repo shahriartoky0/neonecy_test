@@ -1,30 +1,79 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class TradeController extends GetxController {
+class TradeController extends GetxController with GetSingleTickerProviderStateMixin {
+  final RxInt selectedOrderType = 0.obs;
+  final RxString fromToken = 'PEPE'.obs;
+  final RxString toToken = 'PLUME'.obs;
+  final RxString fromAmount = '950'.obs;
+  final RxString toAmount = '0.12'.obs;
+  final RxString availableBalance = '20,000'.obs;
+  final RxString maxFromRange = '96000000'.obs;
+  final RxString maxToRange = '1200000'.obs;
 
-  final RxInt count = 0.obs;
+  void selectOrderType(int index) {
+    selectedOrderType.value = index;
+  }
 
-  void increment() => count.value++;
+  void swapTokens() {
+    final String tempToken = fromToken.value;
+    final String tempAmount = fromAmount.value;
+    final String tempRange = maxFromRange.value;
 
+    fromToken.value = toToken.value;
+    fromAmount.value = toAmount.value;
+    maxFromRange.value = maxToRange.value;
 
-  
-  /// [onInit] Lifecycle method called when the controller is initialized.
-  ///
-  /// Resets loading states, clears existing data, and triggers and more..
-  /// initial fetch
-  /// 
+    toToken.value = tempToken;
+    toAmount.value = tempAmount;
+    maxToRange.value = tempRange;
+  }
+
+  void updateFromAmount(String value) {
+    fromAmount.value = value;
+    if (value.isNotEmpty) {
+      final double amount = double.tryParse(value) ?? 0;
+      const double rate = 0.000126;
+      toAmount.value = (amount * rate).toStringAsFixed(8);
+    }
+  }
+
+  void setMaxAmount() {
+    fromAmount.value = availableBalance.value.replaceAll(',', '');
+    updateFromAmount(fromAmount.value);
+  }
+
+  /// ============> For the top tab bar =====>
+  RxInt selectedTab = 0.obs; // 0 for Exchange, 1 for Wallet
+
+  void selectTab(int index) {
+    selectedTab.value = index;
+  }
+
+  bool isExchangeSelected() => selectedTab.value == 0;
+
+  bool isWalletSelected() => selectedTab.value == 1;
+
+  /// ===> For the Tab options =====>
+  late TabController tabController;
+  RxInt selectedIndex = 0.obs;
+
+  final List<String> homeTabTitles = <String>['Convert', 'Sport', 'Margin', 'Buy/Sell', 'P2'];
+
   @override
   void onInit() {
     super.onInit();
-    count.value = 0;
+    tabController = TabController(length: homeTabTitles.length, vsync: this);
+
+    // Listen to tab changes
+    tabController.addListener(() {
+      selectedIndex.value = tabController.index;
+    });
   }
 
-  /// [dispose] Lifecycle method called when the controller is destroyed.
-  ///
-  /// Cleans up by resetting loading states and clearing lists and more...
   @override
-  void dispose() {
-    super.dispose();
-    count.value = 0;
+  void onClose() {
+    tabController.dispose();
+    super.onClose();
   }
 }

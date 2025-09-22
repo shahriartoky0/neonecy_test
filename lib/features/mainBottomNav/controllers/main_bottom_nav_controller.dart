@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/features/home/screens/home_screen.dart';
 import 'package:neonecy_test/features/markets/screens/markets_screen.dart';
 import '../../../core/design/app_icons.dart';
+import '../../futures/screens/futures_screen.dart';
 import '../../trade/screens/trade_screen.dart';
 
 class MainBottomNavController extends GetxController {
@@ -19,8 +21,8 @@ class MainBottomNavController extends GetxController {
     const HomeScreen(),
     const MarketsScreen(),
     const TradeScreen(),
-    const Text('Future'),
-    const Text('Asset'),
+    const FuturesScreen(),
+    const Text('Asset').centered,
   ];
 
   final List<String> icons = <String>[

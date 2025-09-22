@@ -5,12 +5,10 @@ import 'package:neonecy_test/features/home/controllers/home_controller.dart';
 import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_controller.dart';
 import 'package:neonecy_test/features/mainBottomNav/screens/main_bottom_nav_screen.dart';
 import 'package:neonecy_test/features/markets/controllers/markets_controller.dart';
-import 'package:neonecy_test/features/markets/widget/enhanced_crupto.dart';
+import 'package:neonecy_test/features/trade/controllers/trade_controller.dart';
 import 'core/design/app_theme.dart';
 import 'core/routes/app_navigation.dart';
-import 'core/routes/app_routes.dart';
 import 'features/markets/controllers/enhanced_market_controller.dart';
-import 'features/trade/screens/trade_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -29,7 +27,7 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       // initialRoute: AppRoutes.homeScreen,
       getPages: AppNavigation.routes,
-      home: MainBottomNavScreen(),
+      home: const MainBottomNavScreen(),
       initialBinding: ControllerBinder(),
       debugShowCheckedModeBanner: false,
     );
@@ -45,6 +43,6 @@ class ControllerBinder extends Bindings {
     Get.put(CryptoMarketController());
     Get.put(MarketsController());
     Get.put(EnhancedCryptoMarketController());
-    Get.put(CryptoSwapController());
+    Get.put(TradeController());
   }
 }

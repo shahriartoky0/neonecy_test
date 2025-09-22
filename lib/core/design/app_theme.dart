@@ -70,9 +70,10 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.red,
+        backgroundColor: AppColors.yellow,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        disabledBackgroundColor: AppColors.yellow.withValues(alpha: 0.5)
       ),
     ),
     dividerColor: AppColors.textGreyLight,
