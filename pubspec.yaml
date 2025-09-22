@@ -27,7 +27,7 @@ dependencies:
   connectivity_plus:
   #for logging the error :
   logger:
-  #for icon :
+  #for launcher icon :
   flutter_launcher_icons: ^0.14.4
   #for the device ID :
   device_info_plus: ^10.1.0

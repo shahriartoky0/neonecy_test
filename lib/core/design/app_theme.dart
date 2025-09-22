@@ -9,7 +9,7 @@ class AppTheme {
     //font family
     scaffoldBackgroundColor: AppColors.bgColor,
     // colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryColor),
-    iconTheme: const IconThemeData(opacity: 1, color: AppColors.white),
+    iconTheme: const IconThemeData(opacity: 1, color: AppColors.textGreyLight),
     fontFamily: 'inter',
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,
@@ -39,11 +39,7 @@ class AppTheme {
         borderRadius: BorderRadius.all(Radius.circular(12)),
         borderSide: BorderSide.none,
       ),
-      hintStyle: TextStyle(
-        color: AppColors.hintText,
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-      ),
+      hintStyle: TextStyle(color: AppColors.hintText, fontSize: 14, fontWeight: FontWeight.w500),
       iconColor: AppColors.textGreyLight,
       contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: AppSizes.sm),
     ),
@@ -79,7 +75,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     ),
-    dividerColor: AppColors.white,
-    dividerTheme: const DividerThemeData(color: AppColors.white),
+    dividerColor: AppColors.textGreyLight,
+    dividerTheme: const DividerThemeData(color: AppColors.textGreyLight, thickness: 0.5),
   );
 }

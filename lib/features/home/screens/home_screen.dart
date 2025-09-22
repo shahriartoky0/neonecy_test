@@ -1,13 +1,18 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/common/widgets/app_button.dart';
 import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/design/app_icons.dart';
+import 'package:neonecy_test/core/design/app_images.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import '../controllers/home_controller.dart';
+import '../widgets/crypto_market.dart';
+import '../widgets/discover_post_card.dart';
 
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
@@ -15,80 +20,322 @@ class HomeScreen extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Row(
-
-              children: <Widget>[
-                appbarIcon(assetPath: AppIcons.appbarLeft, onTap: () {}),
-                IconButton(
-                  onPressed: () {},
-                  icon: Badge(
-                    backgroundColor: AppColors.yellow,
-                    label: Text('22', style: TextStyle(color: AppColors.black, fontSize: 10)),
-                    child: const Icon(Icons.message_outlined, color: AppColors.white),
-                  ),
+      body: SafeArea(
+        child: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              // AppBar
+              SliverAppBar(
+                pinned: false,
+                floating: true,
+                snap: true,
+                title: Row(
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        appbarIcon(assetPath: AppIcons.appbarLeft, onTap: () {}),
+                        IconButton(
+                          onPressed: () {},
+                          icon: const Badge(
+                            backgroundColor: AppColors.yellow,
+                            label: Text(
+                              '22',
+                              style: TextStyle(color: AppColors.black, fontSize: 10),
+                            ),
+                            child: Icon(Icons.message_outlined, color: AppColors.white),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.iconBackground,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Obx(
+                          () => Row(
+                            children: <Widget>[
+                              topTabButton(
+                                label: 'Exchange',
+                                isSelected: controller.isExchangeSelected(),
+                                onTap: () {
+                                  controller.selectTab(0);
+                                },
+                              ),
+                              topTabButton(
+                                label: 'Wallet',
+                                isSelected: controller.isWalletSelected(),
+                                onTap: () {
+                                  controller.selectTab(1);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ).centered,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            Expanded(
-              child: TabBar(
-                controller: controller.tabController,
-                dividerColor: Colors.transparent,
-                isScrollable: true,
-                indicatorColor: AppColors.primaryColor,
-                indicatorWeight: 5,
-                tabAlignment: TabAlignment.center,
-                labelColor: Colors.black87,
-                labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 14),
-                tabs: const <Widget>[
-                  Tab(child: Text("Exchange")),
-                  Tab(child: Text("Wallet")),
+                actions: <Widget>[
+                  appbarIcon(assetPath: AppIcons.appbarHeadphone, onTap: () {}),
+                  const SizedBox(width: AppSizes.sm),
+                  appbarIcon(assetPath: AppIcons.appbarCoin, onTap: () {}),
+                  const SizedBox(width: AppSizes.iconXs),
                 ],
               ),
-            ),
-          ],
-        ),
-        actions: <Widget>[
-          appbarIcon(assetPath: AppIcons.appbarHeadphone, onTap: () {}),
-          SizedBox(width: AppSizes.sm),
-          appbarIcon(assetPath: AppIcons.appbarCoin, onTap: () {}),
-          SizedBox(width: AppSizes.iconXs),
-        ],
-      ),
-      body: Expanded(
-        child: TabBarView(
-          controller: controller.tabController,
-          children: <Widget>[
-            /// ========== > Exchange Tab view =====>
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: '#BinanceHODLerPLUME',
-                suffixIcon: Padding(
-                  padding: const EdgeInsets.all(AppSizes.iconXs),
-                  child: CustomSvgImage(assetName: AppIcons.search, color: AppColors.textGreyLight),
+
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          hintText: '#BinanceHODLerPLUME',
+                          suffixIcon: Icon(CupertinoIcons.search, color: AppColors.textGreyLight),
+                        ),
+                      ),
+                      const SizedBox(height: AppSizes.md),
+                      Text(
+                        'Est.Total Value(USD) ^',
+                        style: TextStyle(color: AppColors.textWhite.withValues(alpha: 0.85)),
+                      ),
+                      const SizedBox(height: AppSizes.md),
+
+                      /// ========> The dollar amount and the add fund button  =======>
+                      Row(
+                        spacing: AppSizes.md,
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(
+                              '\$0 297854454',
+                              style: context.txtTheme.displayMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          AppButton(
+                            width: 100,
+                            bgColor: AppColors.yellow,
+                            textColor: AppColors.black,
+                            labelText: 'Add Funds',
+                            onTap: () {},
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSizes.sm),
+
+                      /// ========> The PNL percentage =======>
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Text("Today's PNL"),
+                          Text("+\$0.00146468 (+0.50%) ", style: TextStyle(color: AppColors.green)),
+                          Text("V", style: TextStyle(color: AppColors.green, fontSize: 11)),
+                        ],
+                      ),
+                      const SizedBox(height: AppSizes.md),
+
+                      /// ========> Different Icons with routes =======>
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: AppSizes.md,
+                          children: <Widget>[
+                            quickRouteWidget(
+                              label: 'Rewards \nHub',
+                              assetPath: AppIcons.homeReward,
+                              onTap: () {},
+                            ),
+                            quickRouteWidget(
+                              label: 'Sharia Earn',
+                              assetPath: AppIcons.homeSharia,
+                              onTap: () {},
+                            ),
+                            quickRouteWidget(
+                              label: 'Referral',
+                              assetPath: AppIcons.homeReferral,
+                              onTap: () {},
+                            ),
+                            quickRouteWidget(
+                              label: 'Simple Earn',
+                              assetPath: AppIcons.homeSimpleEarn,
+                              onTap: () {},
+                            ),
+                            quickRouteWidget(
+                              label: 'More',
+                              assetPath: AppIcons.homeMore,
+                              onTap: () {},
+                            ),
+                          ],
+                        ).centered,
+                      ),
+                      const SizedBox(height: AppSizes.md),
+
+                      /// ================> The Crypto Table ==============>
+                      const CryptoMarketWidget(),
+                      const SizedBox(height: AppSizes.md),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            /// ========== > Wallet Tab view =====>
-            Text("Wallet UI appear here", style: context.txtTheme.headlineMedium).centered,
-          ],
+              // Sticky TabBar
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _SliverTabBarDelegate(
+                  TabBar(
+                    controller: controller.tabController,
+                    dividerColor: Colors.transparent,
+                    isScrollable: true,
+                    indicatorColor: AppColors.yellow,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    indicatorPadding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
+                    indicatorWeight: 1,
+                    tabAlignment: TabAlignment.center,
+                    labelColor: AppColors.textWhite,
+                    labelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
+                      color: AppColors.textGreyLight,
+                    ),
+                    tabs: controller.homeTabTitles
+                        .map((String title) => Tab(child: Text(title)))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ];
+          },
+          body: TabBarView(
+            controller: controller.tabController,
+            children: <Widget>[
+              /// ========== > Discover View ======>
+              SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    const SizedBox(height: AppSizes.sm),
+                    const Divider(),
+                    StockCard(
+                      username: "FARUK",
+                      timeAgo: "3h ",
+                      symbol: "SOM",
+                      question: "Again possible or not ?",
+                      imagePath: AppImages.demoImage,
+                      priceChange: "-11.88%",
+                      isPositive: false,
+                      comments: 12,
+                      likes: 19,
+                      reposts: 18,
+                      shares: 0,
+                    ),
+                    const Divider(),
+                    // Added more cards here for testing scrolling
+                    StockCard(
+                      username: "ALICE",
+                      timeAgo: "1h ",
+                      symbol: "BTC",
+                      question: "Will it drop below 40k?",
+                      imagePath: AppImages.demoImage,
+                      priceChange: "+2.45%",
+                      isPositive: true,
+                      comments: 8,
+                      likes: 25,
+                      reposts: 12,
+                      shares: 3,
+                    ),
+                  ],
+                ),
+              ),
+
+              /// ========== > Other Tab view =====>
+              const Text("Following UI appear here").centered,
+              const Text("Campaign UI appear here").centered,
+              const Text("News UI appear here").centered,
+              const Text("Announcement UI appear here").centered,
+            ],
+          ),
         ),
       ),
     );
   }
 
+  /// =====> The widget of icon in the rows  ============>
+  Column quickRouteWidget({
+    required String label,
+    required String assetPath,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      spacing: 4,
+      children: <Widget>[
+        Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(AppSizes.borderRadiusXl),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(AppSizes.borderRadiusXl),
+            splashColor: AppColors.iconBackgroundLight,
+            onTap: () {
+              DeviceUtility.hapticFeedback();
+              onTap();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: CustomSvgImage(assetName: assetPath, height: 48),
+            ),
+          ),
+        ),
+        Text(label, textAlign: TextAlign.center),
+      ],
+    );
+  }
+
+  /// ==========> for the exchange and wallet button ===========>
+  Expanded topTabButton({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.iconBackgroundLight : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          child: AnimatedDefaultTextStyle(
+            style: TextStyle(
+              color: isSelected ? AppColors.textWhite : AppColors.textGreyLight,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Text(label),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// ========> App Bar Icons with clicking effects ============>
   Material appbarIcon({required String assetPath, required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
         splashColor: AppColors.primaryColor,
-        onTap: (){
-          DeviceUtility.hapticFeedback() ;
+        onTap: () {
+          DeviceUtility.hapticFeedback();
         },
         child: Padding(
           padding: const EdgeInsets.all(2.0),
@@ -96,5 +343,28 @@ class HomeScreen extends GetView<HomeController> {
         ),
       ),
     );
+  }
+}
+
+// Custom SliverPersistentHeaderDelegate for the sticky TabBar
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar tabBar;
+
+  _SliverTabBarDelegate(this.tabBar);
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(color: Theme.of(context).scaffoldBackgroundColor, child: tabBar);
+  }
+
+  @override
+  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
+    return tabBar != oldDelegate.tabBar;
   }
 }
