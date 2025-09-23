@@ -92,7 +92,7 @@ class _CustomGifRefreshWidgetState extends State<CustomGifRefreshWidget>
             setState(() {
               // Accumulate drag distance instead of replacing it
               _dragDistance +=
-                  (-notification.overscroll * 5); // Multiply by 5 to make it more sensitive
+              (-notification.overscroll * 5); // Multiply by 5 to make it more sensitive
               _dragDistance = _dragDistance.clamp(0.0, widget.refreshTriggerDistance * 2);
               _canRefresh = _dragDistance >= widget.refreshTriggerDistance;
             });
@@ -115,55 +115,53 @@ class _CustomGifRefreshWidgetState extends State<CustomGifRefreshWidget>
 
         return false;
       },
-      child: Stack(
+      child: Column(
         children: <Widget>[
-          // Main content
-          widget.child,
-
-          // Refresh indicator
-          if (_dragDistance > 0 || _isRefreshing)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AnimatedBuilder(
-                animation: _animationController,
-                builder: (BuildContext context, Widget? child) {
-                  final double indicatorHeight = _isRefreshing
-                      ? 80.0
-                      : (_dragDistance * 0.8).clamp(0.0, 80.0);
-
-                  return Container(
-                    height: indicatorHeight,
-                    color: AppColors.primaryColor,
-                    child: Center(
-                      child: AnimatedScale(
-                        scale: _isRefreshing
-                            ? _scaleAnimation.value
-                            : (0.3 + (_dragDistance / widget.refreshTriggerDistance) * 0.7).clamp(
-                                0.3,
-                                1.0,
-                              ),
-                        duration: const Duration(milliseconds: 100),
-                        child: AnimatedOpacity(
-                          opacity: _isRefreshing
-                              ? 1.0
-                              : (_dragDistance / widget.refreshTriggerDistance).clamp(0.3, 1.0),
-                          duration: const Duration(milliseconds: 100),
-                          child: SizedBox(
-                            width: 40,
-                            height: 40,
-                            child: _isRefreshing
-                                ? Image.asset(widget.gifAssetPath, fit: BoxFit.contain)
-                                : Image.asset(widget.gifAssetPath, fit: BoxFit.contain),
-                          ),
-                        ),
+          // Refresh indicator at the top - takes its own space
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: _dragDistance > 0 || _isRefreshing
+                ? _isRefreshing
+                ? 80.0
+                : (_dragDistance * 0.8).clamp(0.0, 80.0)
+                : 0.0,
+            width: double.infinity,
+            color: Colors.transparent, // You can change this to AppColors.primaryColor if needed
+            child: _dragDistance > 0 || _isRefreshing
+                ? AnimatedBuilder(
+              animation: _animationController,
+              builder: (BuildContext context, Widget? child) {
+                return Center(
+                  child: AnimatedScale(
+                    scale: _isRefreshing
+                        ? _scaleAnimation.value
+                        : (0.3 + (_dragDistance / widget.refreshTriggerDistance) * 0.7).clamp(
+                      0.3,
+                      1.0,
+                    ),
+                    duration: const Duration(milliseconds: 100),
+                    child: AnimatedOpacity(
+                      opacity: _isRefreshing
+                          ? 1.0
+                          : (_dragDistance / widget.refreshTriggerDistance).clamp(0.3, 1.0),
+                      duration: const Duration(milliseconds: 100),
+                      child: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: Image.asset(widget.gifAssetPath, fit: BoxFit.contain),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
+                  ),
+                );
+              },
+            )
+                : const SizedBox.shrink(),
+          ),
+
+          // Main content - takes remaining space
+          Expanded(
+            child: widget.child,
+          ),
         ],
       ),
     );

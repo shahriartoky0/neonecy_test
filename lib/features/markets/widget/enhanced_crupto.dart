@@ -10,23 +10,20 @@ class EnhancedCryptoMarketWidget extends GetView<EnhancedCryptoMarketController>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-
-
-
-
-
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.primaryColor,
-            borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
+    return SingleChildScrollView(
+      child: Column(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.primaryColor,
+              borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
+            ),
+            child: Column(
+              children: <Widget>[_buildTabBar(), _buildCryptoTable(), _buildLoadingIndicator()],
+            ),
           ),
-          child: Column(
-            children: <Widget>[_buildTabBar(), _buildCryptoTable(), _buildLoadingIndicator()],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -214,10 +211,7 @@ class EnhancedCryptoMarketWidget extends GetView<EnhancedCryptoMarketController>
                             ),
                             child: Text(
                               crypto.leverage,
-                              style: const TextStyle(
-                                color: AppColors.hintText,
-                                fontSize: 10,
-                               ),
+                              style: const TextStyle(color: AppColors.hintText, fontSize: 10),
                             ),
                           ),
                         ],

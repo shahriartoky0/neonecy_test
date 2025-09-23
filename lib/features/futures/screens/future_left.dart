@@ -17,7 +17,7 @@ class FutureLeft extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Row(
-          children: [
+          children: <Widget>[
             Text('BTCUSDT ', style: context.txtTheme.headlineMedium),
             Container(
               decoration: BoxDecoration(
@@ -128,18 +128,16 @@ class FutureLeft extends StatelessWidget {
             color: AppColors.iconBackground,
             borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
           ),
-          child: Expanded(
-            child: Row(
-              spacing: 5,
-              children: <Widget>[
-                const Icon(CupertinoIcons.minus, size: 12,),
-                Text('Amount', style: context.txtTheme.labelMedium),
-                const Icon(CupertinoIcons.plus, size: 12,),
-                Text('| ', style: context.txtTheme.labelMedium),
-                Text('BTC', style: context.txtTheme.labelMedium),
-                const Icon(Icons.arrow_drop_down_sharp),
-              ],
-            ),
+          child: Row(
+            spacing: 5,
+            children: <Widget>[
+              const Icon(CupertinoIcons.minus, size: 12,),
+              Text('Amount', style: context.txtTheme.labelMedium),
+              const Icon(CupertinoIcons.plus, size: 12,),
+              Text('| ', style: context.txtTheme.labelMedium),
+              Text('BTC', style: context.txtTheme.labelMedium),
+              const Icon(Icons.arrow_drop_down_sharp),
+            ],
           ),
         ),
         const SizedBox(height: AppSizes.md),

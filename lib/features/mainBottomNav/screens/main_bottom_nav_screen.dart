@@ -25,7 +25,7 @@ class MainBottomNavScreen extends GetView<MainBottomNavController> {
           elevation: 0,
           child: Obx(
                 () => Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(
                 controller.icons.length,
                     (int index) => _buildNavItem(index),
@@ -44,7 +44,8 @@ class MainBottomNavScreen extends GetView<MainBottomNavController> {
         spacing: AppSizes.sm,
         children: <Widget>[
           CustomSvgImage(
-            height: controller.isTabSelected(index) ? 24 : 20,
+            // height: controller.isTabSelected(index) ? 24 : 20,
+            height: 23,
             assetName: controller.icons[index],
             color: controller.isTabSelected(index)
                 ? AppColors.yellow
@@ -53,6 +54,7 @@ class MainBottomNavScreen extends GetView<MainBottomNavController> {
           Text(
             controller.labels[index],
             style: TextStyle(
+              fontSize: 10,
               color: controller.isTabSelected(index)
                   ? AppColors.textWhite
                   : AppColors.textGreyLight,

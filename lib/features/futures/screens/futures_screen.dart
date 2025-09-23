@@ -147,6 +147,7 @@ class UsdMScreen extends StatelessWidget {
             const Text("Positions UI appear here").centered,
             const Text("Orders UI appear here").centered,
             const Text("Futures Grid appear here").centered,
+            const Text("History Grid appear here").centered,
           ],
         ),
       ),

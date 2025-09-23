@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/logger_utils.dart';
+
 class HomeController extends GetxController with GetSingleTickerProviderStateMixin {
   /// ===> For the top Buttons =====>
-  RxInt selectedTab = 0.obs; // 0 for Exchange, 1 for Wallet
+  RxInt selectedTab = 0.obs;
+  RxBool showSpace = false.obs;
 
   void selectTab(int index) {
     selectedTab.value = index;
@@ -36,10 +39,18 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     });
   }
 
+  Future<void> onRefresh() async {
+    showSpace.value = true;
+    LoggerUtils.debug("Refreshing...${showSpace.value}"); // Debug
+    // Add your refresh logic here
+    await Future.delayed(const Duration(seconds: 4));
+    showSpace.value = false;
+    LoggerUtils.debug("Refresh completed ${showSpace.value}");
+  }
 
   @override
   void onClose() {
     tabController.dispose();
-     super.onClose();
+    super.onClose();
   }
 }

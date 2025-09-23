@@ -19,25 +19,22 @@ import '../widgets/discover_post_card.dart';
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
 
-  Future<void> _onRefresh() async {
-    LoggerUtils.debug("Refreshing..."); // Debug
-    // Add your refresh logic here
-    await Future.delayed(const Duration(seconds: 2));
-    LoggerUtils.debug("Refresh completed"); // Debug
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: CustomGifRefreshWidget(
-          onRefresh: _onRefresh,
+          onRefresh: () async {
+            await controller.onRefresh();
+          },
+
           gifAssetPath: AppImages.loader, // Your gif asset path
           refreshTriggerDistance: 80.0,
           child: NestedScrollView(
-            physics: BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(),
             headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
+
                 // AppBar
                 SliverAppBar(
                   pinned: false,
