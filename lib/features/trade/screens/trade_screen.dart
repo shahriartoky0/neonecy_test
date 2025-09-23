@@ -21,7 +21,7 @@ class TradeScreen extends GetView<TradeController> {
             controller: controller.tabController,
             dividerColor: Colors.transparent,
             isScrollable: true,
-            indicatorColor: AppColors.yellow,
+            indicatorColor: Colors.transparent,
             indicatorSize: TabBarIndicatorSize.label,
             indicatorPadding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
             indicatorWeight: 1,

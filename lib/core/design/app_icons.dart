@@ -40,6 +40,8 @@ class AppIcons {
   static String futureDivider = "$baseUrl/future_divider.svg";
   static String futurePage = "$baseUrl/future_page.svg";
 
+  // Assets Icons
+  static String eye = "$baseUrl/eye.svg";
 
   // Navigation Icons
 
