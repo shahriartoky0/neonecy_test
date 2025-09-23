@@ -86,8 +86,8 @@ class UsdMScreen extends StatelessWidget {
                   spacing: 12,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Expanded(child: FutureLeft()),
-                    Expanded(child: FutureRight()),
+                    Expanded(flex: 3, child: FutureLeft()),
+                    Expanded(flex: 2, child: FutureRight()),
                   ],
                 ),
               ),
@@ -143,14 +143,10 @@ class UsdMScreen extends StatelessWidget {
         body: TabBarView(
           controller: controller.tabController,
           children: <Widget>[
-            /// ========== > USD View ======>
-            const Text("COIN -M UI appear here").centered,
-
             /// ========== > Other Tab views =====>
-            const Text("COIN -M UI appear here").centered,
-            const Text("Options UI appear here").centered,
-            const Text("Smart UI appear here").centered,
-            const Text("History UI appear here").centered,
+            const Text("Positions UI appear here").centered,
+            const Text("Orders UI appear here").centered,
+            const Text("Futures Grid appear here").centered,
           ],
         ),
       ),

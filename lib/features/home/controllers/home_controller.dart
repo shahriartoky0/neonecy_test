@@ -36,9 +36,10 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     });
   }
 
+
   @override
   void onClose() {
     tabController.dispose();
-    super.onClose();
+     super.onClose();
   }
 }

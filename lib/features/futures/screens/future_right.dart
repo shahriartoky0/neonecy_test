@@ -185,6 +185,7 @@ class FutureRight extends StatelessWidget {
         splashColor: AppColors.primaryColor,
         onTap: () {
           DeviceUtility.hapticFeedback();
+          onTap();
         },
         child: icon,
       ),

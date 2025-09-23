@@ -77,6 +77,6 @@ class AppTheme {
       ),
     ),
     dividerColor: AppColors.textGreyLight,
-    dividerTheme: const DividerThemeData(color: AppColors.textGreyLight, thickness: 0.5),
+    dividerTheme: const DividerThemeData(color: AppColors.textGreyLight, thickness: 0.2),
   );
 }

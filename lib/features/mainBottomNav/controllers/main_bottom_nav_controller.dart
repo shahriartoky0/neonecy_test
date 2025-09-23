@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
+import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/home/screens/home_screen.dart';
 import 'package:neonecy_test/features/markets/screens/markets_screen.dart';
 import '../../../core/design/app_icons.dart';
@@ -22,7 +23,7 @@ class MainBottomNavController extends GetxController {
     const HomeScreen(),
     const MarketsScreen(),
     const TradeScreen(),
-    FuturesScreen(),
+    const FuturesScreen(),
     const AssetsScreen().centered,
   ];
 
@@ -55,6 +56,7 @@ class MainBottomNavController extends GetxController {
 
   /// Navigate to specific tab
   void navigateToTab(int index) {
+    DeviceUtility.hapticFeedback();
     pageController.jumpToPage(index);
     _selectedIndex.value = index;
   }

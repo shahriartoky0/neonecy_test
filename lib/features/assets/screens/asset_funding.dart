@@ -114,7 +114,8 @@ class AssetFundingScreen extends StatelessWidget {
 
         /// ==========> Search and Tab bar =========>
         Row(
-          children: [
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
             Text('Balances', style: context.txtTheme.headlineMedium),
             const Icon(CupertinoIcons.search),
           ],
@@ -146,11 +147,7 @@ class AssetFundingScreen extends StatelessWidget {
               );
             },
             separatorBuilder: (BuildContext context, int index) {
-              return const Column(
-                children: [
-                   Divider(),
-                ],
-              );
+              return Divider();
             },
           ),
         ),
@@ -166,6 +163,7 @@ class AssetFundingScreen extends StatelessWidget {
         splashColor: AppColors.primaryColor,
         onTap: () {
           DeviceUtility.hapticFeedback();
+          onTap();
         },
         child: icon,
       ),

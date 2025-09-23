@@ -292,6 +292,7 @@ class TradeConvertScreen extends GetView<TradeController> {
         splashColor: AppColors.primaryColor,
         onTap: () {
           DeviceUtility.hapticFeedback();
+          onTap();
         },
         child: CustomSvgImage(assetName: assetPath, color: AppColors.white, height: 20),
       ),

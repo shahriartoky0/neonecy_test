@@ -154,6 +154,7 @@ class AssetOverviewScreen extends StatelessWidget {
         splashColor: AppColors.primaryColor,
         onTap: () {
           DeviceUtility.hapticFeedback();
+          onTap();
         },
         child: icon,
       ),
