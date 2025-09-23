@@ -36,7 +36,13 @@ class AppIcons {
   static String discoverShare = "$baseUrl/discover_share.svg";
   static String discoverProfile = "$baseUrl/discover_profile.svg";
 
+  // Future Icons
+  static String futureDivider = "$baseUrl/future_divider.svg";
+  static String futurePage = "$baseUrl/future_page.svg";
+
+
   // Navigation Icons
+
   static String navAsset = "$baseUrl/nav_asset.svg";
   static String navFuture = "$baseUrl/nav_future.svg";
   static String navHome = "$baseUrl/nav_home.svg";

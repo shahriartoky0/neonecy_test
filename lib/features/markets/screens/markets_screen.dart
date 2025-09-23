@@ -56,7 +56,7 @@ class MarketsScreen extends GetView<MarketsController> {
                   .toList(),
             ),
           ),
-
+          Divider(),
           // TabBarView section - Takes remaining space
           Expanded(
             child: TabBarView(

@@ -21,7 +21,7 @@ class MainBottomNavController extends GetxController {
     const HomeScreen(),
     const MarketsScreen(),
     const TradeScreen(),
-    const FuturesScreen(),
+    FuturesScreen(),
     const Text('Asset').centered,
   ];
 

@@ -39,6 +39,7 @@ class TradeScreen extends GetView<TradeController> {
       ),
       body: Column(
         children: <Widget>[
+          const Divider(),
           // TabBarView section - Takes remaining space
           Expanded(
             child: TabBarView(

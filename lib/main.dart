@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/features/futures/controllers/futures_controller.dart';
+ import 'package:neonecy_test/features/futures/screens/futures_screen.dart';
 import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
 import 'package:neonecy_test/features/home/controllers/home_controller.dart';
 import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_controller.dart';
@@ -44,5 +46,6 @@ class ControllerBinder extends Bindings {
     Get.put(MarketsController());
     Get.put(EnhancedCryptoMarketController());
     Get.put(TradeController());
-  }
+    Get.put(FuturesController());
+   }
 }
