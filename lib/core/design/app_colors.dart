@@ -24,4 +24,13 @@ class AppColors {
   static const Color greenAccent = Color(0xFF2EBD85);
   static const Color iconBackground = Color(0xFF29313C);
   static const Color iconBackgroundLight = Color(0xFF36404C);
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF252D3A), // Lighter top
+      Color(0xFF1F2630), // Your primary color
+      Color(0xFF141A22), // Darker bottom
+    ],
+  );
 }

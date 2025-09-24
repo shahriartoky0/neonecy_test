@@ -45,7 +45,7 @@ class MainBottomNavScreen extends GetView<MainBottomNavController> {
         children: <Widget>[
           CustomSvgImage(
             // height: controller.isTabSelected(index) ? 24 : 20,
-            height: 23,
+            height: 20,
             assetName: controller.icons[index],
             color: controller.isTabSelected(index)
                 ? AppColors.yellow

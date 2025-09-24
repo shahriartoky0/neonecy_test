@@ -7,6 +7,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   /// ===> For the top Buttons =====>
   RxInt selectedTab = 0.obs;
   RxBool showSpace = false.obs;
+  RxDouble blurEffectSize = 20.0.obs;
 
   void selectTab(int index) {
     selectedTab.value = index;
@@ -40,11 +41,16 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   }
 
   Future<void> onRefresh() async {
+
     showSpace.value = true;
     LoggerUtils.debug("Refreshing...${showSpace.value}"); // Debug
     // Add your refresh logic here
-    await Future.delayed(const Duration(seconds: 4));
+    for(int i = 0; i < 8; i++){
+      blurEffectSize.value += 20;
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
     showSpace.value = false;
+    blurEffectSize.value = 20;
     LoggerUtils.debug("Refresh completed ${showSpace.value}");
   }
 
