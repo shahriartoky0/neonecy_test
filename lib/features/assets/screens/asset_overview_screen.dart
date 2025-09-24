@@ -34,11 +34,11 @@ class AssetOverviewScreen extends StatelessWidget {
               spacing: AppSizes.md,
               children: <Widget>[
                 clickableIcon(
-                  icon: CustomSvgImage(assetName: AppIcons.assetsGraph, height: 24),
+                  icon: CustomSvgImage(assetName: AppIcons.assetsGraph, height: 18),
                   onTap: () {},
                 ),
                 clickableIcon(
-                  icon: CustomSvgImage(assetName: AppIcons.assetHistory, height: 24),
+                  icon: CustomSvgImage(assetName: AppIcons.assetHistory, height: 18),
                   onTap: () {},
                 ),
               ],
@@ -83,7 +83,7 @@ class AssetOverviewScreen extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: AppButton(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 bgColor: AppColors.yellow,
                 textColor: AppColors.black,
                 labelText: 'Add Funds',
@@ -92,7 +92,7 @@ class AssetOverviewScreen extends StatelessWidget {
             ),
             Expanded(
               child: AppButton(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 8),
 
                 bgColor: AppColors.iconBackgroundLight,
                 textColor: AppColors.textWhite,
@@ -102,7 +102,7 @@ class AssetOverviewScreen extends StatelessWidget {
             ),
             Expanded(
               child: AppButton(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: const EdgeInsets.symmetric(vertical: 8),
 
                 bgColor: AppColors.iconBackgroundLight,
                 textColor: AppColors.textWhite,
