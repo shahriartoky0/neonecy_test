@@ -89,8 +89,7 @@ class HomeScreen extends GetView<HomeController> {
         onRefresh: () async {
           await controller.onRefresh();
         },
-
-        gifAssetPath: AppImages.loader, // Your gif asset path
+        gifAssetPath: AppImages.loader,
         refreshTriggerDistance: 80.0,
         child: NestedScrollView(
           physics: const BouncingScrollPhysics(),

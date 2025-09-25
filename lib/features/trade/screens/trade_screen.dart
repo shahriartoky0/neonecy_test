@@ -10,7 +10,6 @@ import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 
 class TradeScreen extends GetView<TradeController> {
   const TradeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

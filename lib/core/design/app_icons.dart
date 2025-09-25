@@ -3,6 +3,14 @@ class AppIcons {
 
   static String baseUrl = "assets/icons";
 
+  // Auth Icons
+  static String loginUser = "$baseUrl/login_user.svg";
+  static String loginLock = "$baseUrl/login_lock.svg";
+  static String warning = "$baseUrl/warning.svg";
+  static String pointer = "$baseUrl/point.svg";
+  static String profile = "$baseUrl/profile.svg";
+
+
   // Appbar Icons
   static String appbarCoin = "$baseUrl/appbar_coin.svg";
   static String appbarHeadphone = "$baseUrl/appbar_headphone.svg";

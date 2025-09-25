@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/features/auth/screens/login_screen.dart';
 import 'package:neonecy_test/features/futures/controllers/futures_controller.dart';
  import 'package:neonecy_test/features/futures/screens/futures_screen.dart';
 import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
@@ -10,6 +11,7 @@ import 'package:neonecy_test/features/markets/controllers/markets_controller.dar
 import 'package:neonecy_test/features/trade/controllers/trade_controller.dart';
 import 'core/design/app_theme.dart';
 import 'core/routes/app_navigation.dart';
+import 'core/routes/app_routes.dart';
 import 'features/markets/controllers/enhanced_market_controller.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -27,9 +29,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       theme: AppTheme.defaultThemeData,
       navigatorKey: navigatorKey,
-      // initialRoute: AppRoutes.homeScreen,
+      initialRoute: AppRoutes.firstSplashScreen,
       getPages: AppNavigation.routes,
-      home: const MainBottomNavScreen(),
+      // home: const LoginScreen(),
       initialBinding: ControllerBinder(),
       debugShowCheckedModeBanner: false,
     );

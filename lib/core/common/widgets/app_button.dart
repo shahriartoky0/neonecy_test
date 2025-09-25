@@ -10,6 +10,7 @@ class AppButton extends StatelessWidget {
   final VoidCallback onTap;
   final double? width;
   final EdgeInsets? padding;
+  final TextStyle? textStyle;
 
   final Color bgColor;
   final Color textColor;
@@ -21,7 +22,7 @@ class AppButton extends StatelessWidget {
     this.bgColor = AppColors.red,
     this.textColor = AppColors.white,
     this.width,
-    this.padding,
+    this.padding, this.textStyle,
   });
 
   @override
@@ -46,7 +47,7 @@ class AppButton extends StatelessWidget {
            ),
           child: Text(
             labelText,
-            style: context.txtTheme.labelMedium?.copyWith(color: textColor),
+            style: textStyle ?? context.txtTheme.labelMedium?.copyWith(color: textColor),
           ).centered,
         ),
       ),
