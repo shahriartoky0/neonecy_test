@@ -79,7 +79,7 @@ class AssetOverviewScreen extends StatelessWidget {
 
         /// ==========> The three buttons ===>
         Row(
-          spacing: 8,
+           spacing: 8,
           children: <Widget>[
             Expanded(
               child: AppButton(

@@ -28,53 +28,57 @@ class HomeScreen extends GetView<HomeController> {
           return AppBar(
             toolbarHeight: controller.showSpace.value ? 0 : kToolbarHeight,
 
-            title: Row(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    appbarIcon(assetPath: AppIcons.appbarLeft, onTap: () {}, height: 13),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Badge(
-                        backgroundColor: AppColors.yellow,
-                        label: Text('22', style: TextStyle(color: AppColors.black, fontSize: 10)),
-                        child: Icon(Icons.message_outlined, color: AppColors.white, size: 20),
+            title: AnimatedOpacity(
+              opacity: controller.showSpace.value ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 400),
+              child: Row(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      appbarIcon(assetPath: AppIcons.appbarLeft, onTap: () {}, height: 13),
+                      IconButton(
+                        onPressed: () {},
+                        icon: const Badge(
+                          backgroundColor: AppColors.yellow,
+                          label: Text('22', style: TextStyle(color: AppColors.black, fontSize: 10)),
+                          child: Icon(Icons.message_outlined, color: AppColors.white, size: 20),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                ),
-                Expanded(
-                  child: Container(
-                    height: 40,
-                    padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.iconBackground,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Obx(
-                      () => Row(
-                        children: <Widget>[
-                          topTabButton(
-                            label: 'Exchange',
-                            isSelected: controller.isExchangeSelected(),
-                            onTap: () {
-                              controller.selectTab(0);
-                            },
-                          ),
-                          topTabButton(
-                            label: 'Wallet',
-                            isSelected: controller.isWalletSelected(),
-                            onTap: () {
-                              controller.selectTab(1);
-                            },
-                          ),
-                        ],
+                      const SizedBox(width: 6),
+                    ],
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.iconBackground,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    ),
-                  ).centered,
-                ),
-              ],
+                      child: Obx(
+                            () => Row(
+                          children: <Widget>[
+                            topTabButton(
+                              label: 'Exchange',
+                              isSelected: controller.isExchangeSelected(),
+                              onTap: () {
+                                controller.selectTab(0);
+                              },
+                            ),
+                            topTabButton(
+                              label: 'Wallet',
+                              isSelected: controller.isWalletSelected(),
+                              onTap: () {
+                                controller.selectTab(1);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ).centered,
+                  ),
+                ],
+              ),
             ),
             actions: <Widget>[
               appbarIcon(assetPath: AppIcons.appbarHeadphone, onTap: () {}),
@@ -89,7 +93,8 @@ class HomeScreen extends GetView<HomeController> {
         onRefresh: () async {
           await controller.onRefresh();
         },
-        gifAssetPath: AppImages.loader,
+
+        gifAssetPath: AppImages.loader, // Your gif asset path
         refreshTriggerDistance: 80.0,
         child: NestedScrollView(
           physics: const BouncingScrollPhysics(),
@@ -101,11 +106,14 @@ class HomeScreen extends GetView<HomeController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.zero,
-                          hintText: '#BinanceHODLerPLUME',
-                          suffixIcon: Icon(CupertinoIcons.search, color: AppColors.textGreyLight),
+                      SizedBox(
+                        height: 40,
+                        child: TextFormField(
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: AppSizes.sm),
+                             hint: Text('#BinanceHODLerPLUME',style: TextStyle(fontSize: 12, color: AppColors.hintText),),
+                            suffixIcon: Icon(CupertinoIcons.search, color: AppColors.textGreyLight),
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppSizes.md),
@@ -293,13 +301,10 @@ class HomeScreen extends GetView<HomeController> {
               DeviceUtility.hapticFeedback();
               onTap();
             },
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: CustomSvgImage(assetName: assetPath, height: 40),
-            ),
+            child: CustomSvgImage(assetName: assetPath, height: 40),
           ),
         ),
-        Text(label, textAlign: TextAlign.center),
+        Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11,color: AppColors.textGreyLight),),
       ],
     );
   }

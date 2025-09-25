@@ -19,6 +19,8 @@ class TabRow extends StatelessWidget {
     return SizedBox(
       height: 70,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
         children: <Widget>[
           // Crypto Tab
           Obx(

@@ -19,17 +19,20 @@ class MainBottomNavScreen extends GetView<MainBottomNavController> {
           return controller.screens[index];
         },
       ),
-      bottomNavigationBar: Material(
-        child: BottomAppBar(
-          color: AppColors.primaryColor,
-          elevation: 0,
-          child: Obx(
-                () => Row(
-               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(
-                controller.icons.length,
-                    (int index) => _buildNavItem(index),
-              ),
+      bottomNavigationBar: Container(
+        color: AppColors.primaryColor,
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 8,
+          bottom: MediaQuery.of(context).padding.bottom + 8, // Respects safe area
+        ),
+        child: Obx(
+              () => Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(
+              controller.icons.length,
+                  (int index) => _buildNavItem(index),
             ),
           ),
         ),
@@ -41,15 +44,18 @@ class MainBottomNavScreen extends GetView<MainBottomNavController> {
     return GestureDetector(
       onTap: () => controller.navigateToTab(index),
       child: Column(
-        spacing: AppSizes.sm,
+        mainAxisSize: MainAxisSize.min, // Important: prevents extra space
+        // spacing: AppSizes.sm,
         children: <Widget>[
-          CustomSvgImage(
-            // height: controller.isTabSelected(index) ? 24 : 20,
-            height: 20,
-            assetName: controller.icons[index],
-            color: controller.isTabSelected(index)
-                ? AppColors.yellow
-                : AppColors.textGreyLight,
+          Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: CustomSvgImage(
+              height: 20,
+              assetName: controller.icons[index],
+              color: controller.isTabSelected(index)
+                  ? AppColors.yellow
+                  : AppColors.textGreyLight,
+            ),
           ),
           Text(
             controller.labels[index],

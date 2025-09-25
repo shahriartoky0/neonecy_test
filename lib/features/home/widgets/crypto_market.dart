@@ -69,7 +69,7 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
                 child: Text(
                   category,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : AppColors.textGreyLight,
+                    color: isSelected ? AppColors.white : AppColors.textGreyLight,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                     fontSize: 14,
                   ),
@@ -126,7 +126,7 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
     final Color changeColor = crypto.changePercent >= 0 ? AppColors.green : AppColors.red;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: AppSizes.sm),
       child: Row(
         children: <Widget>[
           Expanded(
