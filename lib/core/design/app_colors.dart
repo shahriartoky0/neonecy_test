@@ -28,10 +28,19 @@ class AppColors {
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
+    colors: <Color>[
       Color(0xFF252D3A), // Lighter top
       Color(0xFF1F2630), // Your primary color
-      Color(0xFF141A22), // Darker bottom
+      Color(0xFF1F2630), // Darker bottom
+    ],
+  );
+  static const LinearGradient reversedPrimaryGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[
+      Color(0xFF1F2630), // Darker bottom
+      Color(0xFF1F2630), // Your primary color
+      Color(0xFF252D3A), // Lighter top
     ],
   );
 }

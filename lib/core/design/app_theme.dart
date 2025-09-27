@@ -11,6 +11,10 @@ class AppTheme {
     // colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryColor),
     iconTheme: const IconThemeData(opacity: 1, color: AppColors.textGreyLight),
     fontFamily: 'inter',
+    textSelectionTheme: const TextSelectionThemeData(
+      cursorColor: AppColors.textGreyLight,
+      selectionColor: AppColors.iconBackgroundLight,
+    ),
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,
       fillColor: AppColors.iconBackground,
@@ -73,7 +77,7 @@ class AppTheme {
         backgroundColor: AppColors.yellow,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        disabledBackgroundColor: AppColors.yellow.withValues(alpha: 0.5)
+        disabledBackgroundColor: AppColors.yellow.withValues(alpha: 0.5),
       ),
     ),
     dividerColor: AppColors.textGreyLight,

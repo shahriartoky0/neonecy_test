@@ -154,7 +154,7 @@ class CustomToast extends StatelessWidget {
               child: Text(
                 message,
                 style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.start,
               ),
             ),
           ],

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/app_button.dart';
+import 'package:neonecy_test/core/common/widgets/custom_modal.dart';
 import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
@@ -10,6 +11,8 @@ import 'package:neonecy_test/core/design/app_images.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
+import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
+import 'package:neonecy_test/features/auth/controllers/sign_up_controller.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/crypto_market.dart';
 import '../widgets/custom_refresher.dart';
@@ -23,19 +26,83 @@ class HomeScreen extends GetView<HomeController> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: // AppBar
-        Obx(() {
+        child: Obx(() {
           return AppBar(
             toolbarHeight: controller.showSpace.value ? 0 : kToolbarHeight,
-
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: controller.showSpace.value
+                    ? AppColors.reversedPrimaryGradient
+                    : const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[Colors.transparent, Colors.transparent],
+                      ),
+              ),
+            ),
             title: AnimatedOpacity(
               opacity: controller.showSpace.value ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 800),
               child: Row(
                 children: <Widget>[
                   Row(
                     children: <Widget>[
-                      appbarIcon(assetPath: AppIcons.appbarLeft, onTap: () {}, height: 13),
+                      appbarIcon(
+                        assetPath: AppIcons.appbarLeft,
+                        onTap: () {
+                          CustomBottomSheet.show(
+                            height: context.screenHeight * 0.25,
+                            context: context,
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                    'Do you want to Logout ?',
+                                    style: context.txtTheme.titleMedium?.copyWith(
+                                      color: AppColors.textWhite,
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSizes.md),
+                                  Row(
+                                    spacing: AppSizes.sm,
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: AppButton(
+                                          labelText: 'No',
+                                          onTap: () {
+                                            Navigator.pop(context);
+                                          },
+                                          bgColor: AppColors.yellow,
+                                          textColor: AppColors.black,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: AppButton(
+                                          labelText: 'Yes',
+                                          onTap: () {
+                                            /// =====> Logout logic =====>
+                                            final LoginController loginController = Get.put(
+                                              LoginController(),
+                                            );
+                                            loginController.logOut();
+                                          },
+                                          bgColor: AppColors.red,
+                                          textColor: AppColors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        height: 13,
+                      ),
                       IconButton(
                         onPressed: () {},
                         icon: const Badge(
@@ -56,7 +123,7 @@ class HomeScreen extends GetView<HomeController> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Obx(
-                            () => Row(
+                        () => Row(
                           children: <Widget>[
                             topTabButton(
                               label: 'Exchange',
@@ -106,12 +173,20 @@ class HomeScreen extends GetView<HomeController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
+                      const SizedBox(height: AppSizes.md),
                       SizedBox(
                         height: 40,
                         child: TextFormField(
+                          style: const TextStyle(color: AppColors.textWhite),
                           decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: AppSizes.sm),
-                             hint: Text('#BinanceHODLerPLUME',style: TextStyle(fontSize: 12, color: AppColors.hintText),),
+                            contentPadding: EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: AppSizes.sm,
+                            ),
+                            hint: Text(
+                              '#BinanceHODLerPLUME',
+                              style: TextStyle(fontSize: 12, color: AppColors.hintText),
+                            ),
                             suffixIcon: Icon(CupertinoIcons.search, color: AppColors.textGreyLight),
                           ),
                         ),
@@ -304,7 +379,11 @@ class HomeScreen extends GetView<HomeController> {
             child: CustomSvgImage(assetName: assetPath, height: 40),
           ),
         ),
-        Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11,color: AppColors.textGreyLight),),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 11, color: AppColors.textGreyLight),
+        ),
       ],
     );
   }

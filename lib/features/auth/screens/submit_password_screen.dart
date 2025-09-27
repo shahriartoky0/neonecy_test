@@ -15,12 +15,12 @@ class SubmitPasswordScreen extends GetView<SignUpController> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, String> userName = Get.arguments;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
             Get.back();
-
           },
           icon: const Icon(Icons.arrow_back, color: AppColors.white),
         ),
@@ -41,40 +41,49 @@ class SubmitPasswordScreen extends GetView<SignUpController> {
                 color: AppColors.iconBackground,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Column(
-                children: <Widget>[
-                  CustomTextField(
-                    controller: controller.passwordTEController,
-                    hintText: 'Enter Password',
-                    isPassword: true,
-                    prefixIcon: CustomSvgImage(assetName: AppIcons.loginLock, height: 8),
-                    // controller: _telegramController,
-                    keyboardType: TextInputType.text,
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your telegram username';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.md),
-                  CustomTextField(
-                    controller: controller.confirmPasswordTEController,
-                    hintText: 'Confirm Password',
-                    isPassword: true,
+              child: Form(
+                key: controller.passwordFormKey,
+                child: Column(
+                  children: <Widget>[
+                    CustomTextField(
+                      controller: controller.passwordTEController,
+                      hintText: 'Enter Password',
+                      isPassword: true,
+                      prefixIcon: CustomSvgImage(assetName: AppIcons.loginLock, height: 8),
+                      // controller: _telegramController,
+                      keyboardType: TextInputType.text,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters ';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: AppSizes.md),
+                    CustomTextField(
+                      controller: controller.confirmPasswordTEController,
+                      hintText: 'Confirm Password',
+                      isPassword: true,
 
-                    prefixIcon: CustomSvgImage(assetName: AppIcons.loginLock, height: 8),
-                    // controller: _telegramController,
-                    keyboardType: TextInputType.text,
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your telegram username';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppSizes.sm),
-                ],
+                      prefixIcon: CustomSvgImage(assetName: AppIcons.loginLock, height: 8),
+                      // controller: _telegramController,
+                      keyboardType: TextInputType.text,
+                      validator: (String? value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password again';
+                        }
+                        if (value != controller.passwordTEController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: AppSizes.sm),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: AppSizes.md),
@@ -120,7 +129,17 @@ class SubmitPasswordScreen extends GetView<SignUpController> {
             AppButton(
               labelText: "Submit",
               onTap: () {
-                Get.toNamed(AppRoutes.finalSignUp);
+                if (!controller.passwordFormKey.currentState!.validate()) {
+                  return;
+                }
+                Get.toNamed(
+                  AppRoutes.finalSignUp,
+                  arguments: <String, String>{
+                    ...userName,
+                    'password': controller.passwordTEController.text,
+                    'password_confirmation': controller.confirmPasswordTEController.text,
+                  },
+                );
               },
               bgColor: AppColors.yellow,
               padding: const EdgeInsets.symmetric(vertical: 12),

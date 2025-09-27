@@ -7,6 +7,7 @@ import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/core/utils/custom_loader.dart';
+import 'package:neonecy_test/core/utils/swipe_wrapper.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
 import 'package:neonecy_test/features/auth/controllers/sign_up_controller.dart';
 import '../controllers/auth_controller.dart';
@@ -52,29 +53,40 @@ class LoginScreen extends GetView<AuthController> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Obx(
-                          () => Container(
-                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryColor,
-                              borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                topTabButton(
-                                  label: 'Login',
-                                  isSelected: controller.isLoginTabSelected(),
-                                  onTap: () {
-                                    controller.selectTab(0);
-                                  },
-                                ),
-                                topTabButton(
-                                  label: 'Signup',
-                                  isSelected: controller.isSignUpTabSelected(),
-                                  onTap: () {
-                                    controller.selectTab(1);
-                                  },
-                                ),
-                              ],
+                          () => FastDragWrapper(
+                            sensitivity: 40.0,
+                            // Lower = more sensitive
+                            velocityThreshold: 250.0,
+                            // Lower = easier quick swipes
+                            showFeedback: false,
+                            // Disable for maximum speed
+                            onDragComplete: (int direction) {
+                              controller.selectTab(direction == 1 ? 0 : 1);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryColor,
+                                borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  topTabButton(
+                                    label: 'Login',
+                                    isSelected: controller.isLoginTabSelected(),
+                                    onTap: () {
+                                      controller.selectTab(0);
+                                    },
+                                  ),
+                                  topTabButton(
+                                    label: 'Signup',
+                                    isSelected: controller.isSignUpTabSelected(),
+                                    onTap: () {
+                                      controller.selectTab(1);
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -84,59 +96,65 @@ class LoginScreen extends GetView<AuthController> {
                         () => controller.isLoginTabSelected()
                             ?
                               /// =========> login page ===========>
-                              Column(
-                                children: <Widget>[
-                                  CustomTextField(
-                                    controller: loginController.userNameTEController,
-                                    hintText: 'Enter Your Telegram User Name',
-                                    prefixIcon: CustomSvgImage(
-                                      assetName: AppIcons.loginUser,
-                                      height: 8,
+                              Form(
+                                key: loginController.loginFormKey,
+                                child: Column(
+                                  children: <Widget>[
+                                    CustomTextField(
+                                      controller: loginController.userNameTEController,
+                                      hintText: 'Enter Your Telegram User Name',
+                                      prefixIcon: CustomSvgImage(
+                                        assetName: AppIcons.loginUser,
+                                        height: 8,
+                                      ),
+                                      // controller: _telegramController,
+                                      keyboardType: TextInputType.text,
+                                      validator: (String? value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your telegram username';
+                                        }
+                                        return null;
+                                      },
                                     ),
-                                    // controller: _telegramController,
-                                    keyboardType: TextInputType.text,
-                                    validator: (String? value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter your telegram username';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: AppSizes.md),
-                                  CustomTextField(
-                                    controller: loginController.passwordTEController,
-                                    isPassword: true,
-                                    hintText: 'Enter a password',
-                                    prefixIcon: CustomSvgImage(assetName: AppIcons.loginLock),
-                                    // controller: _telegramController,
-                                    validator: (String? value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter your password';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
+                                    const SizedBox(height: AppSizes.md),
+                                    CustomTextField(
+                                      controller: loginController.passwordTEController,
+                                      isPassword: true,
+                                      hintText: 'Enter a password',
+                                      prefixIcon: CustomSvgImage(assetName: AppIcons.loginLock),
+                                      // controller: _telegramController,
+                                      validator: (String? value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your password';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ],
+                                ),
                               )
                             :
                               /// ======= Signup Page =========>
                               Column(
                                 children: <Widget>[
-                                  CustomTextField(
-                                    controller: signUpController.userNameTEController,
-                                    hintText: 'Enter Your Telegram User Name',
-                                    prefixIcon: CustomSvgImage(
-                                      assetName: AppIcons.loginUser,
-                                      height: 8,
+                                  Form(
+                                    key: signUpController.userNameFormKey,
+                                    child: CustomTextField(
+                                      controller: signUpController.userNameTEController,
+                                      hintText: 'Enter Your Telegram User Name',
+                                      prefixIcon: CustomSvgImage(
+                                        assetName: AppIcons.loginUser,
+                                        height: 8,
+                                      ),
+                                      // controller: _telegramController,
+                                      keyboardType: TextInputType.text,
+                                      validator: (String? value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your telegram username';
+                                        }
+                                        return null;
+                                      },
                                     ),
-                                    // controller: _telegramController,
-                                    keyboardType: TextInputType.text,
-                                    validator: (String? value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please enter your telegram username';
-                                      }
-                                      return null;
-                                    },
                                   ),
                                   const SizedBox(height: AppSizes.xxl),
                                   const SizedBox(height: AppSizes.md),
@@ -155,15 +173,24 @@ class LoginScreen extends GetView<AuthController> {
 
                 Obx(
                   () => Visibility(
-                    replacement: CustomLoading(),
+                    replacement: const CustomLoading(),
                     visible: loginController.isLoading.value == false,
                     child: AppButton(
                       labelText: controller.isLoginTabSelected() ? 'Login' : 'Continue',
                       onTap: () {
                         if (controller.isSignUpTabSelected()) {
-                          Get.toNamed(AppRoutes.submitPassword);
+                          if (!signUpController.userNameFormKey.currentState!.validate()) {
+                            return;
+                          }
+                          Get.toNamed(
+                            AppRoutes.submitPassword,
+                            arguments: <String, String>{
+                              'user_name': signUpController.userNameTEController.text,
+                            },
+                          );
                         } else {
                           /// =========== Login logic ====>
+                          FocusScope.of(context).unfocus();
                           loginController.handleLogin();
                         }
                       },
@@ -177,6 +204,7 @@ class LoginScreen extends GetView<AuthController> {
                     ),
                   ),
                 ),
+                const SizedBox(height: AppSizes.md,)
               ],
             ),
           ),

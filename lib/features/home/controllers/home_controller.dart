@@ -47,7 +47,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     // Add your refresh logic here
     for(int i = 0; i < 8; i++){
       blurEffectSize.value += 20;
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 200));
     }
     showSpace.value = false;
     blurEffectSize.value = 20;

@@ -149,8 +149,8 @@ class _CustomGifRefreshWidgetState extends State<CustomGifRefreshWidget>
                                 : (_dragDistance / widget.refreshTriggerDistance).clamp(0.3, 1.0),
                             duration: const Duration(milliseconds: 100),
                             child: SizedBox(
-                              width: 40,
-                              height: 40,
+                              width: 60,
+                              height: 60,
                               child: Image.asset(widget.gifAssetPath, fit: BoxFit.contain),
                             ),
                           ),

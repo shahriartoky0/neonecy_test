@@ -6,6 +6,7 @@ import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
+import 'package:neonecy_test/core/utils/custom_loader.dart';
 import 'package:neonecy_test/features/auth/controllers/sign_up_controller.dart';
 import '../widgets/custom_textfield.dart';
 
@@ -14,6 +15,7 @@ class SignUpFinalPage extends GetView<SignUpController> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, String> previousMap = Get.arguments;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -52,36 +54,39 @@ class SignUpFinalPage extends GetView<SignUpController> {
                   children: <Widget>[
                     const SizedBox(height: AppSizes.md),
 
-                    Column(
-                      children: <Widget>[
-                        CustomTextField(
-                          controller: controller.fullNameTEController,
-                          hintText: 'Enter Your Full Name',
-                          prefixIcon: CustomSvgImage(assetName: AppIcons.profile, height: 8),
-                          // controller: _telegramController,
-                          keyboardType: TextInputType.text,
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your full name';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: AppSizes.md),
-                        CustomTextField(
-                          controller: controller.lastNameTEController,
-                          isPassword: true,
-                          hintText: 'Enter Your Last Name',
-                          prefixIcon: CustomSvgImage(assetName: AppIcons.profile),
-                          // controller: _telegramController,
-                          validator: (String? value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter last name';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
+                    Form(
+                      key: controller.namesFormKey,
+                      child: Column(
+                        children: <Widget>[
+                          CustomTextField(
+                            controller: controller.firstNameTEController,
+                            hintText: 'Enter Your First Name',
+                            prefixIcon: CustomSvgImage(assetName: AppIcons.profile, height: 8),
+                            // controller: _telegramController,
+                            keyboardType: TextInputType.text,
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your first name';
+                              }
+
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: AppSizes.md),
+                          CustomTextField(
+                            controller: controller.lastNameTEController,
+                            hintText: 'Enter Your Last Name',
+                            prefixIcon: CustomSvgImage(assetName: AppIcons.profile),
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter last name';
+                              }
+
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: AppSizes.md),
@@ -92,15 +97,32 @@ class SignUpFinalPage extends GetView<SignUpController> {
               ),
               const SizedBox(height: AppSizes.xxl),
 
-              AppButton(
-                labelText: 'Complete',
-                onTap: () {},
-                bgColor: AppColors.yellow,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  color: AppColors.primaryColor,
-                  fontWeight: FontWeight.w600,
+              Obx(
+                () => Visibility(
+                  visible: controller.loader.value == false,
+                  replacement: const CustomLoading(),
+                  child: AppButton(
+                    labelText: 'Complete',
+                    onTap: () {
+                      if (!controller.namesFormKey.currentState!.validate()) {
+                        return;
+                      }
+                      FocusScope.of(context).unfocus();
+                      final Map<String, String> formData = <String, String>{
+                        ...previousMap,
+                        'first_name': controller.firstNameTEController.text,
+                        'last_name': controller.lastNameTEController.text,
+                      };
+                      controller.handleSignUp(formData: formData);
+                    },
+                    bgColor: AppColors.yellow,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -7,27 +7,45 @@ import 'network_response.dart';
 class NetworkCaller {
   // Generic function to handle any HTTP request (GET, POST, PUT, DELETE)
   Future<NetworkResponse> _request(
-    String method,
-    String url, {
-    Map<String, dynamic>? body,
-    Map<String, String>? headers,
-    bool isLogin = false,
-  }) async {
+      String method,
+      String url, {
+        Map<String, dynamic>? body,
+        Map<String, String>? headers,
+        bool isLogin = false,
+        bool isFormData = false, // New parameter to specify form data
+      }) async {
     final Uri uri = Uri.parse(url);
+
+    // Set headers based on content type
     final Map<String, String> requestHeaders = <String, String>{
-      'Content-Type': 'application/json',
+      if (!isFormData) 'Content-Type': 'application/json',
+      if (isFormData) 'Content-Type': 'application/x-www-form-urlencoded',
       ...?headers,
     };
 
     try {
-      // Make the request using a single method instead of multiple ones.
       Response response;
+      String? requestBody;
+
+      // Prepare body based on content type
+      if (body != null) {
+        if (isFormData) {
+          // Convert Map to form-encoded string
+          requestBody = body.entries
+              .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}')
+              .join('&');
+        } else {
+          // JSON encode for regular requests
+          requestBody = jsonEncode(body);
+        }
+      }
+
       switch (method.toUpperCase()) {
         case 'POST':
           response = await post(
             uri,
             headers: requestHeaders,
-            body: jsonEncode(body),
+            body: requestBody,
           );
           break;
         case 'GET':
@@ -37,24 +55,23 @@ class NetworkCaller {
           response = await put(
             uri,
             headers: requestHeaders,
-            body: jsonEncode(body),
+            body: requestBody,
           );
           break;
         case 'DELETE':
           response = await delete(uri, headers: requestHeaders);
           break;
-        case 'PATCH': // Add the PATCH case
+        case 'PATCH':
           response = await patch(
             uri,
             headers: requestHeaders,
-            body: jsonEncode(body),
+            body: requestBody,
           );
           break;
         default:
           throw Exception('Unsupported HTTP method: $method');
       }
 
-      // Handle the response
       return _handleResponse(response, isLogin);
     } catch (e) {
       debugPrint('Error: $e');
@@ -67,7 +84,6 @@ class NetworkCaller {
     try {
       final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
 
-      // Check if the response status is successful
       if (response.statusCode == 200 || response.statusCode == 201) {
         return NetworkResponse(
           isSuccess: true,
@@ -76,7 +92,6 @@ class NetworkCaller {
         );
       }
 
-      // If status code is 401, it might be related to login, handle accordingly
       if (response.statusCode == 401 && !isLogin) {
         return NetworkResponse(
           isSuccess: false,
@@ -85,7 +100,6 @@ class NetworkCaller {
         );
       }
 
-      // Handle unsuccessful responses
       return NetworkResponse(
         isSuccess: false,
         statusCode: response.statusCode,
@@ -99,71 +113,76 @@ class NetworkCaller {
     }
   }
 
-  // POST Request
+  // POST Request with form data support
   Future<NetworkResponse> postRequest(
-    String url, {
-    Map<String, dynamic>? body,
-    bool isLogin = false,
-    Map<String, String>? headers,
-  }) async {
+      String url, {
+        Map<String, dynamic>? body,
+        bool isLogin = false,
+        Map<String, String>? headers,
+        bool isFormData = false, // New parameter
+      }) async {
     return _request(
       'POST',
       url,
       body: body,
       isLogin: isLogin,
       headers: headers,
+      isFormData: isFormData,
     );
   }
 
-  // GET Request
+  // Form data specific POST request
+  Future<NetworkResponse> postFormData(
+      String url, {
+        required Map<String, dynamic> formData,
+        bool isLogin = false,
+        Map<String, String>? headers,
+      }) async {
+    return postRequest(
+      url,
+      body: formData,
+      isLogin: isLogin,
+      headers: headers,
+      isFormData: true,
+    );
+  }
+
+  // Other methods remain the same but can be extended similarly
   Future<NetworkResponse> getRequest(
-    String url, {
-    Map<String, dynamic>? body,
-    bool isLogin = false,
-    Map<String, String>? headers,
-  }) async {
+      String url, {
+        Map<String, dynamic>? body,
+        bool isLogin = false,
+        Map<String, String>? headers,
+      }) async {
     return _request('GET', url, body: body, isLogin: isLogin, headers: headers);
   }
 
-  // PUT Request
   Future<NetworkResponse> putRequest(
-    String url, {
-    Map<String, dynamic>? body,
-    bool isLogin = false,
-    Map<String, String>? headers,
-  }) async {
-    return _request('PUT', url, body: body, isLogin: isLogin, headers: headers);
+      String url, {
+        Map<String, dynamic>? body,
+        bool isLogin = false,
+        Map<String, String>? headers,
+        bool isFormData = false,
+      }) async {
+    return _request('PUT', url, body: body, isLogin: isLogin, headers: headers, isFormData: isFormData);
   }
 
-  // DELETE Request
   Future<NetworkResponse> deleteRequest(
-    String url, {
-    Map<String, dynamic>? body,
-    bool isLogin = false,
-    Map<String, String>? headers,
-  }) async {
-    return _request(
-      'DELETE',
-      url,
-      body: body,
-      isLogin: isLogin,
-      headers: headers,
-    );
+      String url, {
+        Map<String, dynamic>? body,
+        bool isLogin = false,
+        Map<String, String>? headers,
+      }) async {
+    return _request('DELETE', url, body: body, isLogin: isLogin, headers: headers);
   }
 
-  // PATCH Request
   Future<NetworkResponse> patchRequest(
-    String url, {
-    Map<String, dynamic>? body,
-    bool isLogin = false,
-    Map<String, String>? headers,
-  }) async {
-    return _request(
-      'PATCH',
-      url,
-      body: body,
-      isLogin: isLogin,
-      headers: headers,
-    );
+      String url, {
+        Map<String, dynamic>? body,
+        bool isLogin = false,
+        Map<String, String>? headers,
+        bool isFormData = false,
+      }) async {
+    return _request('PATCH', url, body: body, isLogin: isLogin, headers: headers, isFormData: isFormData);
   }
 }
