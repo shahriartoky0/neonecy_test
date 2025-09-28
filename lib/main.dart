@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:neonecy_test/features/auth/screens/login_screen.dart';
 import 'package:neonecy_test/features/futures/controllers/futures_controller.dart';
  import 'package:neonecy_test/features/futures/screens/futures_screen.dart';
@@ -18,6 +19,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
   runApp(const MyApp());
 }
 

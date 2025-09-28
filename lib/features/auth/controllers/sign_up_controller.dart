@@ -49,7 +49,7 @@ class SignUpController extends GetxController {
           ToastManager.show(
             message: response.jsonResponse?['message'] ?? 'Registration Successful',
           );
-          GetStorageModel().saveString(AppConstants.token, response.jsonResponse?['token'] ?? '');
+          GetStorageModel().save(AppConstants.token, response.jsonResponse?['token'] ?? '');
           clearFields();
           Get.offAllNamed(AppRoutes.mainBottomScreen);
         } else if (response.jsonResponse?['status'] == 422) {

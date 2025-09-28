@@ -49,12 +49,14 @@ class LoginController extends GetxController {
         /// ===========> Successful Login =============>
         ///
         else if (response.jsonResponse?['success'] == 200) {
-          GetStorageModel().saveString(AppConstants.token, response.jsonResponse?['token'] ?? '');
-         clearFields();
+         await GetStorageModel().save(AppConstants.token, response.jsonResponse?['token'] ?? '');
+          clearFields();
           ToastManager.show(
             icon: const Icon(CupertinoIcons.check_mark_circled, color: AppColors.white),
             message: 'Login Successful',
           );
+          // LoggerUtils.debug(GetStorageModel().exists(AppConstants.token));
+          // LoggerUtils.debug(GetStorageModel().read(AppConstants.token));
           Get.offAllNamed(AppRoutes.mainBottomScreen);
         }
       } else {

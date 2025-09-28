@@ -125,6 +125,7 @@ class SignUpFinalPage extends GetView<SignUpController> {
                   ),
                 ),
               ),
+              const SizedBox(height: AppSizes.md,),
             ],
           ),
         ),

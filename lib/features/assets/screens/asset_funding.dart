@@ -1,17 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
+import 'package:neonecy_test/core/network/network_response.dart';
+import 'package:neonecy_test/core/utils/logger_utils.dart';
+import 'package:neonecy_test/features/assets/controllers/assets_controller.dart';
 
 import '../../../core/common/widgets/app_button.dart';
 import '../../../core/common/widgets/custom_svg.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart' show AppColors;
 import '../../../core/design/app_icons.dart';
+import '../../../core/utils/coin_gecko.dart';
 import '../../../core/utils/device/device_utility.dart';
 import '../widgets/crypto_card.dart';
 import '../widgets/funding_card.dart';
 
-class AssetFundingScreen extends StatelessWidget {
+class AssetFundingScreen extends GetView<AssetsController> {
   const AssetFundingScreen({super.key});
 
   @override
@@ -84,7 +89,7 @@ class AssetFundingScreen extends StatelessWidget {
                 bgColor: AppColors.yellow,
                 textColor: AppColors.black,
                 labelText: 'Add Funds',
-                onTap: () {},
+                onTap: () async {},
               ),
             ),
             Expanded(

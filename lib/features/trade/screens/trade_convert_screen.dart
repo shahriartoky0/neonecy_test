@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
+import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import '../../../core/common/widgets/custom_svg.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
@@ -14,21 +16,55 @@ class TradeConvertScreen extends GetView<TradeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            _buildOrderTypeSelector(),
-            const SizedBox(height: 24),
-            _buildSwapContainer(),
-            const SizedBox(height: AppSizes.lg),
-            const SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: null,
-                child: Text('Preview', style: TextStyle(color: AppColors.black)),
+        padding: const EdgeInsets.all(AppSizes.screenHorizontal),
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              _buildOrderTypeSelector(),
+              const SizedBox(height: 24),
+
+              /// ======> Balance text field ======>
+              Row(
+                spacing: AppSizes.sm,
+                children: <Widget>[
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      style: const TextStyle(color: AppColors.white),
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hint: const Text(
+                          'Enter Your Balance',
+                          style: TextStyle(fontSize: 12, color: AppColors.textGreyLight),
+                        ).centered,
+                      ),
+                      controller: controller.balanceTEController,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: TextButton(
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        controller.saveTheBalance();
+                        ToastManager.show(message: 'Balance Updated');
+                      },
+                      child: const Text('Submit Balance'),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              _buildSwapContainer(),
+              const SizedBox(height: AppSizes.lg),
+              const SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: null,
+                  child: Text('Preview', style: TextStyle(color: AppColors.black)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -150,6 +186,7 @@ class TradeConvertScreen extends GetView<TradeController> {
             children: <Widget>[
               Obx(() => _buildTokenSelector(controller.fromToken.value, AppColors.green)),
               const SizedBox(width: AppSizes.md),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,

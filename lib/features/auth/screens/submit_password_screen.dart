@@ -149,6 +149,8 @@ class SubmitPasswordScreen extends GetView<SignUpController> {
                 fontWeight: FontWeight.w600,
               ),
             ),
+            const SizedBox(height: AppSizes.md,),
+
           ],
         ),
       ),

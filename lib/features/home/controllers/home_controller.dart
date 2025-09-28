@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/config/app_constants.dart';
+import 'package:neonecy_test/core/design/app_icons.dart';
+import 'package:neonecy_test/core/utils/get_storage.dart';
 
+import '../../../core/utils/coin_gecko.dart';
 import '../../../core/utils/logger_utils.dart';
+import 'crypto_market_controller.dart';
 
 class HomeController extends GetxController with GetSingleTickerProviderStateMixin {
   /// ===> For the top Buttons =====>
@@ -38,20 +43,38 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     tabController.addListener(() {
       selectedIndex.value = tabController.index;
     });
+    //// ========for balance ======>
+    GetStorageModel().delete(AppConstants.balanceText);
   }
 
   Future<void> onRefresh() async {
-
     showSpace.value = true;
     LoggerUtils.debug("Refreshing...${showSpace.value}"); // Debug
     // Add your refresh logic here
-    for(int i = 0; i < 8; i++){
+    for (int i = 0; i < 8; i++) {
       blurEffectSize.value += 20;
       await Future.delayed(const Duration(milliseconds: 200));
     }
     showSpace.value = false;
     blurEffectSize.value = 20;
     LoggerUtils.debug("Refresh completed ${showSpace.value}");
+
+    /// =====> for the balance =====>
+    fetchAndSetTheBalance();
+
+    /// ======for the refresh ====>
+    final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
+    cryptoMarketController.refreshCurrentTab();
+  }
+
+  /// ==========> For the balance ======>
+  final RxString balance = '\$0 297854454'.obs;
+
+  void fetchAndSetTheBalance() {
+    final String storedBalance = GetStorageModel().read(AppConstants.balanceText);
+    if (storedBalance.isNotEmpty) {
+      balance.value = GetStorageModel().read(AppConstants.balanceText);
+    }
   }
 
   @override

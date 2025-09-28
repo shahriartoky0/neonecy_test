@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
+import 'package:neonecy_test/core/utils/custom_loader.dart';
 import '../controllers/crypto_market_controller.dart';
 import '../model/crypto_data_model.dart';
 
@@ -114,14 +115,48 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
 
   Widget _buildCryptoList() {
     return Obx(
-      () => Column(
-        children: controller.cryptoList
-            .map((CryptoData crypto) => _buildCryptoItem(crypto))
-            .toList(),
-      ),
+          ()   {
+        // if (controller.isLoading.value) {
+        //   return const SizedBox(
+        //     height: 200,
+        //     child: Center(
+        //       child: Column(
+        //         mainAxisAlignment: MainAxisAlignment.center,
+        //         children: <Widget>[
+        //           CustomLoading(),
+        //           SizedBox(height: 16),
+        //           Text(
+        //             'Loading trending cryptocurrencies...',
+        //             style: TextStyle(color: AppColors.textGreyLight),
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //  );
+        // }
+
+        if (controller.cryptoList.isEmpty) {
+          return const SizedBox(
+            height: 100,
+            child: Center(
+              child: Text(
+                'No data available',
+                style: TextStyle(color: AppColors.textGreyLight),
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          children: controller.cryptoList
+              .map((CryptoData crypto) => _buildCryptoItem(crypto))
+              .toList(),
+        );
+      },
     );
   }
 
+// Updated crypto item with additional data
   Widget _buildCryptoItem(CryptoData crypto) {
     final Color changeColor = crypto.changePercent >= 0 ? AppColors.green : AppColors.red;
 
@@ -129,13 +164,34 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: AppSizes.sm),
       child: Row(
         children: <Widget>[
+          // Symbol and name
           Expanded(
             flex: 2,
-            child: Text(
-              crypto.symbol,
-              style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.w600),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  crypto.symbol,
+                  style: const TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (crypto.name != null)
+                  Text(
+                    crypto.name!,
+                    style: const TextStyle(
+                      color: AppColors.textGreyLight,
+                      fontSize: 11,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
             ),
           ),
+
+          // Price and relevant subtext
           Expanded(
             flex: 2,
             child: Column(
@@ -146,14 +202,20 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
                   style: const TextStyle(color: AppColors.white),
                   textAlign: TextAlign.right,
                 ),
-                Text(
-                  "\$${crypto.price.toStringAsFixed(2)}",
-                  style: const TextStyle(color: AppColors.textGreyLight, fontSize: 11),
-                  textAlign: TextAlign.right,
-                ),
+                if (crypto.subText != null)
+                  Text(
+                    crypto.subText!,
+                    style: const TextStyle(
+                      color: AppColors.textGreyLight,
+                      fontSize: 11,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
               ],
             ),
           ),
+
+          // Change percentage
           Expanded(
             flex: 2,
             child: Container(
@@ -165,7 +227,7 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  '${crypto.changePercent > 0 ? '+' : ''}${crypto.changePercent.toStringAsFixed(2)}%',
+                  crypto.formattedChangePercent,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,

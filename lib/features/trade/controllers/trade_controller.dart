@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/config/app_constants.dart';
+import 'package:neonecy_test/core/utils/get_storage.dart';
 
 class TradeController extends GetxController with GetSingleTickerProviderStateMixin {
   final RxInt selectedOrderType = 0.obs;
@@ -69,6 +71,13 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     tabController.addListener(() {
       selectedIndex.value = tabController.index;
     });
+  }
+
+  /// ===========> For the balance =====>
+  final TextEditingController balanceTEController = TextEditingController();
+
+  void saveTheBalance() {
+    GetStorageModel().save(AppConstants.balanceText, balanceTEController.text);
   }
 
   @override

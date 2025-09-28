@@ -13,6 +13,7 @@ import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
 import 'package:neonecy_test/features/auth/controllers/sign_up_controller.dart';
+import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/crypto_market.dart';
 import '../widgets/custom_refresher.dart';
@@ -23,6 +24,7 @@ class HomeScreen extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
+    final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -203,10 +205,16 @@ class HomeScreen extends GetView<HomeController> {
                         spacing: AppSizes.md,
                         children: <Widget>[
                           Expanded(
-                            child: Text(
-                              '\$0 297854454',
-                              style: context.txtTheme.displayMedium,
-                              overflow: TextOverflow.ellipsis,
+                            child: Obx(
+                              () => AnimatedOpacity(
+                                opacity: controller.showSpace.value ? 0.0 : 1.0,
+                                duration: const Duration(milliseconds: 800),
+                                child: Text(
+                                  controller.balance.value,
+                                  style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ),
                           ),
                           AppButton(
@@ -224,8 +232,14 @@ class HomeScreen extends GetView<HomeController> {
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          Text("Today's PNL"),
-                          Text("+\$0.00146468 (+0.50%) ", style: TextStyle(color: AppColors.green)),
+                          Text(
+                            "Today's PNL",
+                            style: TextStyle(color: AppColors.green, fontSize: 11),
+                          ),
+                          Text(
+                            "+\$0.00146468 (+0.50%) ",
+                            style: TextStyle(color: AppColors.green, fontSize: 10),
+                          ),
                           Text("V", style: TextStyle(color: AppColors.green, fontSize: 11)),
                         ],
                       ),
