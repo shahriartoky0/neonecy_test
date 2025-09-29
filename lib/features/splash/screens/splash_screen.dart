@@ -18,7 +18,9 @@ class SplashScreen extends GetView<SplashController> {
         backgroundColor: AppColors.splashBgColor,
       ),
       backgroundColor: AppColors.splashBgColor,
-      body: SafeArea(child: Image.asset(AppImages.firstSplash).centered),
+      body: Transform.translate(
+          offset: Offset(0, -50),
+          child: Image.asset(AppImages.firstSplash).centered),
     );
   }
 }

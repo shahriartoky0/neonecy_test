@@ -51,7 +51,7 @@ class CryptoCard extends GetView<AssetsController> {
                   cryptoName,
                   style: const TextStyle(
                     color: AppColors.textWhite,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -63,14 +63,14 @@ class CryptoCard extends GetView<AssetsController> {
               balance,
               style: const TextStyle(
                 color: AppColors.textWhite,
-                fontSize: 17,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSizes.sm),
 
         // Second row with crypto price and USD value
         Row(
@@ -78,9 +78,9 @@ class CryptoCard extends GetView<AssetsController> {
           children: <Widget>[
             Text(
               cryptoSymbol,
-              style: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
+              style: const TextStyle(color: AppColors.textGreyLight, fontSize: 12),
             ),
-            Text(price, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 14)),
+            Text(price, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 12)),
           ],
         ),
 
@@ -92,20 +92,20 @@ class CryptoCard extends GetView<AssetsController> {
           children: <Widget>[
             const Text(
               "Today's P&L",
-              style: TextStyle(color: AppColors.textGreyLight, fontSize: 14),
+              style: TextStyle(color: AppColors.textGreyLight, fontSize: 12),
             ),
             Text(
               '$pnl ($percentageChange)',
               style: const TextStyle(
                 color: AppColors.textGreyLight,
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: AppSizes.md),
+        const SizedBox(height: AppSizes.sm),
 
         // Action buttons
         Row(

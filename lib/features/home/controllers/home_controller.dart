@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_constants.dart';
@@ -12,7 +14,6 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   /// ===> For the top Buttons =====>
   RxInt selectedTab = 0.obs;
   RxBool showSpace = false.obs;
-  RxDouble blurEffectSize = 20.0.obs;
 
   void selectTab(int index) {
     selectedTab.value = index;
@@ -34,9 +35,13 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     'Announcement',
   ];
 
+
   @override
   void onInit() {
     super.onInit();
+
+
+    /// ==============> for the tabs ==========>
     tabController = TabController(length: homeTabTitles.length, vsync: this);
 
     // Listen to tab changes
@@ -44,7 +49,8 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
       selectedIndex.value = tabController.index;
     });
     //// ========for balance ======>
-    GetStorageModel().delete(AppConstants.balanceText);
+    fetchAndSetTheBalance();
+    // GetStorageModel().delete(AppConstants.balanceText);
   }
 
   Future<void> onRefresh() async {
@@ -52,29 +58,53 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     LoggerUtils.debug("Refreshing...${showSpace.value}"); // Debug
     // Add your refresh logic here
     for (int i = 0; i < 8; i++) {
-      blurEffectSize.value += 20;
       await Future<void>.delayed(const Duration(milliseconds: 200));
     }
     showSpace.value = false;
-    blurEffectSize.value = 20;
     LoggerUtils.debug("Refresh completed ${showSpace.value}");
 
     /// =====> for the balance =====>
     fetchAndSetTheBalance();
+
+    /// =====> for the hintText =====>
+    hintText.value = _generateRandomHint();
 
     /// ====== for the refresh ====>
     final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
     cryptoMarketController.refreshCurrentTab();
   }
 
+  /// ==========> For app hint text ====>
+  final RxString hintText = '#BinanceHODLerPLUME'.obs;
+
   /// ==========> For the balance ======>
-  final RxString balance = '\$0 297854454'.obs;
+  final RxString balance = '0.00'.obs;
 
   void fetchAndSetTheBalance() {
     final bool isBalanceStored = GetStorageModel().exists(AppConstants.balanceText);
     if (isBalanceStored) {
       balance.value = GetStorageModel().read(AppConstants.balanceText);
+    } else {
+      balance.value = '0.00';
     }
+  }
+
+  /// =========> for randomly generated hint texts ===========>
+  // List of possible hint texts
+  final List<String> hintOptions = <String>[
+    '#BinanceHODLerPLUME',
+    '#CryptoRisingStar',
+    '#BitcoinToTheMoon',
+    '#EthereumForTheWin',
+    '#AltcoinsRock',
+    '#FutureOfFinance',
+  ];
+
+  // Randomly generate hint text
+  String _generateRandomHint() {
+    final Random random = Random();
+    final int randomIndex = random.nextInt(hintOptions.length);
+    return hintOptions[randomIndex];
   }
 
   @override

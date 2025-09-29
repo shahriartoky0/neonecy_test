@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/logger_utils.dart';
+
 class FuturesController extends GetxController with GetSingleTickerProviderStateMixin {
   /// ===> For the Tab options =====>
   late TabController tabController;
@@ -23,5 +25,19 @@ class FuturesController extends GetxController with GetSingleTickerProviderState
   void onClose() {
     tabController.dispose();
     super.onClose();
+  }
+
+  /// =========> For the refresh State ============>
+  RxBool onRefreshState = false.obs;
+
+  Future<void> onRefresh() async {
+    try {
+      onRefreshState.value = true;
+      await Future<void>.delayed(const Duration(milliseconds: 2000));
+    } catch (e) {
+      LoggerUtils.error(e);
+    } finally {
+      onRefreshState.value = false;
+    }
   }
 }

@@ -12,7 +12,6 @@ import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
-import 'package:neonecy_test/features/auth/controllers/sign_up_controller.dart';
 import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/crypto_market.dart';
@@ -178,18 +177,29 @@ class HomeScreen extends GetView<HomeController> {
                       const SizedBox(height: AppSizes.md),
                       SizedBox(
                         height: 40,
+
+                        /// TODO : make a scrolling type animation simply
                         child: TextFormField(
                           style: const TextStyle(color: AppColors.textWhite),
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(
                               vertical: 0,
                               horizontal: AppSizes.sm,
                             ),
-                            hint: Text(
-                              '#BinanceHODLerPLUME',
-                              style: TextStyle(fontSize: 12, color: AppColors.hintText),
+                            hint: Obx(
+                              () => AnimatedOpacity(
+                                opacity: controller.showSpace.value ? 0.0 : 1.0,
+                                duration: const Duration(milliseconds: 800),
+                                child: Text(
+                                  controller.hintText.value,
+                                  style: const TextStyle(fontSize: 12, color: AppColors.hintText),
+                                ),
+                              ),
                             ),
-                            suffixIcon: Icon(CupertinoIcons.search, color: AppColors.textGreyLight),
+                            suffixIcon: const Icon(
+                              CupertinoIcons.search,
+                              color: AppColors.textGreyLight,
+                            ),
                           ),
                         ),
                       ),
@@ -206,14 +216,10 @@ class HomeScreen extends GetView<HomeController> {
                         children: <Widget>[
                           Expanded(
                             child: Obx(
-                              () => AnimatedOpacity(
-                                opacity: controller.showSpace.value ? 0.0 : 1.0,
-                                duration: const Duration(milliseconds: 800),
-                                child: Text(
-                                  controller.balance.value,
-                                  style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                              () => Text(
+                                '\$ ${controller.balance.value}',
+                                style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),
@@ -233,8 +239,8 @@ class HomeScreen extends GetView<HomeController> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            "Today's PNL",
-                            style: TextStyle(color: AppColors.green, fontSize: 11),
+                            "Today's PNL ",
+                            style: TextStyle(color: AppColors.white, fontSize: 11),
                           ),
                           Text(
                             "+\$0.00146468 (+0.50%) ",

@@ -9,6 +9,9 @@ import 'package:neonecy_test/features/futures/controllers/futures_controller.dar
 import 'package:neonecy_test/features/futures/controllers/usd_controller.dart';
 import 'package:neonecy_test/features/futures/screens/future_left.dart';
 import 'package:neonecy_test/features/futures/screens/future_right.dart';
+import 'package:neonecy_test/features/home/widgets/custom_refresher.dart';
+
+import '../../../core/design/app_images.dart';
 
 class FuturesScreen extends GetView<FuturesController> {
   const FuturesScreen({super.key});
@@ -16,49 +19,87 @@ class FuturesScreen extends GetView<FuturesController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: SizedBox(
-          height: 60, // Fixed height for TabBar
-          child: TabBar(
-            controller: controller.tabController,
-            dividerColor: Colors.transparent,
-            isScrollable: true,
-            indicatorColor: Colors.transparent,
-            indicatorSize: TabBarIndicatorSize.label,
-            indicatorPadding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
-            indicatorWeight: 1,
-            tabAlignment: TabAlignment.start,
-            labelColor: AppColors.textWhite,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w400,
-              fontSize: 16,
-              color: AppColors.textGreyLight,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+
+        child: Obx(
+          () => AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: controller.onRefreshState.value
+                    ? AppColors.reversedPrimaryGradient
+                    : const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: <Color>[Colors.transparent, Colors.transparent],
+                      ),
+              ),
             ),
-            tabs: controller.futureTabTitle.map((String title) => Tab(child: Text(title))).toList(),
+            title: AnimatedOpacity(
+              opacity: controller.onRefreshState.value ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 800),
+              child: SizedBox(
+                height: 60, // Fixed height for TabBar
+                child: TabBar(
+                  controller: controller.tabController,
+                  dividerColor: Colors.transparent,
+                  isScrollable: true,
+                  indicatorColor: Colors.transparent,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  indicatorPadding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
+                  indicatorWeight: 1,
+                  tabAlignment: TabAlignment.start,
+                  labelColor: AppColors.textWhite,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
+                  unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16,
+                    color: AppColors.textGreyLight,
+                  ),
+                  tabs: controller.futureTabTitle
+                      .map((String title) => Tab(child: Text(title)))
+                      .toList(),
+                ),
+              ),
+            ),
           ),
         ),
       ),
 
       body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            const Divider(),
-            Expanded(
-              child: TabBarView(
-                controller: controller.tabController,
-                children: <Widget>[
-                  /// ========== > USD View ======>
-                  const UsdMScreen(),
+        child: CustomGifRefreshWidget(
+          onRefresh: () async {
+            await controller.onRefresh();
+          },
 
-                  /// ========== > Other Tab views =====>
-                  const Text("COIN -M UI appear here").centered,
-                  const Text("Options UI appear here").centered,
-                  const Text("Smart UI appear here").centered,
-                ],
-              ),
+          gifAssetPath: AppImages.loader,
+          refreshTriggerDistance: 80.0,
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const Divider(),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.85,
+                  child: TabBarView(
+                    controller: controller.tabController,
+                    children: <Widget>[
+                      /// ========== > USD View ======>
+                      const UsdMScreen(),
+
+                      /// ========== > Other Tab views =====>
+                      const Text("COIN -M UI appear here").centered,
+                      const Text("Options UI appear here").centered,
+                      const Text("Smart UI appear here").centered,
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

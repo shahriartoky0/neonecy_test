@@ -21,11 +21,10 @@ class AssetFundingScreen extends GetView<AssetsController> {
 
   @override
   Widget build(BuildContext context) {
-    final HomeController homeController = Get.find<HomeController>( );
+    final HomeController homeController = Get.find<HomeController>();
     return CustomGifRefreshWidget(
       onRefresh: () async {
         await controller.onRefresh();
-        // print('popopo');
       },
 
       gifAssetPath: AppImages.loader, // Your gif asset path
@@ -63,14 +62,10 @@ class AssetFundingScreen extends GetView<AssetsController> {
             Row(
               children: <Widget>[
                 Obx(
-                  ()=>  AnimatedOpacity(
-                    opacity: controller.inRefresh.value ? 0 : 1,
-                    duration: const Duration(milliseconds: 800),
-                    child: Text(
-                      homeController.balance.value,
-                      style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  () => Text(
+                    '\$ ${homeController.balance.value}',
+                    style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 const SizedBox(width: 5),
@@ -91,7 +86,7 @@ class AssetFundingScreen extends GetView<AssetsController> {
                 Text("Today's PNL ", style: TextStyle(color: AppColors.white, fontSize: 11)),
                 Text(
                   "+\$0.00146468 (+0.50%) ",
-                  style: TextStyle(color: AppColors.white, fontSize: 11),
+                  style: TextStyle(color: AppColors.greenAccent, fontSize: 11),
                 ),
                 Text(">", style: TextStyle(color: AppColors.grey, fontSize: 11)),
               ],
@@ -104,7 +99,7 @@ class AssetFundingScreen extends GetView<AssetsController> {
               children: <Widget>[
                 Expanded(
                   child: AppButton(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
                     bgColor: AppColors.yellow,
                     textColor: AppColors.black,
                     labelText: 'Add Funds',
@@ -113,7 +108,7 @@ class AssetFundingScreen extends GetView<AssetsController> {
                 ),
                 Expanded(
                   child: AppButton(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
 
                     bgColor: AppColors.iconBackgroundLight,
                     textColor: AppColors.textWhite,
@@ -123,7 +118,7 @@ class AssetFundingScreen extends GetView<AssetsController> {
                 ),
                 Expanded(
                   child: AppButton(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
 
                     bgColor: AppColors.iconBackgroundLight,
                     textColor: AppColors.textWhite,
