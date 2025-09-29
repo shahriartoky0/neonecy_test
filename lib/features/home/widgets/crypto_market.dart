@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
-import 'package:neonecy_test/core/utils/custom_loader.dart';
+ import '../../../core/utils/custom_loader.dart';
 import '../controllers/crypto_market_controller.dart';
 import '../model/crypto_data_model.dart';
 

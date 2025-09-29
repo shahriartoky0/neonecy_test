@@ -66,7 +66,9 @@ class _FastDragWrapperState extends State<FastDragWrapper>
   }
 
   void _onPanStart(DragStartDetails details) {
-    if (!widget.enabled) return;
+    if (!widget.enabled) {
+      return;
+    }
 
     _isDragging = true;
     _hasTriggered = false;
@@ -78,7 +80,9 @@ class _FastDragWrapperState extends State<FastDragWrapper>
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (!widget.enabled || !_isDragging) return;
+    if (!widget.enabled || !_isDragging) {
+      return;
+    }
 
     setState(() {
       _dragPosition += details.delta.dx;
@@ -86,7 +90,7 @@ class _FastDragWrapperState extends State<FastDragWrapper>
       // Immediate trigger when threshold is reached
       if (!_hasTriggered && _dragPosition.abs() > widget.sensitivity) {
         _hasTriggered = true;
-        int direction = _dragPosition > 0 ? 1 : -1;
+        final int direction = _dragPosition > 0 ? 1 : -1;
 
         // Trigger immediately
         widget.onDragComplete?.call(direction);
@@ -102,16 +106,18 @@ class _FastDragWrapperState extends State<FastDragWrapper>
   }
 
   void _onPanEnd(DragEndDetails details) {
-    if (!widget.enabled || !_isDragging) return;
+    if (!widget.enabled || !_isDragging) {
+      return;
+    }
 
     _isDragging = false;
 
     // Check velocity for quick swipes
     if (!_hasTriggered) {
-      double velocity = details.velocity.pixelsPerSecond.dx;
+      final double velocity = details.velocity.pixelsPerSecond.dx;
 
       if (velocity.abs() > widget.velocityThreshold) {
-        int direction = velocity > 0 ? 1 : -1;
+        final int direction = velocity > 0 ? 1 : -1;
         widget.onDragComplete?.call(direction);
 
         if (widget.showFeedback) {
@@ -143,8 +149,8 @@ class _FastDragWrapperState extends State<FastDragWrapper>
 
     return AnimatedBuilder(
       animation: _animation,
-      builder: (context, child) {
-        double currentPosition = _isDragging ? _dragPosition : _animation.value;
+      builder: (BuildContext context, Widget? child) {
+        final double currentPosition = _isDragging ? _dragPosition : _animation.value;
 
         return GestureDetector(
           onPanStart: _onPanStart,

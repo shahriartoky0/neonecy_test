@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import '../../../core/config/app_sizes.dart';
@@ -11,7 +12,7 @@ class FundingCard extends GetView<AssetsController> {
   final String price;
   final String pnl;
   final String percentageChange;
-  final String icon;
+  final String iconImage;
 
   const FundingCard({
     super.key,
@@ -21,7 +22,7 @@ class FundingCard extends GetView<AssetsController> {
     required this.price,
     required this.pnl,
     required this.percentageChange,
-    required this.icon,
+    required this.iconImage,
   });
 
   @override
@@ -38,20 +39,26 @@ class FundingCard extends GetView<AssetsController> {
               children: <Widget>[
                 // Crypto icon (using a circular container with a background color)
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: 32,
+                  height: 32,
                   decoration: const BoxDecoration(
-                    color: AppColors.greenAccent,
                     shape: BoxShape.circle,
                   ),
-                  child: Center(child: Text(icon, style: const TextStyle(fontSize: 14))),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: iconImage,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
+
                 const SizedBox(width: 8),
                 Text(
                   cryptoName,
                   style: const TextStyle(
                     color: AppColors.textWhite,
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -63,7 +70,7 @@ class FundingCard extends GetView<AssetsController> {
               balance,
               style: const TextStyle(
                 color: AppColors.textWhite,
-                fontSize: 17,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -78,9 +85,9 @@ class FundingCard extends GetView<AssetsController> {
           children: <Widget>[
             Text(
               cryptoSymbol,
-              style: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
+              style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13),
             ),
-            Text(price, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 14)),
+            Text(price, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
           ],
         ),
 
@@ -90,12 +97,12 @@ class FundingCard extends GetView<AssetsController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            const Text("Available\nFreeze", style: TextStyle(color: AppColors.textGreyLight, fontSize: 14)),
+            const Text("Available\nMarket Cap", style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
             Text(
-              '$pnl ($percentageChange)',
+              '$pnl $percentageChange',
               style: const TextStyle(
                 color: AppColors.white,
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
             ),

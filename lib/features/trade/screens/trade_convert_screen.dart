@@ -48,6 +48,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                         FocusScope.of(context).unfocus();
                         controller.saveTheBalance();
                         ToastManager.show(message: 'Balance Updated');
+                        controller.balanceTEController.clear();
                       },
                       child: const Text('Submit Balance'),
                     ),
@@ -163,7 +164,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                       '${controller.availableBalance.value} PEPE',
                       style: const TextStyle(
                         color: AppColors.textWhite,
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -243,7 +244,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                       '${controller.toAmount.value} - ${controller.maxToRange.value}',
                       style: TextStyle(
                         color: AppColors.grey.withValues(alpha: 0.4),
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -282,7 +283,7 @@ class TradeConvertScreen extends GetView<TradeController> {
           const SizedBox(width: 8),
           Text(
             token,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
           ),
           const SizedBox(width: 4),
           const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 16),

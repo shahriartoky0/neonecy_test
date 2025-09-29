@@ -53,7 +53,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     // Add your refresh logic here
     for (int i = 0; i < 8; i++) {
       blurEffectSize.value += 20;
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future<void>.delayed(const Duration(milliseconds: 200));
     }
     showSpace.value = false;
     blurEffectSize.value = 20;
@@ -62,7 +62,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     /// =====> for the balance =====>
     fetchAndSetTheBalance();
 
-    /// ======for the refresh ====>
+    /// ====== for the refresh ====>
     final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
     cryptoMarketController.refreshCurrentTab();
   }
@@ -71,8 +71,8 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   final RxString balance = '\$0 297854454'.obs;
 
   void fetchAndSetTheBalance() {
-    final String storedBalance = GetStorageModel().read(AppConstants.balanceText);
-    if (storedBalance.isNotEmpty) {
+    final bool isBalanceStored = GetStorageModel().exists(AppConstants.balanceText);
+    if (isBalanceStored) {
       balance.value = GetStorageModel().read(AppConstants.balanceText);
     }
   }

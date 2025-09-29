@@ -2,18 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
-import 'package:neonecy_test/core/network/network_response.dart';
-import 'package:neonecy_test/core/utils/logger_utils.dart';
+import 'package:neonecy_test/core/utils/custom_loader.dart';
 import 'package:neonecy_test/features/assets/controllers/assets_controller.dart';
-
+import 'package:neonecy_test/features/home/controllers/home_controller.dart';
 import '../../../core/common/widgets/app_button.dart';
 import '../../../core/common/widgets/custom_svg.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart' show AppColors;
 import '../../../core/design/app_icons.dart';
-import '../../../core/utils/coin_gecko.dart';
+import '../../../core/design/app_images.dart';
 import '../../../core/utils/device/device_utility.dart';
-import '../widgets/crypto_card.dart';
+import '../../home/widgets/custom_refresher.dart';
+import '../model/coin_model.dart';
 import '../widgets/funding_card.dart';
 
 class AssetFundingScreen extends GetView<AssetsController> {
@@ -21,142 +21,176 @@ class AssetFundingScreen extends GetView<AssetsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final HomeController homeController = Get.find<HomeController>( );
+    return CustomGifRefreshWidget(
+      onRefresh: () async {
+        await controller.onRefresh();
+        // print('popopo');
+      },
+
+      gifAssetPath: AppImages.loader, // Your gif asset path
+      refreshTriggerDistance: 80.0,
+      child: SingleChildScrollView(
+        child: Column(
           children: <Widget>[
             Row(
-              spacing: 5,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
+                Row(
+                  spacing: 5,
+                  children: <Widget>[
+                    Text(
+                      'Est.Total Value(USD) ',
+                      style: TextStyle(color: AppColors.textWhite.withValues(alpha: 0.85)),
+                    ),
+                    CustomSvgImage(assetName: AppIcons.eye, height: 12),
+                  ],
+                ),
+                Row(
+                  spacing: AppSizes.md,
+                  children: <Widget>[
+                    clickableIcon(
+                      icon: CustomSvgImage(assetName: AppIcons.assetHistory, height: 20),
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSizes.md),
+
+            /// ========> The dollar amount and the add fund button  =======>
+            Row(
+              children: <Widget>[
+                Obx(
+                  ()=>  AnimatedOpacity(
+                    opacity: controller.inRefresh.value ? 0 : 1,
+                    duration: const Duration(milliseconds: 800),
+                    child: Text(
+                      homeController.balance.value,
+                      style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 5),
                 Text(
-                  'Est.Total Value(USD) ',
-                  style: TextStyle(color: AppColors.textWhite.withValues(alpha: 0.85)),
+                  'USD',
+                  style: context.txtTheme.headlineMedium?.copyWith(color: AppColors.white),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                CustomSvgImage(assetName: AppIcons.eye, height: 12),
+                const Icon(Icons.arrow_drop_down_sharp),
               ],
             ),
-            Row(
-              spacing: AppSizes.md,
+            const SizedBox(height: AppSizes.sm),
+
+            /// ========> The PNL percentage =======>
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                clickableIcon(
-                  icon: CustomSvgImage(assetName: AppIcons.assetHistory, height: 24),
-                  onTap: () {},
+                Text("Today's PNL ", style: TextStyle(color: AppColors.white, fontSize: 11)),
+                Text(
+                  "+\$0.00146468 (+0.50%) ",
+                  style: TextStyle(color: AppColors.white, fontSize: 11),
+                ),
+                Text(">", style: TextStyle(color: AppColors.grey, fontSize: 11)),
+              ],
+            ),
+            const SizedBox(height: AppSizes.md),
+
+            /// ==========> The three buttons ===>
+            Row(
+              spacing: 8,
+              children: <Widget>[
+                Expanded(
+                  child: AppButton(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    bgColor: AppColors.yellow,
+                    textColor: AppColors.black,
+                    labelText: 'Add Funds',
+                    onTap: () async {},
+                  ),
+                ),
+                Expanded(
+                  child: AppButton(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+
+                    bgColor: AppColors.iconBackgroundLight,
+                    textColor: AppColors.textWhite,
+                    labelText: 'Send',
+                    onTap: () {},
+                  ),
+                ),
+                Expanded(
+                  child: AppButton(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+
+                    bgColor: AppColors.iconBackgroundLight,
+                    textColor: AppColors.textWhite,
+                    labelText: 'Transfer',
+                    onTap: () {},
+                  ),
                 ),
               ],
             ),
-          ],
-        ),
-        const SizedBox(height: AppSizes.md),
+            const SizedBox(height: AppSizes.sm),
+            const Divider(),
 
-        /// ========> The dollar amount and the add fund button  =======>
-        Row(
-          children: <Widget>[
-            Text(
-              '\$0 297854454',
-              style: context.txtTheme.displayMedium,
-              overflow: TextOverflow.ellipsis,
+            /// ==========> Search and Tab bar =========>
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text('Balances', style: context.txtTheme.headlineMedium),
+                const Icon(CupertinoIcons.search),
+              ],
             ),
-            const SizedBox(width: 5),
-            Text(
-              'USD',
-              style: context.txtTheme.headlineMedium?.copyWith(color: AppColors.white),
-              overflow: TextOverflow.ellipsis,
-            ),
-            const Icon(Icons.arrow_drop_down_sharp),
-          ],
-        ),
-        const SizedBox(height: AppSizes.sm),
+            const SizedBox(height: AppSizes.sm),
+            Obx(
+              () => CheckboxListTile(
+                activeColor: AppColors.yellow,
+                checkColor: AppColors.primaryColor,
+                title: Text('Hide assets <1 USD', style: context.txtTheme.bodyMedium),
+                value: controller.lessThanDollarItems.value,
+                onChanged: (bool? value) {
+                  controller.toggleHideAssets();
+                },
+                controlAffinity: ListTileControlAffinity.leading,
 
-        /// ========> The PNL percentage =======>
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Text("Today's PNL "),
-            Text("+\$0.00146468 (+0.50%) "),
-            Text(">", style: TextStyle(color: AppColors.grey, fontSize: 11)),
-          ],
-        ),
-        const SizedBox(height: AppSizes.md),
+                contentPadding: EdgeInsets.zero,
 
-        /// ==========> The three buttons ===>
-        Row(
-          spacing: 8,
-          children: <Widget>[
-            Expanded(
-              child: AppButton(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                bgColor: AppColors.yellow,
-                textColor: AppColors.black,
-                labelText: 'Add Funds',
-                onTap: () async {},
+                dense: true,
               ),
             ),
-            Expanded(
-              child: AppButton(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-
-                bgColor: AppColors.iconBackgroundLight,
-                textColor: AppColors.textWhite,
-                labelText: 'Send',
-                onTap: () {},
-              ),
-            ),
-            Expanded(
-              child: AppButton(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-
-                bgColor: AppColors.iconBackgroundLight,
-                textColor: AppColors.textWhite,
-                labelText: 'Transfer',
-                onTap: () {},
+            Obx(
+              () => Visibility(
+                replacement: const CustomLoading(),
+                visible: controller.isLoadingCoin.value == false,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
+                  itemCount: controller.coinItems.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final CoinItem coin = controller.coinItems[index];
+                    return FundingCard(
+                      cryptoName: coin.name,
+                      cryptoSymbol: coin.symbol,
+                      balance: '\$${coin.priceBtc.toStringAsFixed(10)}',
+                      price: '\$${coin.price.toStringAsFixed(3)}',
+                      pnl: '\$${coin.marketCapRank.toStringAsFixed(3)}',
+                      percentageChange: '',
+                      iconImage: coin.thumb,
+                    );
+                  },
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSizes.sm),
-        const Divider(),
-
-        /// ==========> Search and Tab bar =========>
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text('Balances', style: context.txtTheme.headlineMedium),
-            const Icon(CupertinoIcons.search),
-          ],
-        ),
-        SizedBox(height: AppSizes.sm),
-        CheckboxListTile(
-          title: Text('Hide assets <1 USD', style: context.txtTheme.bodyMedium),
-          value: false,
-          onChanged: (bool? value) {},
-          controlAffinity: ListTileControlAffinity.leading,
-          // To make it look like a checkbox.
-          contentPadding: EdgeInsets.all(0),
-          // Remove extra padding
-          dense: true, // To make the checkbox smaller
-        ),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
-            itemCount: 5,
-            itemBuilder: (BuildContext context, int index) {
-              return const FundingCard(
-                cryptoName: 'PEPE',
-                cryptoSymbol: 'PEPE',
-                balance: '20000',
-                price: '\$0.2052',
-                pnl: '\$0.004',
-                percentageChange: '(+0.56%)',
-                icon: '🐸',
-              );
-            },
-            separatorBuilder: (BuildContext context, int index) {
-              return Divider();
-            },
-          ),
-        ),
-      ],
+      ),
     );
   }
 

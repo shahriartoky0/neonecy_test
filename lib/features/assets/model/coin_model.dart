@@ -1,4 +1,3 @@
-
 class CoinItem {
   final String id;
   final int coinId;
@@ -9,8 +8,11 @@ class CoinItem {
   final String small;
   final String large;
   final String slug;
+  final double price;
   final double priceBtc;
-  final CoinData data;
+  final String marketCap;
+  final String totalVolume;
+  final String sparkline;
 
   CoinItem({
     required this.id,
@@ -22,80 +24,41 @@ class CoinItem {
     required this.small,
     required this.large,
     required this.slug,
+    required this.price,
     required this.priceBtc,
-    required this.data,
+    required this.marketCap,
+    required this.totalVolume,
+    required this.sparkline,
   });
 
   factory CoinItem.fromJson(Map<String, dynamic> json) {
     return CoinItem(
-      id: json['id'],
-      coinId: json['coin_id'],
-      name: json['name'],
-      symbol: json['symbol'],
-      marketCapRank: json['market_cap_rank'],
-      thumb: json['thumb'],
-      small: json['small'],
-      large: json['large'],
-      slug: json['slug'],
-      priceBtc: json['price_btc'].toDouble(),
-      data: CoinData.fromJson(json['data']),
+      id: json['item']['id'],
+      coinId: json['item']['coin_id'],
+      name: json['item']['name'],
+      symbol: json['item']['symbol'],
+      marketCapRank: json['item']['market_cap_rank'],
+      thumb: json['item']['thumb'],
+      small: json['item']['small'],
+      large: json['item']['large'],
+      slug: json['item']['slug'],
+      price: json['item']['data']['price'],
+      priceBtc: json['item']['data']['price_btc'] != null ? double.parse(json['item']['data']['price_btc']) : 0.0,
+      marketCap: json['item']['data']['market_cap'],
+      totalVolume: json['item']['data']['total_volume'],
+      sparkline: json['item']['data']['sparkline'],
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'coin_id': coinId,
-      'name': name,
-      'symbol': symbol,
-      'market_cap_rank': marketCapRank,
-      'thumb': thumb,
-      'small': small,
-      'large': large,
-      'slug': slug,
-      'price_btc': priceBtc,
-      'data': data.toJson(),
-    };
   }
 }
 
 class CoinData {
-  final double price;
-  final String marketCap;
-  final String marketCapBtc;
-  final String totalVolume;
-  final String totalVolumeBtc;
-  final String sparkline;
+  final CoinItem item;
 
-  CoinData({
-    required this.price,
-    required this.marketCap,
-    required this.marketCapBtc,
-    required this.totalVolume,
-    required this.totalVolumeBtc,
-    required this.sparkline,
-  });
+  CoinData({required this.item});
 
   factory CoinData.fromJson(Map<String, dynamic> json) {
     return CoinData(
-      price: json['price'].toDouble(),
-      marketCap: json['market_cap'],
-      marketCapBtc: json['market_cap_btc'],
-      totalVolume: json['total_volume'],
-      totalVolumeBtc: json['total_volume_btc'],
-      sparkline: json['sparkline'],
+      item: CoinItem.fromJson(json),
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'price': price,
-      'market_cap': marketCap,
-      'market_cap_btc': marketCapBtc,
-      'total_volume': totalVolume,
-      'total_volume_btc': totalVolumeBtc,
-      'sparkline': sparkline,
-    };
-  }
 }
-

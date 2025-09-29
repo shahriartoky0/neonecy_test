@@ -52,7 +52,7 @@ class AssetOverviewScreen extends StatelessWidget {
           children: <Widget>[
             Text(
               '\$0 297854454',
-              style: context.txtTheme.displayMedium,
+              style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(width: 5),

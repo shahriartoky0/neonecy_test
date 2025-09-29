@@ -13,6 +13,7 @@ import 'package:neonecy_test/features/trade/controllers/trade_controller.dart';
 import 'core/design/app_theme.dart';
 import 'core/routes/app_navigation.dart';
 import 'core/routes/app_routes.dart';
+import 'features/assets/controllers/assets_controller.dart';
 import 'features/markets/controllers/enhanced_market_controller.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -51,5 +52,6 @@ class ControllerBinder extends Bindings {
     Get.put(EnhancedCryptoMarketController());
     Get.put(TradeController());
     Get.put(FuturesController());
+    Get.put(AssetsController());
    }
 }

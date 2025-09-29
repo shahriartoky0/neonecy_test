@@ -23,7 +23,7 @@ class AssetTopTabController extends GetxController with GetSingleTickerProviderS
   void onInit() {
     super.onInit();
     tabController = TabController(length: assetTabTitles.length, vsync: this);
-
+    tabController.index = 1;
     // Listen to tab changes
     tabController.addListener(() {
       selectedIndex.value = tabController.index;
