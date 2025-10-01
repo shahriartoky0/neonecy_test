@@ -230,7 +230,7 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
                   crypto.formattedChangePercent,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
