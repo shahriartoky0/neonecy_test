@@ -45,7 +45,7 @@ class AssetsController extends GetxController {
 
   // Filter assets less than $1
   void filterAssets() {
-    coinItems.value = coinItems.where((coin) => coin.price >= 1.0).toList();
+    coinItems.value = coinItems.where((coin) => coin.price >= 1.1).toList();
   }
 
   // Refresh functionality
