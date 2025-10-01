@@ -71,7 +71,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
 
     /// ====== for the refresh ====>
     final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
-    cryptoMarketController.refreshCurrentTab();
+   await  cryptoMarketController.refreshCurrentTab();
   }
 
   /// ==========> For app hint text ====>

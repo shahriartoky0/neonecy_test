@@ -1,8 +1,8 @@
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-import 'package:neonecy_test/core/network/network_response.dart';
+// lib/features/crypto_market/controller/crypto_market_controller.dart
 
-import '../../../core/utils/coin_gecko.dart';
+import 'package:get/get.dart';
+import '../../../core/network/network_response.dart';
+ import '../../../core/utils/coin_market_service.dart';
 import '../../../core/utils/logger_utils.dart';
 import '../model/crypto_data_model.dart';
 
@@ -10,13 +10,18 @@ class CryptoMarketController extends GetxController {
   RxInt selectedTab = 1.obs;
   RxList<CryptoData> cryptoList = <CryptoData>[].obs;
   RxBool isLoading = false.obs;
+  RxString errorMessage = ''.obs;
 
   final List<String> tabs = <String>['Favourite', 'Hot', 'Alpha', 'New', 'Gainers'];
   final List<String> categories = <String>['Crypto', 'Spot', 'Futures'];
   RxInt selectedCategory = 0.obs;
 
-  final CoinGeckoService _geckoService = CoinGeckoService();
-  final Map<int, List<CryptoData>> _cachedData = <int, List<CryptoData>>{};
+  final CoinMarketCapService _cmcService = CoinMarketCapService();
+  final Map<String, List<CryptoData>> _cachedData = <String, List<CryptoData>>{};
+
+  // Track last successful load time per cache key
+  final Map<String, DateTime> _lastLoadTimes = <String, DateTime>{};
+  static const Duration cacheValidDuration = Duration(minutes: 5);
 
   @override
   void onInit() {
@@ -31,16 +36,24 @@ class CryptoMarketController extends GetxController {
 
   void selectCategory(int index) {
     selectedCategory.value = index;
+    // Reload data when category changes
+    loadTabData();
   }
 
   Future<void> loadTabData() async {
-    // Use cached data if available
-    if (_cachedData.containsKey(selectedTab.value)) {
-      cryptoList.value = _cachedData[selectedTab.value]!;
+    // Create cache key based on tab and category
+    final String cacheKey = '${selectedTab.value}_${selectedCategory.value}';
+
+    // Check if cached data is still valid
+    if (_cachedData.containsKey(cacheKey) &&
+        _lastLoadTimes.containsKey(cacheKey) &&
+        DateTime.now().difference(_lastLoadTimes[cacheKey]!) < cacheValidDuration) {
+      cryptoList.value = _cachedData[cacheKey]!;
       return;
     }
 
     isLoading.value = true;
+    errorMessage.value = '';
 
     try {
       List<CryptoData> data = <CryptoData>[];
@@ -63,447 +76,377 @@ class CryptoMarketController extends GetxController {
           break;
       }
 
-      _cachedData[selectedTab.value] = data;
-      cryptoList.value = data;
+      if (data.isNotEmpty) {
+        _cachedData[cacheKey] = data;
+        cryptoList.value = data;
+        _lastLoadTimes[cacheKey] = DateTime.now();
+        errorMessage.value = '';
+      } else {
+        errorMessage.value = 'No data available';
+        cryptoList.value = [];
+      }
     } catch (e) {
       LoggerUtils.debug('Error loading tab data: $e');
-      // Load demo data as fallback
-      _loadDemoDataForTab(selectedTab.value);
+      errorMessage.value = 'Failed to load data. Please check your internet connection.';
+      cryptoList.value = [];
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Hot: Trending coins with volume
+  // Hot: Get trending cryptocurrencies or high volume coins
   Future<List<CryptoData>> _loadHotData() async {
-    final NetworkResponse response = await _geckoService.getTrendingCoins();
-
-    if (!response.isSuccess) {
-      LoggerUtils.debug('Hot data failed, using fallback');
-      return _getDemoHotData();
-    }
-
-    final List trendingCoins = response.jsonResponse?['coins'] as List? ?? <dynamic>[];
-    List<CryptoData> hotCryptos = <CryptoData>[];
-
-    for (var coin in trendingCoins.take(10)) {
-      final coinData = coin['item'];
-      final NetworkResponse priceResponse = await _geckoService.getCoinPrice(
-        coinId: coinData['id'],
-        includeMarketCap: true,
-        include24hrVol: true,
-        include24hrChange: true,
+    try {
+      // Try to get trending first
+      final NetworkResponse trendingResponse = await _cmcService.getTrending(
+        limit: 10,
+        timePeriod: '24h',
       );
 
-      if (priceResponse.isSuccess) {
-        final priceData = priceResponse.jsonResponse?[coinData['id']];
-        hotCryptos.add(
-          CryptoData(
-            symbol: coinData['symbol'].toString().toUpperCase(),
-            price: (priceData?['usd'] ?? 0.0).toDouble(),
-            formattedPrice: _formatPrice(priceData?['usd'] ?? 0.0),
-            changePercent: (priceData?['usd_24h_change'] ?? 0.0).toDouble(),
-            name: coinData['name'] ?? '',
-            volume: priceData?['usd_24h_vol']?.toDouble(),
-            marketCap: priceData?['usd_market_cap']?.toDouble(),
-            subText: _formatVolume(priceData?['usd_24h_vol']),
-          ),
-        );
-      }
-      await Future.delayed(Duration(milliseconds: 50));
-    }
+      if (trendingResponse.isSuccess && trendingResponse.jsonResponse != null) {
+        final data = trendingResponse.jsonResponse?['data'] as List? ?? [];
 
-    LoggerUtils.debug('Loaded ${hotCryptos.length} hot cryptocurrencies');
-    return hotCryptos.isNotEmpty ? hotCryptos : _getDemoHotData();
+        if (data.isNotEmpty) {
+          return data.map((coin) {
+            final quote = coin['quote']?['USD'] ?? {};
+            return CryptoData(
+              symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+              price: (quote['price'] ?? 0.0).toDouble(),
+              formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+              changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+              name: coin['name'] ?? '',
+              volume: quote['volume_24h']?.toDouble(),
+              marketCap: quote['market_cap']?.toDouble(),
+              subText: _formatVolume(quote['volume_24h']),
+            );
+          }).toList();
+        }
+      }
+
+      // Fallback to top coins sorted by volume
+      final NetworkResponse response = await _cmcService.getLatestListings(
+        limit: 10,
+        sort: 'volume_24h',
+        sortDir: 'desc',
+      );
+
+      if (response.isSuccess && response.jsonResponse != null) {
+        final data = response.jsonResponse?['data'] as List? ?? [];
+
+        return data.map((coin) {
+          final quote = coin['quote']?['USD'] ?? {};
+          return CryptoData(
+            symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+            price: (quote['price'] ?? 0.0).toDouble(),
+            formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+            changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+            name: coin['name'] ?? '',
+            volume: quote['volume_24h']?.toDouble(),
+            marketCap: quote['market_cap']?.toDouble(),
+            subText: _formatVolume(quote['volume_24h']),
+          );
+        }).toList();
+      }
+
+      return [];
+    } catch (e) {
+      LoggerUtils.debug('Exception in hot data: $e');
+      return [];
+    }
   }
 
-  // Gainers: Use simple top coins and filter
+  // Gainers: Get top gainers
   Future<List<CryptoData>> _loadGainersData() async {
     try {
-      // Use the basic getTopCoins method that should exist
-      final NetworkResponse response = await _geckoService.getTopCoins(
-        vsCurrency: 'usd',
-        perPage: 50,
+      // Try the dedicated gainers endpoint first
+      final NetworkResponse gainersResponse = await _cmcService.getTopGainers(
+        limit: 10,
+        timePeriod: '24h',
       );
 
-      if (!response.isSuccess) {
-        LoggerUtils.debug('Gainers API failed, using demo data');
-        return _getDemoGainersData();
+      if (gainersResponse.isSuccess && gainersResponse.jsonResponse != null) {
+        final data = gainersResponse.jsonResponse?['data'] as List? ?? [];
+
+        if (data.isNotEmpty) {
+          return data.map((coin) {
+            final quote = coin['quote']?['USD'] ?? {};
+            return CryptoData(
+              symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+              price: (quote['price'] ?? 0.0).toDouble(),
+              formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+              changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+              name: coin['name'] ?? '',
+              volume: quote['volume_24h']?.toDouble(),
+              marketCap: quote['market_cap']?.toDouble(),
+              subText: _formatMarketCap(quote['market_cap']),
+            );
+          }).toList();
+        }
       }
 
-      final List coins = response.jsonResponse as List? ?? <dynamic>[];
-      LoggerUtils.debug('Gainers raw data count: ${coins.length}');
+      // Fallback: Get top coins and sort by percent change
+      final NetworkResponse response = await _cmcService.getLatestListings(
+        limit: 100,
+        sort: 'percent_change_24h',
+        sortDir: 'desc',
+      );
 
-      if (coins.isEmpty) {
-        return _getDemoGainersData();
-      }
+      if (response.isSuccess && response.jsonResponse != null) {
+        final data = response.jsonResponse?['data'] as List? ?? [];
 
-      // Filter and sort by positive 24h change
-      final List gainers =
-          coins.where((coin) => (coin['price_change_percentage_24h'] ?? 0) > 0).toList()..sort(
-            (a, b) => (b['price_change_percentage_24h'] ?? 0).compareTo(
-              a['price_change_percentage_24h'] ?? 0,
-            ),
+        // Filter for positive changes only
+        final gainers = data.where((coin) {
+          final change = coin['quote']?['USD']?['percent_change_24h'] ?? 0;
+          return change > 0;
+        }).take(10);
+
+        return gainers.map((coin) {
+          final quote = coin['quote']?['USD'] ?? {};
+          return CryptoData(
+            symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+            price: (quote['price'] ?? 0.0).toDouble(),
+            formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+            changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+            name: coin['name'] ?? '',
+            volume: quote['volume_24h']?.toDouble(),
+            marketCap: quote['market_cap']?.toDouble(),
+            subText: _formatMarketCap(quote['market_cap']),
           );
+        }).toList();
+      }
 
-      List<CryptoData> gainersData = gainers.take(10).map((coin) {
-        return CryptoData(
-          symbol: coin['symbol'].toString().toUpperCase(),
-          price: (coin['current_price'] ?? 0.0).toDouble(),
-          formattedPrice: _formatPrice(coin['current_price'] ?? 0.0),
-          changePercent: (coin['price_change_percentage_24h'] ?? 0.0).toDouble(),
-          name: coin['name'] ?? '',
-          marketCap: coin['market_cap']?.toDouble(),
-          volume: coin['total_volume']?.toDouble(),
-          subText: _formatMarketCap(coin['market_cap']),
-        );
-      }).toList();
-
-      LoggerUtils.debug('Loaded ${gainersData.length} gainer cryptocurrencies');
-      return gainersData.isNotEmpty ? gainersData : _getDemoGainersData();
+      return [];
     } catch (e) {
       LoggerUtils.debug('Exception in gainers: $e');
-      return _getDemoGainersData();
+      return [];
     }
   }
 
-  // Favourite: Use basic API call
+  // Favourite: Top 10 by market cap
   Future<List<CryptoData>> _loadFavouriteData() async {
     try {
-      // Simple approach - get top 10 coins by market cap
-      final NetworkResponse response = await _geckoService.getTopCoins(
-        vsCurrency: 'usd',
-        perPage: 10,
+      final NetworkResponse response = await _cmcService.getLatestListings(
+        limit: 10,
+        sort: 'market_cap',
+        sortDir: 'desc',
       );
 
-      if (!response.isSuccess) {
-        LoggerUtils.debug('Favourites API failed, using demo data');
-        return _getDemoFavouriteData();
+      if (response.isSuccess && response.jsonResponse != null) {
+        final data = response.jsonResponse?['data'] as List? ?? [];
+
+        return data.map((coin) {
+          final quote = coin['quote']?['USD'] ?? {};
+          return CryptoData(
+            symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+            price: (quote['price'] ?? 0.0).toDouble(),
+            formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+            changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+            name: coin['name'] ?? '',
+            volume: quote['volume_24h']?.toDouble(),
+            marketCap: quote['market_cap']?.toDouble(),
+            subText: _formatMarketCap(quote['market_cap']),
+          );
+        }).toList();
       }
 
-      final List coins = response.jsonResponse as List? ?? <dynamic>[];
-
-      if (coins.isEmpty) {
-        return _getDemoFavouriteData();
-      }
-
-      List<CryptoData> favorites = coins.map((coin) {
-        return CryptoData(
-          symbol: coin['symbol'].toString().toUpperCase(),
-          price: (coin['current_price'] ?? 0.0).toDouble(),
-          formattedPrice: _formatPrice(coin['current_price'] ?? 0.0),
-          changePercent: (coin['price_change_percentage_24h'] ?? 0.0).toDouble(),
-          name: coin['name'] ?? '',
-          marketCap: coin['market_cap']?.toDouble(),
-          volume: coin['total_volume']?.toDouble(),
-          subText: _formatMarketCap(coin['market_cap']),
-        );
-      }).toList();
-
-      LoggerUtils.debug('Loaded ${favorites.length} favourite cryptocurrencies');
-      return favorites;
+      return [];
     } catch (e) {
       LoggerUtils.debug('Exception in favourites: $e');
-      return _getDemoFavouriteData();
+      return [];
     }
   }
 
-  // New: Get coins from page 2-3 (newer/smaller coins)
+  // New: Recently added coins
   Future<List<CryptoData>> _loadNewData() async {
     try {
-      final NetworkResponse response = await _geckoService.getTopCoins(
-        vsCurrency: 'usd',
-        perPage: 50,
-        page: 2,
+      final NetworkResponse response = await _cmcService.getNewListings(
+        limit: 10,
       );
 
-      if (!response.isSuccess) {
-        LoggerUtils.debug('New coins API failed, using demo data');
-        return _getDemoNewData();
+      if (response.isSuccess && response.jsonResponse != null) {
+        final data = response.jsonResponse?['data'] as List? ?? [];
+
+        if (data.isNotEmpty) {
+          return data.map((coin) {
+            final quote = coin['quote']?['USD'] ?? {};
+            return CryptoData(
+              symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+              price: (quote['price'] ?? 0.0).toDouble(),
+              formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+              changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+              name: coin['name'] ?? '',
+              volume: quote['volume_24h']?.toDouble(),
+              marketCap: quote['market_cap']?.toDouble(),
+              subText: 'Rank #${coin['cmc_rank'] ?? 'N/A'}',
+            );
+          }).toList();
+        }
       }
 
-      final List coins = response.jsonResponse as List? ?? <dynamic>[];
+      // Fallback: Get coins from further pages (newer/smaller market cap)
+      final fallbackResponse = await _cmcService.getLatestListings(
+        start: 51,  // Start from rank 51
+        limit: 10,
+        sort: 'date_added',
+        sortDir: 'desc',
+      );
 
-      if (coins.isEmpty) {
-        return _getDemoNewData();
+      if (fallbackResponse.isSuccess && fallbackResponse.jsonResponse != null) {
+        final data = fallbackResponse.jsonResponse?['data'] as List? ?? [];
+
+        return data.map((coin) {
+          final quote = coin['quote']?['USD'] ?? {};
+          return CryptoData(
+            symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+            price: (quote['price'] ?? 0.0).toDouble(),
+            formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+            changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+            name: coin['name'] ?? '',
+            volume: quote['volume_24h']?.toDouble(),
+            marketCap: quote['market_cap']?.toDouble(),
+            subText: 'Rank #${coin['cmc_rank'] ?? 'N/A'}',
+          );
+        }).toList();
       }
 
-      List<CryptoData> newData = coins.take(10).map((coin) {
-        return CryptoData(
-          symbol: coin['symbol'].toString().toUpperCase(),
-          price: (coin['current_price'] ?? 0.0).toDouble(),
-          formattedPrice: _formatPrice(coin['current_price'] ?? 0.0),
-          changePercent: (coin['price_change_percentage_24h'] ?? 0.0).toDouble(),
-          name: coin['name'] ?? '',
-          marketCap: coin['market_cap']?.toDouble(),
-          volume: coin['total_volume']?.toDouble(),
-          subText: 'Rank #${coin['market_cap_rank'] ?? 'N/A'}',
-        );
-      }).toList();
-
-      LoggerUtils.debug('Loaded ${newData.length} new cryptocurrencies');
-      return newData;
+      return [];
     } catch (e) {
       LoggerUtils.debug('Exception in new coins: $e');
-      return _getDemoNewData();
+      return [];
     }
   }
 
-  // Alpha: Get smaller cap coins from page 3-4
+  // Alpha: Mid-cap coins with high volatility
   Future<List<CryptoData>> _loadAlphaData() async {
     try {
-      final NetworkResponse response = await _geckoService.getTopCoins(
-        vsCurrency: 'usd',
-        perPage: 50,
-        page: 3,
+      // Get coins from rank 21-50 (mid-cap range)
+      final NetworkResponse response = await _cmcService.getLatestListings(
+        start: 21,
+        limit: 50,
+        sort: 'market_cap',
+        sortDir: 'desc',
       );
 
-      if (!response.isSuccess) {
-        LoggerUtils.debug('Alpha coins API failed, using demo data');
-        return _getDemoAlphaData();
+      if (response.isSuccess && response.jsonResponse != null) {
+        final data = response.jsonResponse?['data'] as List? ?? [];
+
+        // Filter for coins with good volume and volatility
+        final alphaCoins = data.where((coin) {
+          final quote = coin['quote']?['USD'] ?? {};
+          final volume = quote['volume_24h'] ?? 0;
+          final change = (quote['percent_change_24h'] ?? 0).abs();
+          return volume > 10000000 && change > 5; // Active coins with >5% movement
+        }).take(10);
+
+        if (alphaCoins.isNotEmpty) {
+          return alphaCoins.map((coin) {
+            final quote = coin['quote']?['USD'] ?? {};
+            return CryptoData(
+              symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+              price: (quote['price'] ?? 0.0).toDouble(),
+              formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+              changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+              name: coin['name'] ?? '',
+              volume: quote['volume_24h']?.toDouble(),
+              marketCap: quote['market_cap']?.toDouble(),
+              subText: _formatMarketCap(quote['market_cap']),
+            );
+          }).toList();
+        }
+
+        // If no high volatility coins found, just return top 10 from mid-cap range
+        return data.take(10).map((coin) {
+          final quote = coin['quote']?['USD'] ?? {};
+          return CryptoData(
+            symbol: (coin['symbol'] ?? '').toString().toUpperCase(),
+            price: (quote['price'] ?? 0.0).toDouble(),
+            formattedPrice: _formatPrice(quote['price'] ?? 0.0),
+            changePercent: (quote['percent_change_24h'] ?? 0.0).toDouble(),
+            name: coin['name'] ?? '',
+            volume: quote['volume_24h']?.toDouble(),
+            marketCap: quote['market_cap']?.toDouble(),
+            subText: _formatMarketCap(quote['market_cap']),
+          );
+        }).toList();
       }
 
-      final List coins = response.jsonResponse as List? ?? <dynamic>[];
-
-      if (coins.isEmpty) {
-        return _getDemoAlphaData();
-      }
-
-      List<CryptoData> alphaData = coins.take(10).map((coin) {
-        return CryptoData(
-          symbol: coin['symbol'].toString().toUpperCase(),
-          price: (coin['current_price'] ?? 0.0).toDouble(),
-          formattedPrice: _formatPrice(coin['current_price'] ?? 0.0),
-          changePercent: (coin['price_change_percentage_24h'] ?? 0.0).toDouble(),
-          name: coin['name'] ?? '',
-          marketCap: coin['market_cap']?.toDouble(),
-          volume: coin['total_volume']?.toDouble(),
-          subText: _formatMarketCap(coin['market_cap']),
-        );
-      }).toList();
-
-      LoggerUtils.debug('Loaded ${alphaData.length} alpha cryptocurrencies');
-      return alphaData;
+      return [];
     } catch (e) {
       LoggerUtils.debug('Exception in alpha coins: $e');
-      return _getDemoAlphaData();
+      return [];
     }
   }
 
-  // Demo data fallbacks
-  List<CryptoData> _getDemoHotData() {
-    return [
-      CryptoData(
-        symbol: 'BTC',
-        price: 67890,
-        formattedPrice: '67,890',
-        changePercent: 8.45,
-        name: 'Bitcoin',
-        subText: 'Vol: \$2.5B',
-      ),
-      CryptoData(
-        symbol: 'ETH',
-        price: 3456,
-        formattedPrice: '3,456',
-        changePercent: 6.78,
-        name: 'Ethereum',
-        subText: 'Vol: \$1.2B',
-      ),
-      CryptoData(
-        symbol: 'SOL',
-        price: 145,
-        formattedPrice: '145',
-        changePercent: 12.34,
-        name: 'Solana',
-        subText: 'Vol: \$890M',
-      ),
-    ];
-  }
+  // Helper methods
+  String _formatPrice(dynamic price) {
+    if (price == null) return '0';
+    final double p = price is double ? price : (price is int ? price.toDouble() : 0.0);
 
-  List<CryptoData> _getDemoGainersData() {
-    return [
-      CryptoData(
-        symbol: 'PEPE',
-        price: 0.000012,
-        formattedPrice: '0.000012',
-        changePercent: 45.67,
-        name: 'Pepe',
-        subText: 'MCap: \$5.2B',
-      ),
-      CryptoData(
-        symbol: 'SHIB',
-        price: 0.000008,
-        formattedPrice: '0.000008',
-        changePercent: 23.45,
-        name: 'Shiba Inu',
-        subText: 'MCap: \$4.8B',
-      ),
-      CryptoData(
-        symbol: 'DOGE',
-        price: 0.062,
-        formattedPrice: '0.062',
-        changePercent: 12.34,
-        name: 'Dogecoin',
-        subText: 'MCap: \$8.9B',
-      ),
-    ];
-  }
-
-  List<CryptoData> _getDemoFavouriteData() {
-    return [
-      CryptoData(
-        symbol: 'BTC',
-        price: 67890,
-        formattedPrice: '67,890',
-        changePercent: 2.45,
-        name: 'Bitcoin',
-        subText: 'MCap: \$1.3T',
-      ),
-      CryptoData(
-        symbol: 'ETH',
-        price: 3456,
-        formattedPrice: '3,456',
-        changePercent: -1.23,
-        name: 'Ethereum',
-        subText: 'MCap: \$415B',
-      ),
-      CryptoData(
-        symbol: 'BNB',
-        price: 345,
-        formattedPrice: '345',
-        changePercent: 4.32,
-        name: 'BNB',
-        subText: 'MCap: \$52B',
-      ),
-    ];
-  }
-
-  List<CryptoData> _getDemoNewData() {
-    return [
-      CryptoData(
-        symbol: 'ARB',
-        price: 0.85,
-        formattedPrice: '0.85',
-        changePercent: 8.45,
-        name: 'Arbitrum',
-        subText: 'Rank #45',
-      ),
-      CryptoData(
-        symbol: 'OP',
-        price: 1.23,
-        formattedPrice: '1.23',
-        changePercent: -2.15,
-        name: 'Optimism',
-        subText: 'Rank #67',
-      ),
-      CryptoData(
-        symbol: 'BLUR',
-        price: 0.34,
-        formattedPrice: '0.34',
-        changePercent: 15.67,
-        name: 'Blur',
-        subText: 'Rank #89',
-      ),
-    ];
-  }
-
-  List<CryptoData> _getDemoAlphaData() {
-    return [
-      CryptoData(
-        symbol: 'GMT',
-        price: 0.15,
-        formattedPrice: '0.15',
-        changePercent: -5.23,
-        name: 'STEPN',
-        subText: 'MCap: \$89M',
-      ),
-      CryptoData(
-        symbol: 'MAGIC',
-        price: 0.67,
-        formattedPrice: '0.67',
-        changePercent: 12.45,
-        name: 'Magic',
-        subText: 'MCap: \$156M',
-      ),
-      CryptoData(
-        symbol: 'IMX',
-        price: 1.34,
-        formattedPrice: '1.34',
-        changePercent: -8.76,
-        name: 'Immutable X',
-        subText: 'MCap: \$234M',
-      ),
-    ];
-  }
-
-  void _loadDemoDataForTab(int tabIndex) {
-    switch (tabIndex) {
-      case 0:
-        cryptoList.value = _getDemoFavouriteData();
-        break;
-      case 1:
-        cryptoList.value = _getDemoHotData();
-        break;
-      case 2:
-        cryptoList.value = _getDemoAlphaData();
-        break;
-      case 3:
-        cryptoList.value = _getDemoNewData();
-        break;
-      case 4:
-        cryptoList.value = _getDemoGainersData();
-        break;
-    }
-  }
-
-  // Helper methods (same as before)
-  String _formatPrice(double price) {
-    if (price >= 1000) {
-      return price
-          .toStringAsFixed(0)
-          .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
-    } else if (price >= 1) {
-      return price.toStringAsFixed(2);
-    } else if (price >= 0.01) {
-      return price.toStringAsFixed(4);
+    if (p >= 1000) {
+      return p.toStringAsFixed(0)
+          .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+              (Match m) => '${m[1]},');
+    } else if (p >= 1) {
+      return p.toStringAsFixed(2);
+    } else if (p >= 0.01) {
+      return p.toStringAsFixed(4);
+    } else if (p >= 0.0001) {
+      return p.toStringAsFixed(6);
+    } else if (p >= 0.00000001) {
+      return p.toStringAsFixed(8);
     } else {
-      return price.toStringAsFixed(6);
+      return p.toStringAsExponential(2);
     }
   }
 
-  String _formatVolume(double? volume) {
-    if (volume == null || volume == 0) return 'Vol: N/A';
-    if (volume >= 1e9) {
-      return 'Vol: \$${(volume / 1e9).toStringAsFixed(1)}B';
-    } else if (volume >= 1e6) {
-      return 'Vol: \$${(volume / 1e6).toStringAsFixed(1)}M';
+  String _formatVolume(dynamic volume) {
+    if (volume == null) return 'Vol: N/A';
+    final double v = volume is double ? volume : (volume is int ? volume.toDouble() : 0.0);
+
+    if (v >= 1e12) {
+      return 'Vol: \$${(v / 1e12).toStringAsFixed(1)}T';
+    } else if (v >= 1e9) {
+      return 'Vol: \$${(v / 1e9).toStringAsFixed(1)}B';
+    } else if (v >= 1e6) {
+      return 'Vol: \$${(v / 1e6).toStringAsFixed(1)}M';
+    } else if (v >= 1e3) {
+      return 'Vol: \$${(v / 1e3).toStringAsFixed(0)}K';
     } else {
-      return 'Vol: \$${(volume / 1e3).toStringAsFixed(0)}K';
+      return 'Vol: \$${v.toStringAsFixed(0)}';
     }
   }
 
-  String _formatMarketCap(double? marketCap) {
-    if (marketCap == null || marketCap == 0) return 'MCap: N/A';
-    if (marketCap >= 1e9) {
-      return 'MCap: \$${(marketCap / 1e9).toStringAsFixed(1)}B';
-    } else if (marketCap >= 1e6) {
-      return 'MCap: \$${(marketCap / 1e6).toStringAsFixed(1)}M';
+  String _formatMarketCap(dynamic marketCap) {
+    if (marketCap == null) return 'MCap: N/A';
+    final double m = marketCap is double ? marketCap : (marketCap is int ? marketCap.toDouble() : 0.0);
+
+    if (m >= 1e12) {
+      return 'MCap: \$${(m / 1e12).toStringAsFixed(2)}T';
+    } else if (m >= 1e9) {
+      return 'MCap: \$${(m / 1e9).toStringAsFixed(1)}B';
+    } else if (m >= 1e6) {
+      return 'MCap: \$${(m / 1e6).toStringAsFixed(1)}M';
+    } else if (m >= 1e3) {
+      return 'MCap: \$${(m / 1e3).toStringAsFixed(0)}K';
     } else {
-      return 'MCap: \$${(marketCap / 1e3).toStringAsFixed(0)}K';
+      return 'MCap: \$${m.toStringAsFixed(0)}';
     }
   }
 
   // Refresh current tab
   Future<void> refreshCurrentTab() async {
-    _cachedData.remove(selectedTab.value);
+    final String cacheKey = '${selectedTab.value}_${selectedCategory.value}';
+    _cachedData.remove(cacheKey);
+    _lastLoadTimes.remove(cacheKey);
     await loadTabData();
   }
 
   // Clear all cache
   void clearCache() {
     _cachedData.clear();
+    _lastLoadTimes.clear();
   }
 
-  /// ==================> for the balance ===========>
+  // Balance property
   final RxString balance = ''.obs;
 }

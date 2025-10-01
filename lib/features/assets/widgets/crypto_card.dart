@@ -116,11 +116,11 @@ class CryptoCard extends GetView<AssetsController> {
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: _buildActionButton(text: 'Earn', onTap: controller.onEarnTap),
+                    child: _buildActionButton(text: 'Earn', onTap: (){}),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _buildActionButton(text: 'Trade', onTap: controller.onTradeTap),
+                    child: _buildActionButton(text: 'Trade', onTap: (){}),
                   ),
                 ],
               ),

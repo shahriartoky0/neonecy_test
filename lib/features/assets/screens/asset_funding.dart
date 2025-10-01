@@ -171,8 +171,8 @@ class AssetFundingScreen extends GetView<AssetsController> {
                       cryptoName: coin.name,
                       cryptoSymbol: coin.symbol,
                       balance: '\$${coin.priceBtc.toStringAsFixed(10)}',
-                      price: '\$${coin.price.toStringAsFixed(3)}',
-                      pnl: '\$${coin.marketCapRank.toStringAsFixed(3)}',
+                      price: '\$${coin.price.toStringAsFixed(4)}',
+                      pnl: '${coin.marketCap}',
                       percentageChange: '',
                       iconImage: coin.thumb,
                     );
