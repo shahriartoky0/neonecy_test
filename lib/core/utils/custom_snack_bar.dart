@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
+import '../design/app_colors.dart';
 
 
 class ToastManager {
@@ -141,8 +142,8 @@ class CustomToast extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: const <BoxShadow>[
-            BoxShadow(color: Colors.black45, blurRadius: 8, offset: Offset(0, 3)),
+          boxShadow:   <BoxShadow>[
+            BoxShadow(color: AppColors.black, blurRadius: 8, offset: Offset(0, 3)),
           ],
         ),
         child: Row(

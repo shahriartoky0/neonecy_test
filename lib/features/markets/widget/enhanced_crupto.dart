@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
+import '../../../core/utils/custom_loader.dart';
 import '../controllers/enhanced_market_controller.dart';
 import '../model/enhanced_crypto_data_model.dart';
 
@@ -308,7 +309,7 @@ class EnhancedCryptoMarketWidget extends GetView<EnhancedCryptoMarketController>
 
       return Container(
         padding: const EdgeInsets.all(16),
-        child: const CircularProgressIndicator(color: AppColors.textWhite, strokeWidth: 2),
+        child: const CustomLoading(),
       );
     });
   }

@@ -100,7 +100,7 @@ class StockCard extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: AppSizes.md),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSizes.sm),
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: AppColors.grey.withValues(alpha: 0.1),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppSizes.sm),
@@ -109,7 +109,7 @@ class StockCard extends StatelessWidget {
               fit: BoxFit.contain,
               errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
                 return Container(
-                  color: Colors.grey.withValues(alpha: 0.2),
+                  color: AppColors.grey.withValues(alpha: 0.2),
                   child: const Center(
                     child: Icon(Icons.show_chart, color: Colors.white54, size: 48),
                   ),

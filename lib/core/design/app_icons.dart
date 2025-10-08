@@ -36,6 +36,7 @@ class AppIcons {
 
   // Market Icons
   static String marketMenu = "$baseUrl/market_menu.svg";
+  static String exchange = "$baseUrl/exchange.svg";
 
   // Home Icons ==> Discover
   static String discoverComment = "$baseUrl/discover_comment.svg";
