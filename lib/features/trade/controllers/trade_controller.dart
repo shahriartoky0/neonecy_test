@@ -86,3 +86,4 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     super.onClose();
   }
 }
+/// ======> neonecy completed
