@@ -32,6 +32,8 @@ dependencies:
   #for the device ID :
   device_info_plus: ^10.1.0
   get_storage: ^2.1.1
+  path_provider:
+  path:
 
 
 dev_dependencies:
