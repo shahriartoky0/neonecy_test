@@ -15,7 +15,10 @@ class AppRoutes {
   static const String submitPassword = "/submit-password-screen";
   static const String finalSignUp = "/final-signup-screen";
 
-// main screen
+  // main screen
   static const String mainBottomScreen = "/main-bottom-screen";
 
+  // settings screen
+  static const String settingScreen = "/settings-screen";
+  static const String editProfile = "/edit-profile-screen";
 }

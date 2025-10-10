@@ -15,6 +15,7 @@ import 'core/routes/app_navigation.dart';
 import 'core/routes/app_routes.dart';
 import 'features/assets/controllers/assets_controller.dart';
 import 'features/markets/controllers/enhanced_market_controller.dart';
+import 'features/settings/screens/settings_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -32,9 +33,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       theme: AppTheme.defaultThemeData,
       navigatorKey: navigatorKey,
-      initialRoute: AppRoutes.firstSplashScreen,
+      // initialRoute: AppRoutes.firstSplashScreen,
       getPages: AppNavigation.routes,
-      // home: const LoginScreen(),
+      home: const SettingsScreen(),
       initialBinding: ControllerBinder(),
       debugShowCheckedModeBanner: false,
     );

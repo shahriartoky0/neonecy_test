@@ -6,6 +6,10 @@ import 'package:neonecy_test/features/auth/screens/submit_password_screen.dart';
 import 'package:neonecy_test/features/home/screens/home_screen.dart';
 import 'package:neonecy_test/features/mainBottomNav/bindings/mainbottomnav_binding.dart';
 import 'package:neonecy_test/features/mainBottomNav/screens/main_bottom_nav_screen.dart';
+import 'package:neonecy_test/features/settings/bindings/settings_binding.dart';
+import 'package:neonecy_test/features/settings/controllers/settings_controller.dart';
+import 'package:neonecy_test/features/settings/screens/edit_profile_screen.dart';
+import 'package:neonecy_test/features/settings/screens/settings_screen.dart';
 import 'package:neonecy_test/features/splash/bindings/splash_binding.dart';
 import 'package:neonecy_test/features/splash/screens/splash_screen.dart';
 import '../../features/home/bindings/home_binding.dart';
@@ -50,6 +54,18 @@ class AppNavigation {
       page: () => const MainBottomNavScreen(),
       transition: Transition.upToDown,
       binding: MainBottomNavBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.settingScreen,
+      page: () => const SettingsScreen(),
+      transition: Transition.leftToRight,
+      binding: SettingsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.editProfile,
+      page: () => const EditProfileScreen(),
+      transition: Transition.rightToLeft,
+      binding: SettingsBinding(),
     ),
   ];
 }

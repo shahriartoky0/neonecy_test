@@ -20,9 +20,12 @@ class AppColors {
   static const Color black = Color(0xFF111111);
    static const Color grey = Colors.grey;
    static const Color white = Color(0xFFFFFFFF);
+   static const Color thumbColor = Color(0xFF29313C);
    static const Color lightGreen = Color(0xFF3BB487);
   static const Color green = Color(0xFF24A584);
   static const Color greenAccent = Color(0xFF2EBD85);
+  static const Color greenButton = Color(0xFF44EF63);
+
   static const Color iconBackground = Color(0xFF29313C);
   static const Color iconBackgroundLight = Color(0xFF36404C);
   static const LinearGradient primaryGradient = LinearGradient(

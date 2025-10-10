@@ -65,4 +65,6 @@ class AppIcons {
 
   // Setting Icon
   static String setting = "$baseUrl/setting.svg";
-}
+  static String edit = "$baseUrl/edit.svg";
+  static String logOut = "$baseUrl/log_out.svg";
+ }

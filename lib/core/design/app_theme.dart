@@ -82,5 +82,13 @@ class AppTheme {
     ),
     dividerColor: AppColors.textGreyLight,
     dividerTheme: const DividerThemeData(color: AppColors.textGreyLight, thickness: 0.2),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.all(AppColors.thumbColor),
+      trackColor: WidgetStateProperty.all(AppColors.textGreyLight),
+      trackOutlineColor: WidgetStateProperty.all(AppColors.primaryColor),
+      trackOutlineWidth: WidgetStateProperty.all(3),
+
+
+    ),
   );
 }
