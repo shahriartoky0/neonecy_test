@@ -18,12 +18,18 @@ class EditProfileScreen extends GetView<SettingsController> {
     final SettingsController controller = Get.put(SettingsController());
     return Scaffold(
       appBar: AppBar(
+         leading: IconButton(
+          onPressed: () {
+            Get.back();
+          },
+          icon: const Icon(Icons.arrow_back_outlined, color: AppColors.white),
+        ),
         title: const Text('Edit Profile', style: TextStyle(color: AppColors.textWhite)),
         centerTitle: true,
         actions: <Widget>[
           TextButton(
             onPressed: () {},
-            child: Text('Save', style: TextStyle(color: AppColors.yellow)),
+            child: const Text('Save', style: TextStyle(color: AppColors.yellow)),
           ),
         ],
       ),
@@ -33,7 +39,8 @@ class EditProfileScreen extends GetView<SettingsController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: AppSizes.md,
           children: <Widget>[
-            Text('Personal Information'),
+            const Text('Personal Information'),
+
             ///========== change profile pic =============
             SettingsTile(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.sm),
@@ -46,13 +53,10 @@ class EditProfileScreen extends GetView<SettingsController> {
               ],
             ),
 
-          Text('Enter Name'),
-         TextFormField(
-           decoration: InputDecoration(hintText: 'Enter your name '),
-         ), Text('Binance ID'),
-            TextFormField(
-              decoration: InputDecoration(hintText: 'Change Your Binance ID'),
-            ),
+            const Text('Enter Name'),
+            TextFormField(decoration: const InputDecoration(hintText: 'Enter your name ')),
+            const Text('Binance ID'),
+            TextFormField(decoration: const InputDecoration(hintText: 'Change Your Binance ID')),
           ],
         ),
       ),

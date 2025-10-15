@@ -8,6 +8,8 @@ import 'package:neonecy_test/features/mainBottomNav/bindings/mainbottomnav_bindi
 import 'package:neonecy_test/features/mainBottomNav/screens/main_bottom_nav_screen.dart';
 import 'package:neonecy_test/features/settings/bindings/settings_binding.dart';
 import 'package:neonecy_test/features/settings/controllers/settings_controller.dart';
+import 'package:neonecy_test/features/settings/screens/change_address.dart';
+import 'package:neonecy_test/features/settings/screens/edit_coins.dart';
 import 'package:neonecy_test/features/settings/screens/edit_profile_screen.dart';
 import 'package:neonecy_test/features/settings/screens/settings_screen.dart';
 import 'package:neonecy_test/features/splash/bindings/splash_binding.dart';
@@ -64,6 +66,18 @@ class AppNavigation {
     GetPage<dynamic>(
       name: AppRoutes.editProfile,
       page: () => const EditProfileScreen(),
+      transition: Transition.rightToLeft,
+      binding: SettingsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.editCoins,
+      page: () => const EditCoins(),
+      transition: Transition.rightToLeft,
+      binding: SettingsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.changeAddress,
+      page: () => const ChangeAddressPage(),
       transition: Transition.rightToLeft,
       binding: SettingsBinding(),
     ),

@@ -20,27 +20,27 @@ class CoinSelectionBottomSheet extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusXxl)),
       ),
-      builder: (context) => const CoinSelectionBottomSheet(),
+      builder: (BuildContext context) => const CoinSelectionBottomSheet(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CoinSelectionController());
+    final CoinSelectionController controller = Get.put(CoinSelectionController());
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       expand: false,
-      builder: (context, scrollController) {
+      builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: const BoxDecoration(
             gradient: AppColors.primaryGradient,
             borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusXxl)),
           ),
           child: Column(
-            children: [
+            children: <Widget>[
               // Header
               _buildHeader(controller),
 
@@ -65,7 +65,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                        children: <Widget>[
                           const Icon(
                             Icons.error_outline,
                             color: AppColors.red,
@@ -92,7 +92,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
+                        children: <Widget>[
                           Icon(
                             Icons.search_off,
                             color: AppColors.textGreyLight.withOpacity(0.5),
@@ -115,8 +115,8 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                     controller: scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenHorizontal),
                     itemCount: controller.filteredCoins.length,
-                    itemBuilder: (context, index) {
-                      final coin = controller.filteredCoins[index];
+                    itemBuilder: (BuildContext context, int index) {
+                      final CoinItem coin = controller.filteredCoins[index];
                       return _buildCoinItem(coin, controller);
                     },
                   );
@@ -133,7 +133,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSizes.md),
       child: Row(
-        children: [
+        children: <Widget>[
           const Text(
             'From',
             style: TextStyle(
@@ -199,7 +199,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
         ),
         child: Obx(
           () => Row(
-            children: [
+            children: <Widget>[
               topTabButton(
                 label: 'Single Coin',
                 isSelected: controller.isSingleCoinSelected(),
@@ -223,7 +223,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
   }
 
   Widget _buildCoinItem(CoinItem coin, CoinSelectionController controller) {
-    final isPositive = coin.percentChange24h >= 0;
+    final bool isPositive = coin.percentChange24h >= 0;
 
     return InkWell(
       onTap: () => controller.selectCoin(coin),
@@ -235,7 +235,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
           ),
         ),
         child: Row(
-          children: [
+          children: <Widget>[
             // Coin Icon
             Container(
               width: 40,
@@ -248,14 +248,14 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
                 child: CachedNetworkImage(
                   imageUrl: coin.thumb,
-                  placeholder: (context, url) => const Center(
+                  placeholder: (BuildContext context, String url) => const Center(
                     child: SizedBox(
                       width: 20,
                       height: 20,
                       child:  CustomLoading(),
                     ),
                   ),
-                  errorWidget: (context, url, error) =>
+                  errorWidget: (BuildContext context, String url, Object error) =>
                       const Icon(Icons.currency_bitcoin, color: AppColors.textGreyLight),
                 ),
               ),
@@ -267,7 +267,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Text(
                     coin.symbol,
                     style: const TextStyle(
@@ -293,7 +293,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
             // Price and Change
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
+              children: <Widget>[
                 Text(
                   _formatBalance(coin.price),
                   style: const TextStyle(
@@ -304,7 +304,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Row(
-                  children: [
+                  children: <Widget>[
                     Text(
                       '\$${coin.price.toStringAsFixed(2)}',
                       style: const TextStyle(

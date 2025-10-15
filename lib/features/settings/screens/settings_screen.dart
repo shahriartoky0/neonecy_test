@@ -91,8 +91,11 @@ class SettingsScreen extends GetView<SettingsController> {
             const SizedBox(height: AppSizes.lg),
 
             ///========== Crypto Address =============
-            const SettingsTile(
-              children: <Widget>[
+            SettingsTile(
+              onTap: () {
+                Get.toNamed(AppRoutes.editCoins);
+              },
+              children: const <Widget>[
                 Text("Add your crypto address"),
                 Icon(Icons.arrow_forward_ios_rounded, size: 16),
               ],
