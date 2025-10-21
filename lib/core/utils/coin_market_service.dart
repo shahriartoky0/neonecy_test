@@ -167,5 +167,6 @@ class CoinMarketCapService {
       return NetworkResponse(isSuccess: false, errorMessage: e.toString());
     }
   }
+
 }
 

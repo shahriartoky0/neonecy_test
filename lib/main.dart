@@ -10,13 +10,13 @@ import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_
 import 'package:neonecy_test/features/mainBottomNav/screens/main_bottom_nav_screen.dart';
 import 'package:neonecy_test/features/markets/controllers/markets_controller.dart';
  import 'package:neonecy_test/features/trade/controllers/trade_controller.dart';
+import 'package:neonecy_test/features/wallet/screens/wallet_screen.dart';
 import 'core/design/app_theme.dart';
 import 'core/routes/app_navigation.dart';
 import 'core/routes/app_routes.dart';
 import 'features/assets/controllers/assets_controller.dart';
 import 'features/markets/controllers/enhanced_market_controller.dart';
 import 'features/settings/screens/edit_coin_page.dart';
-import 'features/settings/screens/settings_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -37,7 +37,8 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       // initialRoute: AppRoutes.firstSplashScreen,
       getPages: AppNavigation.routes,
-      home: const CoinAmountListPage(),
+      // home: const CoinAmountListPage(),
+      home:   WalletView(),
        initialBinding: ControllerBinder(),
       debugShowCheckedModeBanner: false,
     );

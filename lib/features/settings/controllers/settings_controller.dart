@@ -1,26 +1,30 @@
 import 'package:get/get.dart';
-import 'package:neonecy_test/core/config/app_constants.dart';
-import 'package:neonecy_test/core/utils/get_storage.dart';
 
 class SettingsController extends GetxController {
-  final RxBool switchValue = false.obs;
 
-  void getSwitchCurrentValue() {
-    if (GetStorageModel().exists(AppConstants.switchValue)) {
-      switchValue.value = GetStorageModel().read(AppConstants.switchValue);
-    } else {
-      switchValue.value = false;
-    }
-  }
+  final RxInt count = 0.obs;
 
-  Future<void> toggleSwitch() async {
-    switchValue.value = !switchValue.value;
-    await GetStorageModel().save(AppConstants.switchValue, switchValue.value);
-  }
+  void increment() => count.value++;
 
+
+  
+  /// [onInit] Lifecycle method called when the controller is initialized.
+  ///
+  /// Resets loading states, clears existing data, and triggers and more..
+  /// initial fetch
+  /// 
   @override
   void onInit() {
-    getSwitchCurrentValue();
     super.onInit();
+    count.value = 0;
+  }
+
+  /// [dispose] Lifecycle method called when the controller is destroyed.
+  ///
+  /// Cleans up by resetting loading states and clearing lists and more...
+  @override
+  void dispose() {
+    super.dispose();
+    count.value = 0;
   }
 }
