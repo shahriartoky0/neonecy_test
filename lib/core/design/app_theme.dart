@@ -87,6 +87,7 @@ class AppTheme {
       trackColor: WidgetStateProperty.all(AppColors.textGreyLight),
       trackOutlineColor: WidgetStateProperty.all(AppColors.primaryColor),
       trackOutlineWidth: WidgetStateProperty.all(3),
+
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: AppColors.iconBackgroundLight,

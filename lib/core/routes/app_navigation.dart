@@ -11,8 +11,8 @@ import 'package:neonecy_test/features/settings/controllers/settings_controller.d
 import 'package:neonecy_test/features/settings/screens/change_address.dart';
 import 'package:neonecy_test/features/settings/screens/edit_coins.dart';
 import 'package:neonecy_test/features/settings/screens/edit_profile_screen.dart';
-import 'package:neonecy_test/features/settings/screens/settings_screen.dart';
-import 'package:neonecy_test/features/splash/bindings/splash_binding.dart';
+import 'package:neonecy_test/features/settings/screens/settings_main_bottom.dart';
+ import 'package:neonecy_test/features/splash/bindings/splash_binding.dart';
 import 'package:neonecy_test/features/splash/screens/splash_screen.dart';
 import '../../features/home/bindings/home_binding.dart';
 import 'app_routes.dart';
@@ -57,12 +57,7 @@ class AppNavigation {
       transition: Transition.upToDown,
       binding: MainBottomNavBinding(),
     ),
-    GetPage<dynamic>(
-      name: AppRoutes.settingScreen,
-      page: () => const SettingsScreen(),
-      transition: Transition.leftToRight,
-      binding: SettingsBinding(),
-    ),
+
     GetPage<dynamic>(
       name: AppRoutes.editProfile,
       page: () => const EditProfileScreen(),
@@ -78,6 +73,12 @@ class AppNavigation {
     GetPage<dynamic>(
       name: AppRoutes.changeAddress,
       page: () => const ChangeAddressPage(),
+      transition: Transition.rightToLeft,
+      binding: SettingsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.settingNavScreen,
+      page: () => const SettingsMainBottomNav(),
       transition: Transition.rightToLeft,
       binding: SettingsBinding(),
     ),

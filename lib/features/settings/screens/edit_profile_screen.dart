@@ -57,6 +57,8 @@ class EditProfileScreen extends GetView<SettingsController> {
             TextFormField(decoration: const InputDecoration(hintText: 'Enter your name ')),
             const Text('Binance ID'),
             TextFormField(decoration: const InputDecoration(hintText: 'Change Your Binance ID')),
+            const SizedBox(height: AppSizes.md,),
+
           ],
         ),
       ),

@@ -10,6 +10,7 @@ import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/design/app_images.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
+import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
 import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
@@ -151,7 +152,12 @@ class HomeScreen extends GetView<HomeController> {
             actions: <Widget>[
               appbarIcon(assetPath: AppIcons.appbarHeadphone, onTap: () {}),
               const SizedBox(width: AppSizes.sm),
-              appbarIcon(assetPath: AppIcons.appbarCoin, onTap: () {}),
+              appbarIcon(
+                assetPath: AppIcons.appbarCoin,
+                onTap: () {
+                  Get.toNamed(AppRoutes.settingNavScreen);
+                },
+              ),
               const SizedBox(width: AppSizes.iconXs),
             ],
           );

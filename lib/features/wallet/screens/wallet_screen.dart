@@ -1,6 +1,10 @@
 // lib/features/wallet/views/wallet_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
+import 'package:neonecy_test/core/design/app_icons.dart';
+import 'package:neonecy_test/core/extensions/context_extensions.dart';
+import 'package:neonecy_test/core/utils/custom_loader.dart';
 import '../../../core/common/widgets/app_button.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
@@ -21,11 +25,12 @@ class WalletView extends StatelessWidget {
         onPressed: () {
           _showAddCoinBottomSheet(context);
         },
-        child: Icon(Icons.add, color: AppColors.yellow),
+        child: const Icon(Icons.add, color: AppColors.yellow),
       ),
       appBar: AppBar(
         backgroundColor: AppColors.bgColor,
         foregroundColor: AppColors.white,
+        leading: const SizedBox.shrink(),
         title: const Text('My Wallet'),
         actions: <Widget>[
           IconButton(
@@ -43,7 +48,8 @@ class WalletView extends StatelessWidget {
           Expanded(
             child: Obx(() {
               if (_walletController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.yellow));
+                // return const Center(child: CircularProgressIndicator(color: AppColors.yellow));
+                return const Center(child:CustomLoading());
               }
 
               if (_walletController.walletCoins.isEmpty) {
@@ -87,7 +93,9 @@ class WalletView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          const Icon(Icons.wallet_outlined, size: 100, color: AppColors.textGreyLight),
+          CustomSvgImage(
+              height: 30,
+              assetName: AppIcons.navAsset),
           const SizedBox(height: AppSizes.md),
           const Text(
             'Your wallet is empty',
@@ -95,6 +103,7 @@ class WalletView extends StatelessWidget {
           ),
           const SizedBox(height: AppSizes.md),
           AppButton(
+            width: context.screenWidth * 0.7,
             labelText: 'Add First Coin',
             onTap: () => _showAddCoinBottomSheet(context),
             bgColor: AppColors.yellow,
@@ -153,7 +162,7 @@ class WalletView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    Text(
+                    const Text(
                       'Total Value',
                       style: TextStyle(
                         color: AppColors.textGreyLight,
@@ -207,20 +216,20 @@ class WalletView extends StatelessWidget {
   }
 
   void _showAddCoinBottomSheet(BuildContext context) {
-    final searchController = TextEditingController();
-    final searchQuery = ''.obs;
+    final TextEditingController searchController = TextEditingController();
+    final RxString searchQuery = ''.obs;
 
     showModalBottomSheet(
       backgroundColor: AppColors.bgColor,
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
       ),
       builder: (BuildContext context) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.75, // Limit to 75% of screen height
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.bgColor,
             borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
           ),
@@ -244,8 +253,8 @@ class WalletView extends StatelessWidget {
                   style: const TextStyle(color: AppColors.white),
                   decoration: InputDecoration(
                     hintText: 'Search coins...',
-                    hintStyle: TextStyle(color: AppColors.textGreyLight),
-                    prefixIcon: Icon(Icons.search, color: AppColors.textGreyLight),
+                    hintStyle: const TextStyle(color: AppColors.textGreyLight),
+                    prefixIcon: const Icon(Icons.search, color: AppColors.textGreyLight),
                     filled: true,
                     fillColor: AppColors.iconBackground,
                     border: OutlineInputBorder(
@@ -253,7 +262,7 @@ class WalletView extends StatelessWidget {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  onChanged: (value) {
+                  onChanged: (String value) {
                     searchQuery.value = value.toLowerCase();
                   },
                 ),
@@ -261,13 +270,16 @@ class WalletView extends StatelessWidget {
               const SizedBox(height: AppSizes.sm),
               Expanded(
                 child: Obx(() {
-                  final filteredCoins = _walletController.availableCoins.where((coin) =>
-                  coin.symbol.toLowerCase().contains(searchQuery.value) ||
-                      coin.name.toLowerCase().contains(searchQuery.value)
-                  ).toList();
+                  final List<CoinItem> filteredCoins = _walletController.availableCoins
+                      .where(
+                        (CoinItem coin) =>
+                            coin.symbol.toLowerCase().contains(searchQuery.value) ||
+                            coin.name.toLowerCase().contains(searchQuery.value),
+                      )
+                      .toList();
 
                   if (filteredCoins.isEmpty) {
-                    return Center(
+                    return const Center(
                       child: Text(
                         'No coins found',
                         style: TextStyle(color: AppColors.textGreyLight),
@@ -372,27 +384,27 @@ class WalletView extends StatelessWidget {
               controller: quantityController,
               keyboardType: TextInputType.number,
               style: const TextStyle(color: AppColors.white),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Quantity',
                 hintText: 'Enter number of coins',
-                labelStyle: const TextStyle(color: AppColors.textGreyLight),
-                hintStyle: const TextStyle(color: AppColors.textGreyLight),
+                labelStyle: TextStyle(color: AppColors.textGreyLight),
+                hintStyle: TextStyle(color: AppColors.textGreyLight),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.textGreyLight),
                 ),
                 focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.yellow)),
               ),
             ),
-            SizedBox(height: AppSizes.md),
+            const SizedBox(height: AppSizes.md),
             TextField(
               controller: priceController,
               keyboardType: TextInputType.number,
               style: const TextStyle(color: AppColors.white),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Purchase Price',
                 hintText: 'Enter average purchase price',
-                labelStyle: const TextStyle(color: AppColors.textGreyLight),
-                hintStyle: const TextStyle(color: AppColors.textGreyLight),
+                labelStyle: TextStyle(color: AppColors.textGreyLight),
+                hintStyle: TextStyle(color: AppColors.textGreyLight),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.textGreyLight),
                 ),
@@ -479,12 +491,13 @@ class WalletView extends StatelessWidget {
                       Navigator.pop(bottomSheetContext);
                       _confirmRemoveCoin(context, walletCoin.coinDetails.symbol);
                     },
-                    bgColor: AppColors.textRed,
+                    bgColor: AppColors.red,
                     textColor: AppColors.white,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: AppSizes.md),
           ],
         ),
       ),
@@ -533,11 +546,11 @@ class WalletView extends StatelessWidget {
               controller: quantityController,
               keyboardType: TextInputType.number,
               style: const TextStyle(color: AppColors.white),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Quantity',
                 hintText: 'Enter number of coins',
-                labelStyle: const TextStyle(color: AppColors.textGreyLight),
-                hintStyle: const TextStyle(color: AppColors.textGreyLight),
+                labelStyle: TextStyle(color: AppColors.textGreyLight),
+                hintStyle: TextStyle(color: AppColors.textGreyLight),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.textGreyLight),
                 ),
@@ -549,11 +562,11 @@ class WalletView extends StatelessWidget {
               controller: priceController,
               keyboardType: TextInputType.number,
               style: const TextStyle(color: AppColors.white),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Average Purchase Price',
                 hintText: 'Enter average purchase price',
-                labelStyle: const TextStyle(color: AppColors.textGreyLight),
-                hintStyle: const TextStyle(color: AppColors.textGreyLight),
+                labelStyle: TextStyle(color: AppColors.textGreyLight),
+                hintStyle: TextStyle(color: AppColors.textGreyLight),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.textGreyLight),
                 ),

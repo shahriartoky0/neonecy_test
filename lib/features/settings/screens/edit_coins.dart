@@ -25,7 +25,7 @@ class EditCoins extends GetView<SettingsController> {
           },
           icon: const Icon(Icons.arrow_back_outlined, color: AppColors.white),
         ),
-        title: const Text('Edit Profile', style: TextStyle(color: AppColors.textWhite)),
+        title: const Text('Choose Coin', style: TextStyle(color: AppColors.textWhite)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

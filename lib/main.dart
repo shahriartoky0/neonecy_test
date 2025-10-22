@@ -3,13 +3,15 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:neonecy_test/features/auth/screens/login_screen.dart';
 import 'package:neonecy_test/features/futures/controllers/futures_controller.dart';
- import 'package:neonecy_test/features/futures/screens/futures_screen.dart';
+import 'package:neonecy_test/features/futures/screens/futures_screen.dart';
 import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
 import 'package:neonecy_test/features/home/controllers/home_controller.dart';
 import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_controller.dart';
 import 'package:neonecy_test/features/mainBottomNav/screens/main_bottom_nav_screen.dart';
 import 'package:neonecy_test/features/markets/controllers/markets_controller.dart';
- import 'package:neonecy_test/features/trade/controllers/trade_controller.dart';
+import 'package:neonecy_test/features/settings/controllers/settings_bottom_nav.dart';
+import 'package:neonecy_test/features/settings/screens/settings_screen.dart';
+import 'package:neonecy_test/features/trade/controllers/trade_controller.dart';
 import 'package:neonecy_test/features/wallet/screens/wallet_screen.dart';
 import 'core/design/app_theme.dart';
 import 'core/routes/app_navigation.dart';
@@ -31,15 +33,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return GetMaterialApp(
       theme: AppTheme.defaultThemeData,
       navigatorKey: navigatorKey,
-      // initialRoute: AppRoutes.firstSplashScreen,
+      initialRoute: AppRoutes.mainBottomScreen,
       getPages: AppNavigation.routes,
       // home: const CoinAmountListPage(),
-      home:   WalletView(),
-       initialBinding: ControllerBinder(),
+      // home:   SettingsScreen(),
+      initialBinding: ControllerBinder(),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -50,6 +51,7 @@ class ControllerBinder extends Bindings {
   @override
   void dependencies() {
     Get.put(MainBottomNavController());
+    Get.put(SettingsBottomNavController());
     Get.put(HomeController());
     Get.put(CryptoMarketController());
     Get.put(MarketsController());
@@ -57,5 +59,5 @@ class ControllerBinder extends Bindings {
     Get.put(TradeController());
     Get.put(FuturesController());
     Get.put(AssetsController());
-   }
+  }
 }

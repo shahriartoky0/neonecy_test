@@ -2,11 +2,11 @@
 
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import '../../../core/network/network_response.dart';
 import '../../../core/utils/coin_market_service.dart';
- import '../../../core/utils/get_storage.dart';
+import '../../../core/utils/get_storage.dart';
 import '../../assets/model/coin_model.dart';
-
 
 class CoinAmountController extends GetxController {
   final CoinMarketCapService _coinMarketCapService = CoinMarketCapService();
@@ -94,17 +94,10 @@ class CoinAmountController extends GetxController {
       });
 
       await _storage.save(_storageKey, jsonEncode(dataToSave));
-      Get.snackbar(
-        'Success',
-        'Coin amounts saved successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+
+      ToastManager.show(message: 'Coin amounts saved successfully');
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to save: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      ToastManager.show(message: 'Failed to save: $e');
     }
   }
 
@@ -117,10 +110,7 @@ class CoinAmountController extends GetxController {
   Future<void> clearAllAmounts() async {
     coinAmounts.clear();
     await _storage.delete(_storageKey);
-    Get.snackbar(
-      'Success',
-      'All amounts cleared',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+
+    ToastManager.show(message: 'All amounts cleared');
   }
 }
