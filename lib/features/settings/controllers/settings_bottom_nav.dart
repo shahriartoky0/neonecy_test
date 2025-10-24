@@ -34,10 +34,9 @@ class SettingsBottomNavController extends GetxController {
     pageController = PageController();
   }
 
-
   @override
   void onClose() {
-    _selectedIndex.value = 0;  // Reset the index
+    _selectedIndex.value = 0; // Reset the index
     pageController.jumpToPage(0); // Jump to the first page
     pageController.dispose();
     super.onClose();
@@ -58,5 +57,10 @@ class SettingsBottomNavController extends GetxController {
   /// Check if tab is selected
   bool isTabSelected(int index) {
     return selectedIndex == index;
+  }
+
+  /// =========> start from the home page =====>
+  void resetToHomePage() {
+    _selectedIndex.value = 0;
   }
 }

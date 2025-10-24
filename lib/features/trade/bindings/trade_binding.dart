@@ -4,8 +4,6 @@ import '../controllers/trade_controller.dart';
 class TradeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<TradeController>(
-      () => TradeController()
-    );
+    Get.lazyPut<TradeController>(() => TradeController());
   }
 }

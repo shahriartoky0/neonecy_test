@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:neonecy_test/core/routes/app_routes.dart';
+import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_controller.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
 import '../../assets/model/coin_model.dart';
@@ -33,7 +35,8 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
     // Auto close after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
-        Get.back();
+        Get.find<MainBottomNavController>().resetToHomePage();
+        Get.offAllNamed(AppRoutes.mainBottomScreen);
       }
     });
   }
@@ -45,21 +48,16 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
     final double rate = _parseAmount(widget.toAmount) / fromValue;
 
     return Scaffold(
-       body: SafeArea(
+      body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSizes.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-
               // Title
               const Text(
                 'Conversion Details',
-                style: TextStyle(
-                  color: AppColors.textWhite,
-                  fontSize: AppSizes.fontSizeH3,
-                   
-                ),
+                style: TextStyle(color: AppColors.textWhite, fontSize: AppSizes.fontSizeH3),
               ),
 
               const SizedBox(height: AppSizes.xxl),
@@ -88,20 +86,13 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                   children: <Widget>[
                     Icon(CupertinoIcons.checkmark_alt_circle, color: AppColors.green, size: 18),
                     SizedBox(width: AppSizes.xs),
-                    Text(
-                      'Completed',
-                      style: TextStyle(
-                        color: AppColors.green,
-                        fontSize: 14,
-                         
-                      ),
-                    ),
+                    Text('Completed', style: TextStyle(color: AppColors.green, fontSize: 14)),
                   ],
                 ),
               ),
 
               const SizedBox(height: AppSizes.md),
-              Divider(),
+              const Divider(),
               // Details Container
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,17 +103,20 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                   const SizedBox(height: AppSizes.md),
                   const Divider(color: Color(0xFF3A4552), height: 1),
                   const SizedBox(height: AppSizes.md),
-                  Text(
+                  const Text(
                     'Pay From',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: AppColors.textGreyLight,
                       fontSize: AppSizes.fontSizeBodyS,
                     ),
                   ),
-                  SizedBox(height: AppSizes.sm),
+                  const SizedBox(height: AppSizes.sm),
                   // Pay From
                   Container(
-                    padding: EdgeInsets.symmetric(vertical: AppSizes.md, horizontal: AppSizes.sm),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSizes.md,
+                      horizontal: AppSizes.sm,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: AppColors.textGreyLight.withValues(alpha: 0.4)),
                       borderRadius: BorderRadius.circular(8),
@@ -135,7 +129,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                           style: TextStyle(
                             color: AppColors.textGreyLight,
                             fontSize: AppSizes.fontSizeBodyS,
-                           ),
+                          ),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -146,7 +140,6 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                               style: const TextStyle(
                                 color: AppColors.textWhite,
                                 fontSize: AppSizes.fontSizeBodyS,
-                                 
                               ),
                             ),
                             Text(
@@ -160,14 +153,14 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                   ),
 
                   const SizedBox(height: AppSizes.md),
-                  const Divider(color: Color(0xFF3A4552), height: 1),
+                  const Divider(color: AppColors.bgColor, height: 1),
                   const SizedBox(height: AppSizes.md),
 
                   // Transaction
-                  _buildDetailRow('Transaction', '0.00 ${widget.toCoin.symbol}'),
+                  _buildDetailRow('Transaction', '${widget.fromAmount} ${widget.toCoin.symbol}'),
 
                   const SizedBox(height: AppSizes.md),
-                  const Divider(color: Color(0xFF3A4552), height: 1),
+                  const Divider(color: AppColors.bgColor, height: 1),
                   const SizedBox(height: AppSizes.md),
 
                   // Trade Date
@@ -176,7 +169,6 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
               ),
 
               const Spacer(),
-
             ],
           ),
         ),
@@ -203,11 +195,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
         else
           Text(
             value,
-            style: const TextStyle(
-              color: AppColors.textWhite,
-              fontSize: 15,
-               
-            ),
+            style: const TextStyle(color: AppColors.textWhite, fontSize: 15),
             textAlign: TextAlign.right,
           ),
       ],

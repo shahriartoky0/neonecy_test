@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/features/settings/model/crypto_address_model.dart';
@@ -52,7 +53,6 @@ class ChangeAddressPage extends GetView<ChangeAddressController> {
       ),
       body: Column(
         children: <Widget>[
-
           // Address List
           Expanded(
             child: Obx(() {
@@ -81,8 +81,6 @@ class ChangeAddressPage extends GetView<ChangeAddressController> {
       ),
     );
   }
-
-
 
   Widget _buildEmptyState() {
     return Center(
@@ -125,13 +123,12 @@ class ChangeAddressPage extends GetView<ChangeAddressController> {
       return Material(
         color: AppColors.primaryColor,
         child: InkWell(
-
           borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
           splashColor: AppColors.green.withValues(alpha: 0.25),
           highlightColor: AppColors.greenAccent.withValues(alpha: 0.1),
           onTap: () => controller.selectAddress(address),
-           child: Container(
-             padding: const EdgeInsets.all(AppSizes.md),
+          child: Container(
+            padding: const EdgeInsets.all(AppSizes.md),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
               border: Border.all(
@@ -145,13 +142,10 @@ class ChangeAddressPage extends GetView<ChangeAddressController> {
                 // Header with network name
                 Row(
                   children: <Widget>[
-                    Text(
-                      address.label ?? address.network.toUpperCase(),
-
-                    ),
+                    Text(address.label ?? address.network.toUpperCase()),
                     const Spacer(),
 
-                     IconButton(
+                    IconButton(
                       icon: const Icon(Icons.more_vert, color: AppColors.textGreyLight, size: 20),
                       onPressed: () => _showAddressOptions(context, address),
                       padding: EdgeInsets.zero,
@@ -159,7 +153,6 @@ class ChangeAddressPage extends GetView<ChangeAddressController> {
                     ),
                   ],
                 ),
-
 
                 // Address
                 Row(
@@ -202,15 +195,8 @@ class ChangeAddressPage extends GetView<ChangeAddressController> {
 
   void _copyAddress(String address) {
     Clipboard.setData(ClipboardData(text: address));
-    Get.snackbar(
-      'Copied',
-      'Address copied to clipboard',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.green.withValues(alpha: 0.8),
-      colorText: AppColors.white,
-      duration: const Duration(seconds: 2),
-      margin: const EdgeInsets.all(AppSizes.md),
-    );
+
+    ToastManager.show(message: 'Address copied to clipboard');
   }
 
   void _showAddressOptions(BuildContext context, CryptoAddressModel address) {

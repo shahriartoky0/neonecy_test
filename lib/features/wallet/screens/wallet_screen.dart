@@ -68,7 +68,7 @@ class WalletView extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSizes.md),
-      color: AppColors.splashBgColor,
+      color: AppColors.bgColor,
       child: Column(
         children: <Widget>[
           const Text(

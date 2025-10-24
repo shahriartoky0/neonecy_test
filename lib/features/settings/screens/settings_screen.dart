@@ -19,7 +19,6 @@ class SettingsScreen extends GetView<SettingsController> {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsController controller = Get.put(SettingsController());
     return Scaffold(
       appBar: AppBar(
         leading: const SizedBox(),
@@ -27,8 +26,8 @@ class SettingsScreen extends GetView<SettingsController> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsetsGeometry.symmetric(horizontal: AppSizes.screenHorizontal),
-        child: Column(
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSizes.screenHorizontal),
+        child: Obx(() => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: AppSizes.md,
           children: <Widget>[
@@ -59,7 +58,6 @@ class SettingsScreen extends GetView<SettingsController> {
                   onPressed: () {
                     Get.toNamed(AppRoutes.editProfile);
                   },
-
                   icon: CustomSvgImage(assetName: AppIcons.edit),
                 ),
               ],
@@ -69,26 +67,38 @@ class SettingsScreen extends GetView<SettingsController> {
             SettingsTile(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.sm),
               children: <Widget>[
-                const Text('Change Profile Pic', style: TextStyle(color: AppColors.textGreyLight)),
+                const Text('Profile Pic', style: TextStyle(color: AppColors.textGreyLight)),
                 CircleAvatar(
                   backgroundColor: AppColors.textGreyLight,
-                  child: Image.asset(AppImages.dummyProfilePic),
+                  backgroundImage: controller.profileImage.value != null
+                      ? FileImage(controller.profileImage.value!)
+                      : AssetImage(AppImages.dummyProfilePic) as ImageProvider,
                 ),
               ],
             ),
 
-            const SettingsTile(
+            SettingsTile(
               padding: EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.md),
               children: <Widget>[
-                Text('Enter Name', style: TextStyle(color: AppColors.white)),
-                Text('00226545748', style: TextStyle(color: AppColors.textGreyLight)),
+                const Text('Enter Name', style: TextStyle(color: AppColors.white)),
+                Text(
+                  controller.userName.value.isNotEmpty
+                      ? controller.userName.value
+                      : 'Richard',
+                  style: const TextStyle(color: AppColors.textGreyLight),
+                ),
               ],
             ),
-            const SettingsTile(
+            SettingsTile(
               padding: EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.md),
               children: <Widget>[
-                Text('Binance ID', style: TextStyle(color: AppColors.white)),
-                Text('00226545748', style: TextStyle(color: AppColors.textGreyLight)),
+                const Text('Binance ID', style: TextStyle(color: AppColors.white)),
+                Text(
+                  controller.binanceId.value.isNotEmpty
+                      ? controller.binanceId.value
+                      : '2447892654',
+                  style: const TextStyle(color: AppColors.textGreyLight),
+                ),
               ],
             ),
             const SizedBox(height: AppSizes.md),
@@ -106,7 +116,6 @@ class SettingsScreen extends GetView<SettingsController> {
             InkWell(
               splashColor: AppColors.green.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
-
               onTap: () {
                 Get.offAllNamed(AppRoutes.mainBottomScreen);
               },
@@ -124,7 +133,6 @@ class SettingsScreen extends GetView<SettingsController> {
             InkWell(
               splashColor: AppColors.red.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
-
               onTap: () {
                 CustomBottomSheet.show(
                   height: context.screenHeight * 0.25,
@@ -154,7 +162,6 @@ class SettingsScreen extends GetView<SettingsController> {
                               child: AppButton(
                                 labelText: 'Yes',
                                 onTap: () {
-                                  /// =====> Logout logic =====>
                                   final LoginController loginController = Get.put(
                                     LoginController(),
                                   );
@@ -188,7 +195,7 @@ class SettingsScreen extends GetView<SettingsController> {
               ),
             ),
           ],
-        ),
+        )),
       ),
     );
   }

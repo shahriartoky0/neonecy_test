@@ -138,7 +138,7 @@ class ChangeAddressController extends GetxController {
 
   void deleteAddress(CryptoAddressModel address) {
     if (address.isDefault) {
-      Get.snackbar('Error', 'Cannot delete default address', snackPosition: SnackPosition.BOTTOM);
+      ToastManager.show(message: 'Cannot delete default address');
       return;
     }
 

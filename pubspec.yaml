@@ -34,6 +34,8 @@ dependencies:
   get_storage: ^2.1.1
   path_provider:
   path:
+  #for image :
+  image_picker: ^1.2.0
 
 dev_dependencies:
   flutter_test:

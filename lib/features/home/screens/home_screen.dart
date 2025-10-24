@@ -14,6 +14,7 @@ import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
 import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
+import 'package:neonecy_test/features/settings/controllers/settings_bottom_nav.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/crypto_market.dart';
 import '../widgets/custom_refresher.dart';
@@ -155,6 +156,7 @@ class HomeScreen extends GetView<HomeController> {
               appbarIcon(
                 assetPath: AppIcons.appbarCoin,
                 onTap: () {
+                  Get.find<SettingsBottomNavController>().resetToHomePage();
                   Get.toNamed(AppRoutes.settingNavScreen);
                 },
               ),

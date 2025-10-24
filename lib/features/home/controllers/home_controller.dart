@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_constants.dart';
 import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/utils/get_storage.dart';
+import 'package:neonecy_test/features/wallet/controllers/wallet_controller.dart';
 
 import '../../../core/utils/coin_gecko.dart';
 import '../../../core/utils/logger_utils.dart';
@@ -35,11 +36,9 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     'Announcement',
   ];
 
-
   @override
   void onInit() {
     super.onInit();
-
 
     /// ==============> for the tabs ==========>
     tabController = TabController(length: homeTabTitles.length, vsync: this);
@@ -71,7 +70,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
 
     /// ====== for the refresh ====>
     final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
-   await  cryptoMarketController.refreshCurrentTab();
+    await cryptoMarketController.refreshCurrentTab();
   }
 
   /// ==========> For app hint text ====>
@@ -80,13 +79,40 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   /// ==========> For the balance ======>
   final RxString balance = '0.00'.obs;
 
+  // Existing code...
+
+  final WalletController _walletController = Get.find<WalletController>();
+
   void fetchAndSetTheBalance() {
-    final bool isBalanceStored = GetStorageModel().exists(AppConstants.balanceText);
-    if (isBalanceStored) {
-      balance.value = GetStorageModel().read(AppConstants.balanceText);
-    } else {
-      balance.value = '0.00';
+    try {
+      // Calculate total balance from wallet coins
+      final double totalBalance = _calculateTotalWalletBalance();
+
+      // Save to GetStorage
+      GetStorageModel().save(AppConstants.balanceText, totalBalance.toStringAsFixed(3));
+
+      // Update balance observable
+      balance.value = totalBalance.toStringAsFixed(2);
+    } catch (e) {
+      // Fallback to stored balance or default
+      final bool isBalanceStored = GetStorageModel().exists(AppConstants.balanceText);
+      if (isBalanceStored) {
+        balance.value = GetStorageModel().read(AppConstants.balanceText);
+      } else {
+        balance.value = '0.00';
+      }
+
+      LoggerUtils.debug('Error fetching wallet balance: $e');
     }
+  }
+
+  double _calculateTotalWalletBalance() {
+    double totalBalance = 0.0;
+
+    // Assuming walletCoins is an observable list in WalletController
+    totalBalance = Get.find<WalletController>().totalValuation.value;
+
+    return totalBalance;
   }
 
   /// =========> for randomly generated hint texts ===========>

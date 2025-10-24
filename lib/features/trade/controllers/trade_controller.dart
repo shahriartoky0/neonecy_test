@@ -1,10 +1,17 @@
+// lib/features/trade/controllers/trade_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neonecy_test/core/config/app_constants.dart';
-import 'package:neonecy_test/core/utils/get_storage.dart';
+import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
+import 'package:neonecy_test/core/design/app_colors.dart';
+import 'package:neonecy_test/core/utils/logger_utils.dart';
 import '../../assets/model/coin_model.dart';
+import '../../wallet/controllers/wallet_controller.dart';
+import '../../wallet/models/coin_wallet_model.dart';
+import '../widgets/conversion_details_screen.dart';
 
 class TradeController extends GetxController with GetSingleTickerProviderStateMixin {
+  final WalletController _walletController = Get.find<WalletController>();
+
   final RxInt selectedOrderType = 0.obs;
   final RxString fromToken = 'Select a Coin'.obs;
   final RxString toToken = 'Select a Coin'.obs;
@@ -15,27 +22,18 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   final Rx<CoinItem?> fromCoin = Rx<CoinItem?>(null);
   final Rx<CoinItem?> toCoin = Rx<CoinItem?>(null);
 
-  // User's coin balance for the selected "from" coin
+  // User's actual coin balance from wallet
   final RxDouble fromCoinBalance = 0.0.obs;
 
-  // Get user's USD balance from storage
-  double get userUSDBalance {
-    final String? storedBalance = GetStorageModel().read(AppConstants.balanceText);
-    if (storedBalance != null && storedBalance.isNotEmpty) {
-      // Remove commas if present and parse
-      final String cleanBalance = storedBalance.replaceAll(',', '');
-      return double.tryParse(cleanBalance) ?? 0.0;
-    }
-    return 0.0;
-  }
+  // Available coins in wallet
+  RxList<WalletCoinModel> get userWalletCoins => _walletController.walletCoins;
 
-  // Calculate available balance in selected coin
-  String get availableInSelectedCoin {
-    if (fromCoin.value != null && fromCoin.value!.price > 0) {
-      final double coinBalance = userUSDBalance / fromCoin.value!.price;
-      return _formatCoinAmount(coinBalance);
-    }
-    return '0';
+  // Get user's balance for a specific coin
+  double getBalanceForCoin(String symbol) {
+    final walletCoin = userWalletCoins.firstWhereOrNull(
+      (coin) => coin.coinDetails.symbol == symbol,
+    );
+    return walletCoin?.quantity ?? 0.0;
   }
 
   void selectOrderType(int index) {
@@ -53,6 +51,11 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     fromCoin.value = toCoin.value;
     toCoin.value = tempCoin;
 
+    // Update balance for new from coin
+    if (fromCoin.value != null) {
+      fromCoinBalance.value = getBalanceForCoin(fromCoin.value!.symbol);
+    }
+
     // Recalculate amounts after swap
     if (fromAmount.value.isNotEmpty && fromAmount.value != '0') {
       _updateConversionRate();
@@ -68,10 +71,9 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   }
 
   void setMaxAmount() {
-    if (fromCoin.value != null && fromCoin.value!.price > 0) {
-      // Calculate maximum coins user can have with their USD balance
-      final double maxCoins = userUSDBalance / fromCoin.value!.price;
-      fromAmount.value = _formatCoinAmount(maxCoins);
+    if (fromCoin.value != null) {
+      final double maxCoins = getBalanceForCoin(fromCoin.value!.symbol);
+      fromAmount.value = formatCoinAmount(maxCoins);
       _updateConversionRate();
     }
   }
@@ -81,10 +83,8 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     fromCoin.value = coin;
     fromToken.value = coin.symbol;
 
-    // Calculate how much of this coin the user can afford
-    if (coin.price > 0) {
-      fromCoinBalance.value = userUSDBalance / coin.price;
-    }
+    // Get actual balance from wallet
+    fromCoinBalance.value = getBalanceForCoin(coin.symbol);
 
     // Recalculate if amount exists
     if (fromAmount.value.isNotEmpty && fromAmount.value != '0') {
@@ -96,20 +96,19 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   void selectToCoin(CoinItem coin) {
     toCoin.value = coin;
     toToken.value = coin.symbol;
+
     // Recalculate if amount exists
     if (fromAmount.value.isNotEmpty && fromAmount.value != '0') {
       _updateConversionRate();
     }
   }
 
-  // Update conversion rate based on actual coin prices from CoinItem
+  // Update conversion rate based on actual coin prices
   void _updateConversionRate() {
     if (fromCoin.value != null &&
         toCoin.value != null &&
         fromAmount.value.isNotEmpty &&
         fromAmount.value != '0') {
-
-      // Get the actual prices from the coin objects
       final double fromPrice = fromCoin.value!.price;
       final double toPrice = toCoin.value!.price;
       final double amount = double.tryParse(fromAmount.value) ?? 0;
@@ -118,7 +117,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
         // Convert: (amount of from coin × from coin price) ÷ to coin price
         final double fromValueInUSD = amount * fromPrice;
         final double convertedAmount = fromValueInUSD / toPrice;
-        toAmount.value = _formatCoinAmount(convertedAmount);
+        toAmount.value = formatCoinAmount(convertedAmount);
       } else {
         toAmount.value = '0';
       }
@@ -127,26 +126,103 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     }
   }
 
-  // Get USD value of "from" amount
-  double get fromAmountInUSD {
-    if (fromCoin.value != null && fromAmount.value.isNotEmpty && fromAmount.value != '0') {
-      final double amount = double.tryParse(fromAmount.value) ?? 0;
-      return amount * fromCoin.value!.price;
+  // Execute the trade
+  Future<bool> executeTrade() async {
+    if (!validateTrade()) return false;
+
+    try {
+      final double fromQty = double.parse(fromAmount.value);
+      final double toQty = double.parse(toAmount.value);
+
+      // Remove from coin from wallet
+      final fromWalletCoin = userWalletCoins.firstWhere(
+        (coin) => coin.coinDetails.symbol == fromCoin.value!.symbol,
+      );
+
+      final double newFromBalance = fromWalletCoin.quantity - fromQty;
+
+      if (newFromBalance > 0) {
+        // Update the balance
+        await _walletController.updateWalletCoin(
+          symbol: fromCoin.value!.symbol,
+          newQuantity: newFromBalance,
+        );
+      } else {
+        // Remove the coin entirely
+        await _walletController.removeCoinFromWallet(fromCoin.value!.symbol);
+      }
+      if (fromCoin.value != null && toCoin.value != null) {
+        Get.to(
+          () => ConversionSuccessScreen(
+            fromCoin: fromCoin.value!,
+            toCoin: toCoin.value!,
+            fromAmount: fromAmount.value,
+            toAmount: toAmount.value,
+          ),
+        );
+      }
+      // Add to coin to wallet
+      final existingToCoin = userWalletCoins.firstWhereOrNull(
+        (coin) => coin.coinDetails.symbol == toCoin.value!.symbol,
+      );
+
+      if (existingToCoin != null) {
+        // Update existing coin
+        await _walletController.updateWalletCoin(
+          symbol: toCoin.value!.symbol,
+          newQuantity: existingToCoin.quantity + toQty,
+          newAveragePurchasePrice: toCoin.value!.price, // Use current market price
+        );
+      } else {
+        // Add new coin
+        await _walletController.addCoinToWallet(
+          coin: toCoin.value!,
+          quantity: toQty,
+          averagePurchasePrice: toCoin.value!.price,
+        );
+      }
+
+      // // Reset amounts after successful trade
+      // fromAmount.value = '0';
+      // toAmount.value = '0';
+
+      return true;
+    } catch (e) {
+      print('Error executing trade: $e');
+      return false;
     }
-    return 0.0;
   }
 
-  // Get USD value of "to" amount
-  double get toAmountInUSD {
-    if (toCoin.value != null && toAmount.value.isNotEmpty && toAmount.value != '0') {
-      final double amount = double.tryParse(toAmount.value) ?? 0;
-      return amount * toCoin.value!.price;
+  bool validateTrade() {
+    if (fromCoin.value == null || toCoin.value == null) {
+      ToastManager.show(message: 'Please select both coins', backgroundColor: AppColors.red);
+      return false;
     }
-    return 0.0;
+
+    if (fromCoin.value!.symbol == toCoin.value!.symbol) {
+      ToastManager.show(message: 'Cannot convert to the same coin', backgroundColor: AppColors.red);
+
+      return false;
+    }
+
+    final double fromQty = double.tryParse(fromAmount.value) ?? 0;
+    if (fromQty <= 0) {
+      ToastManager.show(message: 'Please enter a valid amount', backgroundColor: AppColors.red);
+
+      return false;
+    }
+
+    if (fromQty > getBalanceForCoin(fromCoin.value!.symbol)) {
+      ToastManager.show(message: 'Insufficient balance', backgroundColor: AppColors.red);
+
+      return false;
+    }
+
+    return true;
   }
 
   // Format coin amount with appropriate precision
-  String _formatCoinAmount(double amount) {
+  String formatCoinAmount(double amount) {
     if (amount >= 1000) {
       return amount.toStringAsFixed(2);
     } else if (amount >= 1) {
@@ -160,7 +236,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   }
 
   /// ============> For the top tab bar =====>
-  RxInt selectedTab = 0.obs; // 0 for Exchange, 1 for Wallet
+  RxInt selectedTab = 0.obs;
 
   void selectTab(int index) {
     selectedTab.value = index;
@@ -181,30 +257,37 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     super.onInit();
     tabController = TabController(length: homeTabTitles.length, vsync: this);
 
-    // Listen to tab changes
     tabController.addListener(() {
       selectedIndex.value = tabController.index;
     });
-    // Listen to fromCoin changes and auto-fill max amount
+    resetTradeForm();
+    // Listen to fromCoin changes
     ever(fromCoin, (CoinItem? coin) {
       if (coin != null) {
-        // Automatically set max amount when from coin is selected
-        setMaxAmount();
+        // Update balance when coin is selected
+        fromCoinBalance.value = getBalanceForCoin(coin.symbol);
       }
     });
+
+    // Refresh wallet data
+    _walletController.fetchWalletCoins();
   }
 
-  /// ===========> For the balance =====>
-  final TextEditingController balanceTEController = TextEditingController();
+  void resetTradeForm() {
+    // Reset selected tokens
+    fromToken.value = 'Select a Coin';
+    toToken.value = 'Select a Coin';
 
-  void saveTheBalance() {
-    if (balanceTEController.text.isNotEmpty) {
-      GetStorageModel().save(AppConstants.balanceText, balanceTEController.text);
-      // Reset amounts when balance changes
-      fromAmount.value = '0';
-      toAmount.value = '0';
-      update(); // Trigger UI update
-    }
+    // Reset coin objects
+    fromCoin.value = null;
+    toCoin.value = null;
+
+    // Reset amounts
+    fromAmount.value = '0';
+    toAmount.value = '0';
+
+    // Reset balance
+    fromCoinBalance.value = 0.0;
   }
 
   @override

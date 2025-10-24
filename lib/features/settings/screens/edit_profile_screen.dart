@@ -15,50 +15,71 @@ class EditProfileScreen extends GetView<SettingsController> {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsController controller = Get.put(SettingsController());
+    final TextEditingController nameController = TextEditingController(
+      text: controller.userName.value,
+    );
+    final TextEditingController binanceController = TextEditingController(
+      text: controller.binanceId.value,
+    );
+
     return Scaffold(
       appBar: AppBar(
-         leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
+        leading: IconButton(
+          onPressed: () => Get.back(),
           icon: const Icon(Icons.arrow_back_outlined, color: AppColors.white),
         ),
         title: const Text('Edit Profile', style: TextStyle(color: AppColors.textWhite)),
         centerTitle: true,
         actions: <Widget>[
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              controller.updateUsername(nameController.text);
+              controller.updateBinanceId(binanceController.text);
+              controller.saveProfile();
+            },
             child: const Text('Save', style: TextStyle(color: AppColors.yellow)),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsetsGeometry.symmetric(horizontal: AppSizes.screenHorizontal),
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSizes.screenHorizontal),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           spacing: AppSizes.md,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const Text('Personal Information'),
 
-            ///========== change profile pic =============
+            // Profile Picture Section
             SettingsTile(
+              onTap: controller.pickProfileImage,
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.sm),
               children: <Widget>[
                 const Text('Change Profile Pic', style: TextStyle(color: AppColors.textGreyLight)),
-                CircleAvatar(
-                  backgroundColor: AppColors.textGreyLight,
-                  child: Image.asset(AppImages.dummyProfilePic),
-                ),
+                Obx(() {
+                  return CircleAvatar(
+                    backgroundColor: AppColors.textGreyLight,
+                    backgroundImage: controller.profileImage.value != null
+                        ? FileImage(controller.profileImage.value!)
+                        : AssetImage(AppImages.dummyProfilePic) as ImageProvider,
+                  );
+                }),
               ],
             ),
 
             const Text('Enter Name'),
-            TextFormField(decoration: const InputDecoration(hintText: 'Enter your name ')),
-            const Text('Binance ID'),
-            TextFormField(decoration: const InputDecoration(hintText: 'Change Your Binance ID')),
-            const SizedBox(height: AppSizes.md,),
+            TextFormField(
+              style: const TextStyle(color: AppColors.textWhite),
+              controller: nameController,
+              decoration: const InputDecoration(hintText: 'Enter your name'),
+            ),
 
+            const Text('Binance ID'),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: AppColors.textWhite),
+              controller: binanceController,
+              decoration: const InputDecoration(hintText: 'Change Your Binance ID'),
+            ),
           ],
         ),
       ),

@@ -1,10 +1,10 @@
+// lib/features/trade/screens/trade_convert_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
-import 'package:neonecy_test/features/home/controllers/home_controller.dart';
 import 'package:neonecy_test/features/home/widgets/custom_refresher.dart';
 import '../../../core/common/widgets/custom_svg.dart';
 import '../../../core/config/app_sizes.dart';
@@ -13,6 +13,7 @@ import '../../../core/design/app_icons.dart';
 import '../../../core/design/app_images.dart';
 import '../../../core/utils/device/device_utility.dart';
 import '../../assets/model/coin_model.dart';
+import '../../wallet/controllers/wallet_controller.dart';
 import '../controllers/trade_controller.dart';
 import '../widgets/coin_selection_modal.dart';
 import '../widgets/confirm_order_modal.dart';
@@ -23,15 +24,15 @@ class TradeConvertScreen extends GetView<TradeController> {
 
   @override
   Widget build(BuildContext context) {
+    final TradeController controller = Get.put(TradeController());
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(AppSizes.screenHorizontal),
         child: CustomGifRefreshWidget(
           onRefresh: () async {
-            await Future.delayed(Duration(seconds: 2));
-            Get.find<HomeController>().fetchAndSetTheBalance();
+            await Get.find<WalletController>().fetchWalletCoins();
           },
-
           gifAssetPath: AppImages.loader,
           child: SingleChildScrollView(
             child: Column(
@@ -39,56 +40,19 @@ class TradeConvertScreen extends GetView<TradeController> {
                 _buildOrderTypeSelector(),
                 const SizedBox(height: 24),
 
-                /// ======> Balance text field ======>
-                Row(
-                  spacing: AppSizes.sm,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 2,
-                      child: TextFormField(
-                        style: const TextStyle(color: AppColors.white),
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hint: const Text(
-                            'Enter Your Balance',
-                            style: TextStyle(fontSize: 12, color: AppColors.textGreyLight),
-                          ).centered,
-                        ),
-                        controller: controller.balanceTEController,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: TextButton(
-                        onPressed: () {
-                          FocusScope.of(context).unfocus();
-                          controller.saveTheBalance();
-                          ToastManager.show(message: 'Balance Updated');
-                          controller.balanceTEController.clear();
-                        },
-                        child: const Text('Submit Balance'),
-                      ),
-                    ),
-                  ],
-                ),
+                // Wallet Balance Summary
+                _buildWalletSummary(),
+
+                const SizedBox(height: 24),
+
                 _buildSwapContainer(context),
                 const SizedBox(height: AppSizes.md),
+
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
-                      // Validate before showing dialog
-                      if (controller.fromCoin.value == null) {
-                        ToastManager.show(message: 'Please select a coin to convert from');
-                        return;
-                      }
-                      if (controller.toCoin.value == null) {
-                        ToastManager.show(message: 'Please select a coin to convert to');
-                        return;
-                      }
-                      if (controller.fromAmount.value.isEmpty ||
-                          controller.fromAmount.value == '0') {
-                        ToastManager.show(message: 'Please enter an amount');
+                      if (!controller.validateTrade()) {
                         return;
                       }
 
@@ -102,28 +66,90 @@ class TradeConvertScreen extends GetView<TradeController> {
                       );
 
                       if (confirmed == true) {
-                        // Handle successful confirmation
-                        Get.to(
-                          () => ConversionSuccessScreen(
-                            fromCoin: controller.fromCoin.value!,
-                            toCoin: controller.toCoin.value!,
-                            fromAmount: controller.fromAmount.value,
-                            toAmount: controller.toAmount.value,
-                          ),
-                        );
-                        // Add your order execution logic here
+                        // Execute the trade
+                        final bool success = await controller.executeTrade();
+
+                        // if (success) {
+                        //   Get.to(
+                        //     () => ConversionSuccessScreen(
+                        //       fromCoin: controller.fromCoin.value!,
+                        //       toCoin: controller.toCoin.value!,
+                        //       fromAmount: controller.fromAmount.value,
+                        //       toAmount: controller.toAmount.value,
+                        //     ),
+                        //   );
+                        // } else {
+                        //   ToastManager.show(
+                        //     message: 'Trade failed. Please try again.',
+                        //     backgroundColor: AppColors.red,
+                        //   );
+                        // }
                       }
                     },
-                    child: Text('Preview', style: TextStyle(color: AppColors.black)),
+                    child: const Text('Preview', style: TextStyle(color: AppColors.black)),
                   ),
                 ),
-                SizedBox(height: context.screenHeight * 0.4),
+                SizedBox(height: context.screenHeight * 0.3),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildWalletSummary() {
+    return Obx(() {
+      final WalletController walletController = Get.find<WalletController>();
+      final double totalValue = walletController.totalValuation.value;
+      final int coinCount = walletController.walletCoins.length;
+
+      return Container(
+        padding: const EdgeInsets.all(AppSizes.md),
+        decoration: BoxDecoration(
+          color: AppColors.iconBackground,
+          borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Wallet Balance',
+                  style: TextStyle(
+                    color: AppColors.textGreyLight,
+                    fontSize: AppSizes.fontSizeBodyS,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '\$${totalValue.toStringAsFixed(2)}',
+                  style: Get.context!.txtTheme.displayMedium?.copyWith(fontSize: 26),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm, vertical: AppSizes.xs),
+              decoration: BoxDecoration(
+                color: AppColors.greenContainer,
+                borderRadius: BorderRadius.circular(AppSizes.borderRadiusSm),
+              ),
+              child: Text(
+                '$coinCount Coins',
+                style: const TextStyle(
+                  color: AppColors.green,
+                  fontSize: AppSizes.fontSizeBodyS,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildOrderTypeSelector() {
@@ -213,36 +239,21 @@ class TradeConvertScreen extends GetView<TradeController> {
             children: <Widget>[
               const Text('From', style: TextStyle(color: AppColors.textGreyLight, fontSize: 14)),
               Obx(() {
-                final String balance1 = Get.find<HomeController>().balance.value;
-                final double balance = controller.userUSDBalance;
-                final String balanceText = balance > 0
-                    ? '\$${balance.toStringAsFixed(2)}'
-                    : '\$0.00';
+                final double balance = controller.fromCoinBalance.value;
+                final String coinSymbol = controller.fromCoin.value?.symbol ?? '';
 
                 return Row(
                   children: <Widget>[
                     const Text(
-                      'Available  ',
+                      'Available ',
                       style: TextStyle(color: AppColors.textGreyLight, fontSize: 12),
                     ),
                     Text(
-                      double.parse(balance1).toStringAsFixed(2),
+                      balance > 0 ? '${controller.formatCoinAmount(balance)} $coinSymbol' : '0.00',
                       style: const TextStyle(
                         color: AppColors.textWhite,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: AppColors.yellow,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add, color: Colors.black, size: 12),
                       ),
                     ),
                   ],
@@ -259,8 +270,12 @@ class TradeConvertScreen extends GetView<TradeController> {
                   coin: controller.fromCoin.value,
                   token: controller.fromToken.value,
                   color: AppColors.green,
+                  isFromWallet: true,
                   onTap: () async {
-                    final CoinItem? selectedCoin = await CoinSelectionBottomSheet.show(context);
+                    final CoinItem? selectedCoin = await CoinSelectionBottomSheet.show(
+                      context,
+                      fromWallet: true,
+                    );
                     if (selectedCoin != null) {
                       controller.selectFromCoin(selectedCoin);
                     }
@@ -272,23 +287,24 @@ class TradeConvertScreen extends GetView<TradeController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    Obx(() {
-                      final String displayAmount =
-                          controller.fromAmount.value.isEmpty || controller.fromAmount.value == '0'
-                          ? '0.00'
-                          : controller.fromAmount.value;
-
-                      return Text(
-                        displayAmount,
-                        style: TextStyle(
-                          color: controller.fromAmount.value == '0'
-                              ? AppColors.grey.withValues(alpha: 0.4)
-                              : AppColors.white,
+                    Obx(
+                      () => TextField(
+                        textAlign: TextAlign.right,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        style: const TextStyle(
+                          color: AppColors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
-                      );
-                    }),
+                        decoration: const InputDecoration(
+                          hintText: '0.00',
+                          hintStyle: TextStyle(color: AppColors.grey),
+                          border: InputBorder.none,
+                        ),
+                        onChanged: controller.updateFromAmount,
+                        controller: TextEditingController(text: controller.fromAmount.value),
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -300,7 +316,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                             final double amount = double.tryParse(controller.fromAmount.value) ?? 0;
                             final double usdValue = amount * controller.fromCoin.value!.price;
                             return Text(
-                              '  \$${usdValue.toStringAsFixed(2)}',
+                              ' \$${usdValue.toStringAsFixed(2)}',
                               style: const TextStyle(color: AppColors.textGreyLight, fontSize: 12),
                             );
                           }
@@ -310,7 +326,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                         GestureDetector(
                           onTap: () {
                             if (controller.fromCoin.value != null) {
-                              // controller.setMaxAmount();
+                              controller.setMaxAmount();
                             } else {
                               ToastManager.show(message: 'Please select a coin first');
                             }
@@ -353,7 +369,10 @@ class TradeConvertScreen extends GetView<TradeController> {
                   token: controller.toToken.value,
                   color: AppColors.redContainer,
                   onTap: () async {
-                    final CoinItem? selectedCoin = await CoinSelectionBottomSheet.show(context);
+                    final CoinItem? selectedCoin = await CoinSelectionBottomSheet.show(
+                      context,
+                      fromWallet: false,
+                    );
                     if (selectedCoin != null) {
                       controller.selectToCoin(selectedCoin);
                     }
@@ -370,12 +389,11 @@ class TradeConvertScreen extends GetView<TradeController> {
                           controller.toAmount.value.isEmpty || controller.toAmount.value == '0'
                           ? '0.00'
                           : controller.toAmount.value;
-
                       return Text(
                         displayAmount,
                         style: TextStyle(
                           color: controller.toAmount.value == '0'
-                              ? AppColors.grey.withValues(alpha: 0.4)
+                              ? AppColors.grey.withOpacity(0.4)
                               : AppColors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -390,7 +408,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                         final double amount = double.tryParse(controller.toAmount.value) ?? 0;
                         final double usdValue = amount * controller.toCoin.value!.price;
                         return Text(
-                          '  \$${usdValue.toStringAsFixed(2)}',
+                          ' \$${usdValue.toStringAsFixed(2)}',
                           style: const TextStyle(color: AppColors.textGreyLight, fontSize: 12),
                         );
                       }
@@ -411,6 +429,7 @@ class TradeConvertScreen extends GetView<TradeController> {
     required CoinItem? coin,
     required String token,
     required Color color,
+    bool isFromWallet = false,
     required VoidCallback onTap,
   }) {
     return Container(
@@ -492,6 +511,24 @@ class TradeConvertScreen extends GetView<TradeController> {
             ),
             const SizedBox(width: 4),
             const Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 16),
+            // if (isFromWallet) ...<Widget>[
+            //   const SizedBox(width: 4),
+            //   Container(
+            //     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            //     decoration: BoxDecoration(
+            //       color: AppColors.greenContainer,
+            //       borderRadius: BorderRadius.circular(4),
+            //     ),
+            //     child: const Text(
+            //       'Wallet',
+            //       style: TextStyle(
+            //         color: AppColors.green,
+            //         fontSize: 10,
+            //         fontWeight: FontWeight.w600,
+            //       ),
+            //     ),
+            //   ),
+            // ],
           ],
         ),
       ),
@@ -516,10 +553,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                   decoration: BoxDecoration(
                     color: AppColors.primaryColor,
                     borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
-                    border: Border.all(
-                      color: AppColors.textGreyLight.withValues(alpha: 0.4),
-                      width: 2,
-                    ),
+                    border: Border.all(color: AppColors.textGreyLight.withOpacity(0.4), width: 2),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),

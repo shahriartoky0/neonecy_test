@@ -4,6 +4,7 @@ import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/home/screens/home_screen.dart';
 import 'package:neonecy_test/features/markets/screens/markets_screen.dart';
+import 'package:neonecy_test/features/trade/controllers/trade_controller.dart';
 import '../../../core/design/app_icons.dart';
 import '../../assets/screens/assets_screen.dart';
 import '../../futures/screens/futures_screen.dart';
@@ -52,6 +53,9 @@ class MainBottomNavController extends GetxController {
   /// Update selected index when page changes
   void onPageChanged(int index) {
     _selectedIndex.value = index;
+    if (_selectedIndex.value == 2) {
+      Get.find<TradeController>().resetTradeForm();
+    }
   }
 
   /// Navigate to specific tab
@@ -64,5 +68,11 @@ class MainBottomNavController extends GetxController {
   /// Check if tab is selected
   bool isTabSelected(int index) {
     return selectedIndex == index;
+  }
+
+  /// =====> Reset the controller ====>
+  void resetToHomePage() {
+    _selectedIndex.value = 0;
+    pageController.jumpToPage(0);
   }
 }
