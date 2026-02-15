@@ -1,54 +1,64 @@
-// lib/features/wallet/models/wallet_coin_model.dart
-import '../../../core/network/network_response.dart';
+// lib/features/wallet/models/coin_wallet_model.dart
 import '../../assets/model/coin_model.dart';
 
 class WalletCoinModel {
   final CoinItem coinDetails;
   final double quantity;
   final double averagePurchasePrice;
-  final DateTime purchaseDate;
 
   WalletCoinModel({
     required this.coinDetails,
     required this.quantity,
     required this.averagePurchasePrice,
-    DateTime? purchaseDate,
-  }) : purchaseDate = purchaseDate ?? DateTime.now();
+  });
 
-  // Calculate total investment
-  double get totalInvestment => quantity * averagePurchasePrice;
-
-  // Calculate current value based on market price
+  // Calculate current value
   double get currentValue => quantity * coinDetails.price;
 
+  // Calculate invested value
+  double get investedValue => quantity * averagePurchasePrice;
+
+  // Calculate profit/loss
+  double get profitLoss => currentValue - investedValue;
+
   // Calculate profit/loss percentage
-  double get profitLossPercentage {
-    if (totalInvestment == 0) return 0.0;
-    return ((currentValue - totalInvestment) / totalInvestment) * 100;
+  double get profitLossPercent {
+    if (investedValue == 0) return 0.0;
+    return (profitLoss / investedValue) * 100;
   }
 
-  // Convert to JSON for storage
+  // Check if in profit
+  bool get isInProfit => profitLoss >= 0;
+
+  // Convert to JSON for storage (only store essential data)
   Map<String, dynamic> toJson() {
     return {
-      'coinId': coinDetails.id,
+      'coinId': coinDetails.coinId,
+      'name': coinDetails.name,
       'symbol': coinDetails.symbol,
+      'marketCapRank': coinDetails.marketCapRank,
+      'thumb': coinDetails.thumb,
+      'small': coinDetails.small,
+      'large': coinDetails.large,
+      'slug': coinDetails.slug,
       'quantity': quantity,
       'averagePurchasePrice': averagePurchasePrice,
-      'purchaseDate': purchaseDate.toIso8601String(),
     };
   }
 
-  // Create from JSON (used when retrieving from storage)
-  factory WalletCoinModel.fromJson(Map<String, dynamic> json, CoinItem coinDetails) {
+  // Create from JSON
+  factory WalletCoinModel.fromJson(
+      Map<String, dynamic> json,
+      CoinItem updatedCoinDetails,
+      ) {
     return WalletCoinModel(
-      coinDetails: coinDetails,
-      quantity: json['quantity'] ?? 0.0,
-      averagePurchasePrice: json['averagePurchasePrice'] ?? 0.0,
-      purchaseDate: DateTime.parse(json['purchaseDate'] ?? DateTime.now().toIso8601String()),
+      coinDetails: updatedCoinDetails,
+      quantity: (json['quantity'] as num?)?.toDouble() ?? 0.0,
+      averagePurchasePrice: (json['averagePurchasePrice'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
-  // Method to update coin quantity and average purchase price
+  // Update coin with new values
   WalletCoinModel updateCoin({
     double? newQuantity,
     double? newAveragePurchasePrice,
@@ -57,7 +67,19 @@ class WalletCoinModel {
       coinDetails: coinDetails,
       quantity: newQuantity ?? quantity,
       averagePurchasePrice: newAveragePurchasePrice ?? averagePurchasePrice,
-      purchaseDate: purchaseDate,
+    );
+  }
+
+  // Copy with method for updating coin details while keeping investment data
+  WalletCoinModel copyWith({
+    CoinItem? coinDetails,
+    double? quantity,
+    double? averagePurchasePrice,
+  }) {
+    return WalletCoinModel(
+      coinDetails: coinDetails ?? this.coinDetails,
+      quantity: quantity ?? this.quantity,
+      averagePurchasePrice: averagePurchasePrice ?? this.averagePurchasePrice,
     );
   }
 }

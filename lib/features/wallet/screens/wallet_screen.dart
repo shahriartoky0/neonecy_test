@@ -6,9 +6,10 @@ import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/utils/custom_loader.dart';
 import '../../../core/common/widgets/app_button.dart';
+import '../../../core/common/widgets/custom_toast.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
-import '../../assets/model/coin_model.dart';
+ import '../../assets/model/coin_model.dart';
 import '../controllers/wallet_controller.dart';
 import '../models/coin_wallet_model.dart';
 
@@ -25,7 +26,8 @@ class WalletView extends StatelessWidget {
         onPressed: () {
           _showAddCoinBottomSheet(context);
         },
-        child: const Icon(Icons.add, color: AppColors.yellow),
+        backgroundColor: AppColors.yellow,
+        child: const Icon(Icons.add, color: AppColors.black),
       ),
       appBar: AppBar(
         backgroundColor: AppColors.bgColor,
@@ -33,6 +35,10 @@ class WalletView extends StatelessWidget {
         leading: const SizedBox.shrink(),
         title: const Text('My Wallet'),
         actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.refresh, color: AppColors.yellow),
+            onPressed: () => _walletController.fetchWalletCoins(),
+          ),
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.yellow),
             onPressed: () => _showAddCoinBottomSheet(context),
@@ -48,8 +54,7 @@ class WalletView extends StatelessWidget {
           Expanded(
             child: Obx(() {
               if (_walletController.isLoading.value) {
-                // return const Center(child: CircularProgressIndicator(color: AppColors.yellow));
-                return const Center(child:CustomLoading());
+                return const Center(child: CustomLoading());
               }
 
               if (_walletController.walletCoins.isEmpty) {
@@ -83,6 +88,32 @@ class WalletView extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          const SizedBox(height: 4),
+          Obx(() {
+            final double totalPnL = _walletController.totalProfitLoss.value;
+            final double totalPnLPercent = _walletController.totalProfitLossPercent.value;
+            final bool isProfit = totalPnL >= 0;
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  isProfit ? Icons.arrow_upward : Icons.arrow_downward,
+                  color: isProfit ? AppColors.green : AppColors.red,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${isProfit ? '+' : ''}\$${totalPnL.toStringAsFixed(2)} (${isProfit ? '+' : ''}${totalPnLPercent.toStringAsFixed(2)}%)',
+                  style: TextStyle(
+                    color: isProfit ? AppColors.green : AppColors.red,
+                    fontSize: AppSizes.fontSizeBodyS,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -93,9 +124,7 @@ class WalletView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          CustomSvgImage(
-              height: 30,
-              assetName: AppIcons.navAsset),
+          CustomSvgImage(height: 30, assetName: AppIcons.navAsset),
           const SizedBox(height: AppSizes.md),
           const Text(
             'Your wallet is empty',
@@ -126,6 +155,14 @@ class WalletView extends StatelessWidget {
   }
 
   Widget _buildWalletCoinTile(BuildContext context, WalletCoinModel walletCoin) {
+    final double currentValue = walletCoin.quantity * walletCoin.coinDetails.price;
+    final double investedValue = walletCoin.quantity * walletCoin.averagePurchasePrice;
+    final double profitLoss = currentValue - investedValue;
+    final double profitLossPercent = investedValue > 0 ? ((profitLoss / investedValue) * 100) : 0.0;
+    final bool isProfit = profitLoss >= 0;
+    final double priceChange24h = walletCoin.coinDetails.percentChange24h;
+    final bool isPriceUp = priceChange24h >= 0;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
       child: Material(
@@ -137,41 +174,121 @@ class WalletView extends StatelessWidget {
           highlightColor: AppColors.yellow.withOpacity(0.2),
           onTap: () => _showCoinDetailsBottomSheet(context, walletCoin),
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: AppSizes.sm, horizontal: AppSizes.md),
+            padding: const EdgeInsets.all(AppSizes.md),
             child: Row(
               children: <Widget>[
+                // Coin Image
                 CircleAvatar(
                   backgroundColor: AppColors.iconBackgroundLight,
                   backgroundImage: NetworkImage(walletCoin.coinDetails.thumb),
+                  radius: 20,
                 ),
                 const SizedBox(width: AppSizes.md),
+
+                // Coin Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text(
-                        '${walletCoin.coinDetails.symbol} - ${walletCoin.quantity} coins',
-                        style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+                      Row(
+                        children: <Widget>[
+                          Text(
+                            walletCoin.coinDetails.symbol,
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isPriceUp
+                                  ? AppColors.greenContainer
+                                  : AppColors.redContainer,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Icon(
+                                  isPriceUp ? Icons.arrow_upward : Icons.arrow_downward,
+                                  size: 10,
+                                  color: isPriceUp ? AppColors.green : AppColors.red,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${isPriceUp ? '+' : ''}${priceChange24h.toStringAsFixed(2)}%',
+                                  style: TextStyle(
+                                    color: isPriceUp ? AppColors.green : AppColors.red,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 4),
-                      _buildCoinDetailsRow(walletCoin),
+                      Text(
+                        '${walletCoin.quantity.toStringAsFixed(4)} ${walletCoin.coinDetails.symbol}',
+                        style: const TextStyle(
+                          color: AppColors.textGreyLight,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Current: \$${walletCoin.coinDetails.price.toStringAsFixed(2)} | Avg: \$${walletCoin.averagePurchasePrice.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: AppColors.textGreyLight,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
+
+                // Value and P&L
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    const Text(
-                      'Total Value',
-                      style: TextStyle(
-                        color: AppColors.textGreyLight,
-                        fontSize: AppSizes.fontSizeBodyS,
+                    Text(
+                      '\$${currentValue.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(
+                          isProfit ? Icons.arrow_upward : Icons.arrow_downward,
+                          color: isProfit ? AppColors.green : AppColors.red,
+                          size: 12,
+                        ),
+                        Text(
+                          '${isProfit ? '+' : ''}\$${profitLoss.abs().toStringAsFixed(2)}',
+                          style: TextStyle(
+                            color: isProfit ? AppColors.green : AppColors.red,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                     Text(
-                      '\$${(walletCoin.quantity * walletCoin.coinDetails.price).toStringAsFixed(2)}',
-                      style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
+                      '${isProfit ? '+' : ''}${profitLossPercent.toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        color: isProfit ? AppColors.green : AppColors.red,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
@@ -180,38 +297,6 @@ class WalletView extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildCoinDetailsRow(WalletCoinModel walletCoin) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        RichText(
-          text: TextSpan(
-            style: const TextStyle(color: AppColors.textGreyLight),
-            children: <InlineSpan>[
-              const TextSpan(text: 'Price: '),
-              TextSpan(
-                text: '\$${walletCoin.coinDetails.price.toStringAsFixed(2)}',
-                style: const TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ],
-          ),
-        ),
-        RichText(
-          text: TextSpan(
-            style: const TextStyle(color: AppColors.textGreyLight),
-            children: <InlineSpan>[
-              const TextSpan(text: 'Price in BTC: '),
-              TextSpan(
-                text: walletCoin.coinDetails.priceBtc.toStringAsFixed(8),
-                style: const TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -228,7 +313,7 @@ class WalletView extends StatelessWidget {
       ),
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.75, // Limit to 75% of screen height
+          height: MediaQuery.of(context).size.height * 0.75,
           decoration: const BoxDecoration(
             color: AppColors.bgColor,
             borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
@@ -273,9 +358,9 @@ class WalletView extends StatelessWidget {
                   final List<CoinItem> filteredCoins = _walletController.availableCoins
                       .where(
                         (CoinItem coin) =>
-                            coin.symbol.toLowerCase().contains(searchQuery.value) ||
-                            coin.name.toLowerCase().contains(searchQuery.value),
-                      )
+                    coin.symbol.toLowerCase().contains(searchQuery.value) ||
+                        coin.name.toLowerCase().contains(searchQuery.value),
+                  )
                       .toList();
 
                   if (filteredCoins.isEmpty) {
@@ -305,6 +390,9 @@ class WalletView extends StatelessWidget {
   }
 
   Widget _buildCoinSelectionTile(BuildContext context, CoinItem coin) {
+    final double priceChange24h = coin.percentChange24h;
+    final bool isPriceUp = priceChange24h >= 0;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
       decoration: BoxDecoration(
@@ -316,44 +404,68 @@ class WalletView extends StatelessWidget {
           backgroundColor: AppColors.iconBackgroundLight,
           backgroundImage: NetworkImage(coin.thumb),
         ),
-        title: Text(coin.symbol, style: const TextStyle(color: AppColors.white)),
+        title: Row(
+          children: <Widget>[
+            Text(
+              coin.symbol,
+              style: const TextStyle(
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: isPriceUp ? AppColors.greenContainer : AppColors.redContainer,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    isPriceUp ? Icons.arrow_upward : Icons.arrow_downward,
+                    size: 10,
+                    color: isPriceUp ? AppColors.green : AppColors.red,
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    '${isPriceUp ? '+' : ''}${priceChange24h.toStringAsFixed(2)}%',
+                    style: TextStyle(
+                      color: isPriceUp ? AppColors.green : AppColors.red,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            RichText(
-              text: TextSpan(
-                style: const TextStyle(color: AppColors.textGreyLight),
-                children: <InlineSpan>[
-                  const TextSpan(text: 'Price: '),
-                  TextSpan(
-                    text: '\$${coin.price.toStringAsFixed(2)} (in USD)',
-                    style: const TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ],
+            const SizedBox(height: 4),
+            Text(
+              coin.name,
+              style: const TextStyle(
+                color: AppColors.textGreyLight,
+                fontSize: 12,
               ),
             ),
-            RichText(
-              text: TextSpan(
-                style: const TextStyle(color: AppColors.textGreyLight),
-                children: <InlineSpan>[
-                  const TextSpan(text: 'Price in Bitcoin : '),
-                  TextSpan(
-                    text: '\$${coin.priceBtc.toStringAsFixed(2)} ',
-                    style: const TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ],
+            const SizedBox(height: 2),
+            Text(
+              '\$${coin.price.toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: AppColors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            RichText(
-              text: TextSpan(
-                style: const TextStyle(color: AppColors.textGreyLight),
-                children: <InlineSpan>[
-                  const TextSpan(text: 'Market Cap Rank: '),
-                  TextSpan(
-                    text: coin.marketCapRank.toString(),
-                    style: const TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                ],
+            Text(
+              'Rank #${coin.marketCapRank} • ${coin.marketCap}',
+              style: const TextStyle(
+                color: AppColors.textGreyLight,
+                fontSize: 11,
               ),
             ),
           ],
@@ -375,43 +487,49 @@ class WalletView extends StatelessWidget {
         backgroundColor: AppColors.bgColor,
         title: Text(
           'Add ${coin.symbol}',
-          style: const TextStyle(color: AppColors.white, fontSize: 14),
+          style: const TextStyle(color: AppColors.white, fontSize: 16),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            TextField(
-              controller: quantityController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: AppColors.white),
-              decoration: const InputDecoration(
-                labelText: 'Quantity',
-                hintText: 'Enter number of coins',
-                labelStyle: TextStyle(color: AppColors.textGreyLight),
-                hintStyle: TextStyle(color: AppColors.textGreyLight),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textGreyLight),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: quantityController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: AppColors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Quantity',
+                  hintText: 'Enter number of coins',
+                  labelStyle: TextStyle(color: AppColors.textGreyLight),
+                  hintStyle: TextStyle(color: AppColors.textGreyLight),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.textGreyLight),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.yellow),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.yellow)),
               ),
-            ),
-            const SizedBox(height: AppSizes.md),
-            TextField(
-              controller: priceController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: AppColors.white),
-              decoration: const InputDecoration(
-                labelText: 'Purchase Price',
-                hintText: 'Enter average purchase price',
-                labelStyle: TextStyle(color: AppColors.textGreyLight),
-                hintStyle: TextStyle(color: AppColors.textGreyLight),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColors.textGreyLight),
+              const SizedBox(height: AppSizes.md),
+              TextField(
+                controller: priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: AppColors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Purchase Price (USD)',
+                  hintText: 'Enter average purchase price',
+                  labelStyle: TextStyle(color: AppColors.textGreyLight),
+                  hintStyle: TextStyle(color: AppColors.textGreyLight),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.textGreyLight),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.yellow),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.yellow)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: <Widget>[
           TextButton(
@@ -420,17 +538,47 @@ class WalletView extends StatelessWidget {
           ),
           AppButton(
             labelText: 'Add',
-            onTap: () {
+            onTap: () async {
               final double quantity = double.tryParse(quantityController.text) ?? 0.0;
               final double price = double.tryParse(priceController.text) ?? coin.price;
 
               if (quantity > 0) {
-                _walletController.addCoinToWallet(
+                // Close dialog first
+                Navigator.of(dialogContext).pop();
+
+                // Save the coin
+                final bool success = await _walletController.addCoinToWallet(
                   coin: coin,
                   quantity: quantity,
                   averagePurchasePrice: price,
                 );
-                Navigator.of(dialogContext).pop();
+
+                // Now close the bottom sheet after save completes
+                Navigator.of(context).pop();
+
+                // Show toast
+                if (success) {
+                  ToastManager.show(
+                    backgroundColor: AppColors.greenContainer,
+                    textColor: AppColors.white,
+                    message: '${coin.symbol} added to wallet successfully',
+                    icon: const Icon(Icons.check_circle, color: AppColors.green),
+                  );
+                } else {
+                  ToastManager.show(
+                    backgroundColor: AppColors.darkRed,
+                    textColor: AppColors.white,
+                    message: 'Failed to add ${coin.symbol} to wallet',
+                    icon: const Icon(Icons.error_outline, color: AppColors.white),
+                  );
+                }
+              } else {
+                ToastManager.show(
+                  backgroundColor: AppColors.darkRed,
+                  textColor: AppColors.white,
+                  message: 'Please enter a valid quantity',
+                  icon: const Icon(Icons.error_outline, color: AppColors.white),
+                );
               }
             },
             bgColor: AppColors.yellow,
@@ -442,76 +590,223 @@ class WalletView extends StatelessWidget {
   }
 
   void _showCoinDetailsBottomSheet(BuildContext context, WalletCoinModel walletCoin) {
+    final double currentValue = walletCoin.quantity * walletCoin.coinDetails.price;
+    final double investedValue = walletCoin.quantity * walletCoin.averagePurchasePrice;
+    final double profitLoss = currentValue - investedValue;
+    final double profitLossPercent = investedValue > 0 ? ((profitLoss / investedValue) * 100) : 0.0;
+    final bool isProfit = profitLoss >= 0;
+
     showModalBottomSheet(
       backgroundColor: AppColors.bgColor,
       context: context,
-      builder: (BuildContext bottomSheetContext) => Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              '${walletCoin.coinDetails.name} (${walletCoin.coinDetails.symbol}) Details',
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: AppSizes.fontSizeH2,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: AppSizes.md),
-            _buildDetailRow('Market Cap', walletCoin.coinDetails.marketCap),
-            _buildDetailRow('Total Volume', walletCoin.coinDetails.totalVolume),
-            _buildDetailRow('Market Cap Rank', walletCoin.coinDetails.marketCapRank.toString()),
-            _buildDetailRow(
-              'Current Price',
-              '\$${walletCoin.coinDetails.price.toStringAsFixed(2)}',
-            ),
-            _buildDetailRow('Price in BTC', walletCoin.coinDetails.priceBtc.toStringAsFixed(8)),
-            const SizedBox(height: AppSizes.md),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
+      ),
+      builder: (BuildContext bottomSheetContext) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (BuildContext context, ScrollController scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSizes.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Expanded(
-                  child: AppButton(
-                    labelText: 'Edit Coin',
-                    onTap: () {
-                      Navigator.pop(bottomSheetContext);
-                      _showEditCoinBottomSheet(context, walletCoin);
-                    },
-                    bgColor: AppColors.yellow,
-                    textColor: AppColors.black,
+                Row(
+                  children: <Widget>[
+                    CircleAvatar(
+                      backgroundColor: AppColors.iconBackgroundLight,
+                      backgroundImage: NetworkImage(walletCoin.coinDetails.thumb),
+                      radius: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            '${walletCoin.coinDetails.name} (${walletCoin.coinDetails.symbol})',
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Rank #${walletCoin.coinDetails.marketCapRank}',
+                            style: const TextStyle(
+                              color: AppColors.textGreyLight,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.md),
+
+                // Holdings Summary
+                Container(
+                  padding: const EdgeInsets.all(AppSizes.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBackground,
+                    borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      _buildDetailRow('Holdings', '${walletCoin.quantity.toStringAsFixed(4)} ${walletCoin.coinDetails.symbol}'),
+                      const Divider(color: AppColors.textGreyLight),
+                      _buildDetailRow('Current Value', '\$${currentValue.toStringAsFixed(2)}'),
+                      _buildDetailRow('Invested Value', '\$${investedValue.toStringAsFixed(2)}'),
+                      const Divider(color: AppColors.textGreyLight),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          const Text(
+                            'Profit/Loss',
+                            style: TextStyle(color: AppColors.textGreyLight, fontSize: 14),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: <Widget>[
+                              Text(
+                                '${isProfit ? '+' : ''}\$${profitLoss.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: isProfit ? AppColors.green : AppColors.red,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '${isProfit ? '+' : ''}${profitLossPercent.toStringAsFixed(2)}%',
+                                style: TextStyle(
+                                  color: isProfit ? AppColors.green : AppColors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: AppSizes.sm),
-                Expanded(
-                  child: AppButton(
-                    labelText: 'Remove Coin',
-                    onTap: () {
-                      Navigator.pop(bottomSheetContext);
-                      _confirmRemoveCoin(context, walletCoin.coinDetails.symbol);
-                    },
-                    bgColor: AppColors.red,
-                    textColor: AppColors.white,
+
+                const SizedBox(height: AppSizes.md),
+
+                // Market Data
+                const Text(
+                  'Market Data',
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: AppSizes.sm),
+                Container(
+                  padding: const EdgeInsets.all(AppSizes.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBackground,
+                    borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      _buildDetailRow('Current Price', '\$${walletCoin.coinDetails.price.toStringAsFixed(2)}'),
+                      _buildDetailRow('24h Change', '${walletCoin.coinDetails.percentChange24h >= 0 ? '+' : ''}${walletCoin.coinDetails.percentChange24h.toStringAsFixed(2)}%',
+                          valueColor: walletCoin.coinDetails.percentChange24h >= 0 ? AppColors.green : AppColors.red),
+                      _buildDetailRow('Market Cap', walletCoin.coinDetails.marketCap),
+                      _buildDetailRow('24h Volume', walletCoin.coinDetails.totalVolume),
+                      _buildDetailRow('Price in BTC', walletCoin.coinDetails.priceBtc.toStringAsFixed(8)),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.md),
+
+                // Your Investment
+                const Text(
+                  'Your Investment',
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppSizes.sm),
+                Container(
+                  padding: const EdgeInsets.all(AppSizes.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.iconBackground,
+                    borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      _buildDetailRow('Avg Purchase Price', '\$${walletCoin.averagePurchasePrice.toStringAsFixed(2)}'),
+                      _buildDetailRow('Total Invested', '\$${investedValue.toStringAsFixed(2)}'),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: AppSizes.md),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      child: AppButton(
+                        labelText: 'Edit',
+                        onTap: () {
+                          Navigator.pop(bottomSheetContext);
+                          _showEditCoinBottomSheet(Get.context!, walletCoin);
+                        },
+                        bgColor: AppColors.yellow,
+                        textColor: AppColors.black,
+                      ),
+                    ),
+                    const SizedBox(width: AppSizes.sm),
+                    Expanded(
+                      child: AppButton(
+                        labelText: 'Remove',
+                        onTap: () {
+                          Navigator.pop(bottomSheetContext);
+                          _confirmRemoveCoin(context, walletCoin.coinDetails.symbol);
+                        },
+                        bgColor: AppColors.red,
+                        textColor: AppColors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.md),
               ],
             ),
-            const SizedBox(height: AppSizes.md),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value, {Color? valueColor}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text(label, style: const TextStyle(color: AppColors.textGreyLight)),
-          Text(value, style: const TextStyle(color: AppColors.white)),
+          Text(label, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 14)),
+          Text(
+            value,
+            style: TextStyle(
+              color: valueColor ?? AppColors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
         ],
       ),
     );
@@ -522,19 +817,30 @@ class WalletView extends StatelessWidget {
       text: walletCoin.quantity.toString(),
     );
     final TextEditingController priceController = TextEditingController(
-      text: walletCoin.coinDetails.price.toStringAsFixed(2),
+      text: walletCoin.averagePurchasePrice.toStringAsFixed(2),
     );
 
     showModalBottomSheet(
+
       backgroundColor: AppColors.bgColor,
       context: context,
-      builder: (BuildContext bottomSheetContext) => Padding(
-        padding: const EdgeInsets.all(AppSizes.md),
+      isScrollControlled: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
+      ),
+      builder: (BuildContext bottomSheetContext) => SingleChildScrollView(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom ,
+          left: AppSizes.md,
+          right: AppSizes.md,
+          top: AppSizes.md,
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          // mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            SizedBox(height: AppSizes.md,),
             Text(
-              'Edit ${walletCoin.coinDetails.symbol}',
+              'Edit ${walletCoin.coinDetails.name}',
               style: const TextStyle(
                 color: AppColors.white,
                 fontSize: AppSizes.fontSizeH2,
@@ -544,7 +850,7 @@ class WalletView extends StatelessWidget {
             const SizedBox(height: AppSizes.md),
             TextField(
               controller: quantityController,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               style: const TextStyle(color: AppColors.white),
               decoration: const InputDecoration(
                 labelText: 'Quantity',
@@ -554,44 +860,75 @@ class WalletView extends StatelessWidget {
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.textGreyLight),
                 ),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.yellow)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.yellow),
+                ),
               ),
             ),
             const SizedBox(height: AppSizes.md),
             TextField(
               controller: priceController,
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               style: const TextStyle(color: AppColors.white),
               decoration: const InputDecoration(
-                labelText: 'Average Purchase Price',
+                labelText: 'Average Purchase Price (USD)',
                 hintText: 'Enter average purchase price',
                 labelStyle: TextStyle(color: AppColors.textGreyLight),
                 hintStyle: TextStyle(color: AppColors.textGreyLight),
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.textGreyLight),
                 ),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: AppColors.yellow)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.yellow),
+                ),
               ),
             ),
             const SizedBox(height: AppSizes.md),
             AppButton(
+              padding: EdgeInsets.symmetric(vertical: AppSizes.sm),
               labelText: 'Update',
-              onTap: () {
+              onTap: () async {
                 final double quantity = double.tryParse(quantityController.text) ?? 0.0;
-                final double price =
-                    double.tryParse(priceController.text) ?? walletCoin.coinDetails.price;
+                final double price = double.tryParse(priceController.text) ??
+                    walletCoin.averagePurchasePrice;
 
-                _walletController.updateWalletCoin(
-                  symbol: walletCoin.coinDetails.symbol,
-                  newQuantity: quantity,
-                  newAveragePurchasePrice: price,
-                );
+                if (quantity > 0) {
+                  Navigator.of(bottomSheetContext).pop();
 
-                Navigator.of(bottomSheetContext).pop();
+                  final bool success = await _walletController.updateWalletCoin(
+                    symbol: walletCoin.coinDetails.symbol,
+                    newQuantity: quantity,
+                    newAveragePurchasePrice: price,
+                  );
+
+                  if (success) {
+                    ToastManager.show(
+                      backgroundColor: AppColors.greenContainer,
+                      textColor: AppColors.white,
+                      message: '${walletCoin.coinDetails.symbol} updated successfully',
+                      icon: const Icon(Icons.check_circle, color: AppColors.green),
+                    );
+                  } else {
+                    ToastManager.show(
+                      backgroundColor: AppColors.darkRed,
+                      textColor: AppColors.white,
+                      message: 'Failed to update ${walletCoin.coinDetails.symbol}',
+                      icon: const Icon(Icons.error_outline, color: AppColors.white),
+                    );
+                  }
+                } else {
+                  ToastManager.show(
+                    backgroundColor: AppColors.darkRed,
+                    textColor: AppColors.white,
+                    message: 'Please enter a valid quantity',
+                    icon: const Icon(Icons.error_outline, color: AppColors.white),
+                  );
+                }
               },
               bgColor: AppColors.yellow,
               textColor: AppColors.black,
             ),
+            const SizedBox(height: AppSizes.lg),
           ],
         ),
       ),
@@ -615,9 +952,26 @@ class WalletView extends StatelessWidget {
           ),
           AppButton(
             labelText: 'Remove',
-            onTap: () {
-              _walletController.removeCoinFromWallet(symbol);
+            onTap: () async {
               Navigator.of(dialogContext).pop();
+
+              final bool success = await _walletController.removeCoinFromWallet(symbol);
+
+              if (success) {
+                ToastManager.show(
+                  backgroundColor: AppColors.greenContainer,
+                  textColor: AppColors.white,
+                  message: 'Coin removed from wallet successfully',
+                  icon: const Icon(Icons.check_circle, color: AppColors.green),
+                );
+              } else {
+                ToastManager.show(
+                  backgroundColor: AppColors.darkRed,
+                  textColor: AppColors.white,
+                  message: 'Failed to remove coin from wallet',
+                  icon: const Icon(Icons.error_outline, color: AppColors.white),
+                );
+              }
             },
             bgColor: AppColors.textRed,
             textColor: AppColors.white,
