@@ -58,7 +58,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
               const SizedBox(height: AppSizes.sm),
 
               // If selecting from wallet, show only wallet coins
-              if (fromWallet) ...[
+              if (fromWallet) ...<Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenHorizontal),
                   child: Container(
@@ -84,8 +84,8 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: AppSizes.md),
-              ] else ...[
+                // const SizedBox(height: AppSizes.md),
+              ] else ...<Widget>[
                 // Tabs for market selection
                 _buildTabs(controller: controller),
                 const SizedBox(height: AppSizes.md),
@@ -96,10 +96,10 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                 child: Obx(() {
                   if (fromWallet) {
                     // Show wallet coins
-                    final walletCoins = walletController.walletCoins;
+                    final RxList<WalletCoinModel> walletCoins = walletController.walletCoins;
 
                     // Filter wallet coins based on search query
-                    final filteredWalletCoins = controller.searchQuery.value.isEmpty
+                    final List<WalletCoinModel> filteredWalletCoins = controller.searchQuery.value.isEmpty
                         ? walletCoins
                         : walletCoins.where((WalletCoinModel coin) {
                       return coin.coinDetails.name.toLowerCase().contains(
@@ -138,7 +138,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenHorizontal),
                       itemCount: filteredWalletCoins.length,
                       itemBuilder: (BuildContext context, int index) {
-                        final walletCoin = filteredWalletCoins[index];
+                        final WalletCoinModel walletCoin = filteredWalletCoins[index];
                         return _buildWalletCoinItem(walletCoin, controller);
                       },
                     );
@@ -207,8 +207,8 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                       final CoinItem coin = controller.filteredCoins[index];
 
                       // Check if this coin is in wallet
-                      final isInWallet = walletController.walletCoins.any(
-                              (walletCoin) => walletCoin.coinDetails.symbol == coin.symbol
+                      final bool isInWallet = walletController.walletCoins.any(
+                              (WalletCoinModel walletCoin) => walletCoin.coinDetails.symbol == coin.symbol
                       );
 
                       return _buildCoinItem(coin, controller, isInWallet: isInWallet);
@@ -317,9 +317,9 @@ class CoinSelectionBottomSheet extends StatelessWidget {
   }
 
   Widget _buildWalletCoinItem(WalletCoinModel walletCoin, CoinSelectionController controller) {
-    final coin = walletCoin.coinDetails;
-    final balance = walletCoin.quantity;
-    final value = balance * coin.price;
+    final CoinItem coin = walletCoin.coinDetails;
+    final double balance = walletCoin.quantity;
+    final double value = balance * coin.price;
 
     return InkWell(
       onTap: () => controller.selectCoin(coin),
@@ -354,7 +354,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                       child: CustomLoading(),
                     ),
                   ),
-                  errorWidget: (context, url, error) =>
+                  errorWidget: (BuildContext context, String url, Object error) =>
                   const Icon(Icons.currency_bitcoin, color: AppColors.textGreyLight),
                 ),
               ),
@@ -378,21 +378,21 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: AppSizes.xs),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.greenContainer,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'In Wallet',
-                          style: TextStyle(
-                            color: AppColors.green,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                      // Container(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      //   decoration: BoxDecoration(
+                      //     color: AppColors.greenContainer,
+                      //     borderRadius: BorderRadius.circular(4),
+                      //   ),
+                      //   child: const Text(
+                      //     'In Wallet',
+                      //     style: TextStyle(
+                      //       color: AppColors.green,
+                      //       fontSize: 10,
+                      //       fontWeight: FontWeight.w600,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 2),
@@ -493,7 +493,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (isInWallet) ...[
+                      if (isInWallet) ...<Widget>[
                         const SizedBox(width: AppSizes.xs),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

@@ -177,7 +177,7 @@ class FutureLeft extends StatelessWidget {
           labelText: 'Buy/Long',
           onTap: () {},
           bgColor: AppColors.greenAccent,
-          padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+          padding: const EdgeInsets.symmetric(vertical: 12),
         ),
         const SizedBox(height: AppSizes.md),
         maxRow(context, label: 'Max', value: '0.000BTC'),
@@ -189,7 +189,7 @@ class FutureLeft extends StatelessWidget {
           labelText: 'Sell/short',
           onTap: () {},
           bgColor: AppColors.red,
-          padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+          padding: const EdgeInsets.symmetric(vertical: 12),
         ),
       ],
     );

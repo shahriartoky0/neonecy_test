@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import '../../../core/config/app_sizes.dart';
@@ -11,7 +12,7 @@ class CryptoCard extends GetView<AssetsController> {
   final String price;
   final String pnl;
   final String percentageChange;
-  final String icon;
+  final String iconImage;
 
   const CryptoCard({
     super.key,
@@ -21,7 +22,7 @@ class CryptoCard extends GetView<AssetsController> {
     required this.price,
     required this.pnl,
     required this.percentageChange,
-    required this.icon,
+    required this.iconImage,
   });
 
   @override
@@ -38,13 +39,18 @@ class CryptoCard extends GetView<AssetsController> {
               children: <Widget>[
                 // Crypto icon (using a circular container with a background color)
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: 32,
+                  height: 32,
                   decoration: const BoxDecoration(
-                    color: AppColors.greenAccent,
                     shape: BoxShape.circle,
                   ),
-                  child: Center(child: Text(icon, style: const TextStyle(fontSize: 14))),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: iconImage,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -84,26 +90,7 @@ class CryptoCard extends GetView<AssetsController> {
           ],
         ),
 
-        const SizedBox(height: AppSizes.sm),
 
-        // Third row with Today's P&L and percentage change
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const Text(
-              "Today's P&L",
-              style: TextStyle(color: AppColors.textGreyLight, fontSize: 12),
-            ),
-            Text(
-              '$pnl ($percentageChange)',
-              style: const TextStyle(
-                color: AppColors.textGreyLight,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
 
         const SizedBox(height: AppSizes.sm),
 
@@ -135,7 +122,7 @@ class CryptoCard extends GetView<AssetsController> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 2),
         decoration: BoxDecoration(
           color: AppColors.iconBackgroundLight,
           borderRadius: BorderRadius.circular(8),
@@ -143,7 +130,7 @@ class CryptoCard extends GetView<AssetsController> {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ),
       ),

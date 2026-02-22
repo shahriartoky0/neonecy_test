@@ -10,7 +10,7 @@ class ToastManager {
 
   static void show({
     required String message,
-    Widget icon = const Icon(Icons.error_outline),
+    Widget icon = const Icon(Icons.error_outline, color: AppColors.white),
     Color backgroundColor = AppColors.primaryColor,
     Color iconColor = Colors.white,
     Color textColor = Colors.white,
@@ -28,27 +28,26 @@ class ToastManager {
     _currentToast?.remove();
 
     _currentToast = OverlayEntry(
-      builder:
-          (BuildContext context) => Positioned(
-            bottom: 50,
-            left: 20,
-            right: 20,
-            child: SafeArea(
-              child: ToastAnimation(
-                duration: animationDuration,
-                curve: animationCurve,
-                child: CustomToast(
-                  icon: icon,
-                  message: message,
-                  backgroundColor: backgroundColor,
-                  iconColor: iconColor,
-                  textColor: textColor,
-                  borderRadius: borderRadius,
-                  padding: padding,
-                ),
-              ),
+      builder: (BuildContext context) => Positioned(
+        bottom: 50,
+        left: 20,
+        right: 20,
+        child: SafeArea(
+          child: ToastAnimation(
+            duration: animationDuration,
+            curve: animationCurve,
+            child: CustomToast(
+              icon: icon,
+              message: message,
+              backgroundColor: backgroundColor,
+              iconColor: iconColor,
+              textColor: textColor,
+              borderRadius: borderRadius,
+              padding: padding,
             ),
           ),
+        ),
+      ),
     );
 
     overlayState.insert(_currentToast!);

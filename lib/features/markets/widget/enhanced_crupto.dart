@@ -69,6 +69,7 @@ class EnhancedCryptoMarketWidget extends GetView<EnhancedCryptoMarketController>
           _buildTableHeader(),
           ...controller.cryptoList.map((EnhancedCryptoData crypto) => _buildCryptoRow(crypto)),
           if (controller.cryptoList.isEmpty && !controller.isLoading.value) _buildEmptyState(),
+          const SizedBox(height: AppSizes.xxxL,),
         ],
       ),
     );

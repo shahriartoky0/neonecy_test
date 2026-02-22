@@ -1,166 +1,166 @@
+// lib/features/settings/controllers/change_address_controller.dart
 import 'package:get/get.dart';
-import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
+import 'package:neonecy_test/core/design/app_colors.dart';
+import '../../../core/common/widgets/custom_toast.dart';
+import '../../../core/utils/address_storage_service.dart';
 import '../../assets/model/coin_model.dart';
 import '../model/crypto_address_model.dart';
 
 class ChangeAddressController extends GetxController {
-  final RxList<CryptoAddressModel> addresses = <CryptoAddressModel>[].obs;
-  final RxList<CryptoAddressModel> filteredAddresses = <CryptoAddressModel>[].obs;
-  final RxBool isLoading = false.obs;
-  final RxString searchQuery = ''.obs;
-  final Rx<CryptoAddressModel?> selectedAddress = Rx<CryptoAddressModel?>(null);
+  final AddressStorageService _addressService = AddressStorageService();
 
-  // The coin we're managing addresses for
-  late CoinItem coin;
+  final RxList<CryptoAddressModel> addresses = <CryptoAddressModel>[].obs;
+  final RxString selectedCoinSymbol = ''.obs;
+  final Rx<CoinItem?> selectedCoin = Rx<CoinItem?>(null);
 
   @override
   void onInit() {
     super.onInit();
-    // Get the coin passed from previous screen
-    if (Get.arguments != null && Get.arguments is CoinItem) {
-      coin = Get.arguments as CoinItem;
-      loadAddresses();
-    }
-  }
-
-  void loadAddresses() {
-    isLoading.value = true;
-
-    // Simulate loading delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      // Load demo addresses for this coin
-      addresses.value = CryptoAddressModelDemo.getAddressesForCoin(coin.symbol);
-
-      // If no addresses exist, generate some
-      if (addresses.isEmpty) {
-        addresses.value = _generateDemoAddressesForCoin();
+    ever(selectedCoinSymbol, (String symbol) {
+      if (symbol.isNotEmpty) {
+        _reload(symbol);
+      } else {
+        addresses.clear();
       }
-
-      filteredAddresses.value = addresses;
-
-      // Set default selected address
-      final CryptoAddressModel defaultAddress = addresses.firstWhere(
-        (CryptoAddressModel addr) => addr.isDefault,
-        orElse: () => addresses.isNotEmpty ? addresses.first : _createNewAddress(),
-      );
-      selectedAddress.value = defaultAddress;
-
-      isLoading.value = false;
     });
   }
 
-  List<CryptoAddressModel> _generateDemoAddressesForCoin() {
-    // Generate 3-5 demo addresses for the coin
-    final List<CryptoAddressModel> demoAddresses = <CryptoAddressModel>[];
-    final int count = 3 + (coin.symbol.hashCode % 3); // 3-5 addresses
-
-    for (int i = 0; i < count; i++) {
-      final CryptoAddressModel address = CryptoAddressModelDemo.generateNewAddress(
-        coin.symbol,
-        coin.name,
-        _getNetworkForCoin(coin.symbol),
-      );
-      demoAddresses.add(address.copyWith(id: '${coin.symbol}_$i', isDefault: i == 0));
-    }
-
-    return demoAddresses;
+  void selectCoin(CoinItem coin) {
+    selectedCoin.value = coin;
+    selectedCoinSymbol.value = coin.symbol;
   }
 
-  String _getNetworkForCoin(String symbol) {
-    // Map common coins to their networks
-    switch (symbol.toUpperCase()) {
-      case 'BTC':
-        return 'Bitcoin';
-      case 'ETH':
-        return 'Ethereum';
-      case 'BNB':
-        return 'BEP20';
-      case 'USDT':
-      case 'USDC':
-        return 'ERC20';
-      case 'TRX':
-        return 'TRON';
-      case 'SOL':
-        return 'Solana';
-      case 'ADA':
-        return 'Cardano';
-      case 'DOT':
-        return 'Polkadot';
-      case 'MATIC':
-        return 'Polygon';
-      case 'AVAX':
-        return 'Avalanche';
-      default:
-        return 'Ethereum'; // Default to Ethereum
-    }
+  void _reload(String symbol) {
+    addresses.value = _addressService.getAddressesForCoin(symbol);
   }
 
-  CryptoAddressModel _createNewAddress() {
-    return CryptoAddressModelDemo.generateNewAddress(
-      coin.symbol,
-      coin.name,
-      _getNetworkForCoin(coin.symbol),
-    );
-  }
+  int addressCountForCoin(String symbol) =>
+      _addressService.getAddressesForCoin(symbol).length;
 
-  void searchAddresses(String query) {
-    searchQuery.value = query;
+  // ── Add OR replace (one address per coin+network, no "default" concept) ──
+  //
+  // Rule: each coin+network pair holds exactly ONE address.
+  // If the admin adds a second address for the same coin+network,
+  // it silently replaces the old one instead of duplicating.
+  Future<void> addOrReplaceAddress({
+    required String network,
+    required String address,
+    String? label,
+  }) async {
+    try {
+      final coin = selectedCoin.value;
+      if (coin == null) return;
 
-    if (query.isEmpty) {
-      filteredAddresses.value = addresses;
-    } else {
-      filteredAddresses.value = addresses.where((CryptoAddressModel address) {
-        return address.address.toLowerCase().contains(query.toLowerCase()) ||
-            address.network.toLowerCase().contains(query.toLowerCase()) ||
-            (address.label?.toLowerCase().contains(query.toLowerCase()) ?? false);
-      }).toList();
-    }
-  }
+      final existing = _addressService
+          .getAddressesForCoinAndNetwork(coin.symbol, network);
 
-  void clearSearch() {
-    searchQuery.value = '';
-    filteredAddresses.value = addresses;
-  }
-
-  void selectAddress(CryptoAddressModel address) {
-    selectedAddress.value = address;
-    // You can add logic here to save the selection
-    // Get.back(result: address);
-  }
-
-  void addNewAddress() {
-    final CryptoAddressModel newAddress = _createNewAddress();
-    addresses.insert(0, newAddress);
-    filteredAddresses.value = addresses;
-
-    ToastManager.show(message: "New address generated");
-  }
-
-  void deleteAddress(CryptoAddressModel address) {
-    if (address.isDefault) {
-      ToastManager.show(message: 'Cannot delete default address');
-      return;
-    }
-
-    addresses.remove(address);
-    filteredAddresses.value = addresses;
-    ToastManager.show(message: "Address deleted");
-  }
-
-  void setAsDefault(CryptoAddressModel address) {
-    // Remove default from all addresses
-    for (CryptoAddressModel addr in addresses) {
-      if (addr.id == address.id) {
-        final int index = addresses.indexOf(addr);
-        addresses[index] = addr.copyWith(isDefault: true);
-      } else if (addr.isDefault) {
-        final int index = addresses.indexOf(addr);
-        addresses[index] = addr.copyWith(isDefault: false);
+      if (existing.isNotEmpty) {
+        // Replace — update the existing record in place
+        final updated = existing.first.copyWith(
+          address: address.trim(),
+          label: label?.trim().isNotEmpty == true ? label!.trim() : null,
+        );
+        await _addressService.updateAddress(updated);
+        ToastManager.show(
+          backgroundColor: AppColors.greenContainer,
+          textColor: AppColors.white,
+          message: '${coin.symbol} · $network address updated',
+        );
+      } else {
+        // First address for this coin+network — just add it
+        final newAddr = CryptoAddressModel.create(
+          coinSymbol: coin.symbol,
+          coinName: coin.name,
+          network: network,
+          address: address.trim(),
+          label: label?.trim().isNotEmpty == true ? label!.trim() : null,
+        );
+        await _addressService.addAddress(newAddr);
+        ToastManager.show(
+          backgroundColor: AppColors.greenContainer,
+          textColor: AppColors.white,
+          message: '${coin.symbol} · $network address saved',
+        );
       }
-    }
 
-    filteredAddresses.value = addresses;
-    selectedAddress.value = address;
-    ToastManager.show(message: "Default address updated");
+      _reload(coin.symbol);
+    } catch (e) {
+      ToastManager.show(
+        backgroundColor: AppColors.darkRed,
+        textColor: AppColors.white,
+        message: 'Failed to save: $e',
+      );
+    }
+  }
+
+  Future<void> updateAddress({
+    required String addressId,
+    required String network,
+    required String address,
+    String? label,
+  }) async {
+    try {
+      final existing = addresses.firstWhere((a) => a.id == addressId);
+      await _addressService.updateAddress(existing.copyWith(
+        network: network,
+        address: address.trim(),
+        label: label?.trim().isNotEmpty == true ? label!.trim() : null,
+      ));
+      _reload(existing.coinSymbol);
+      ToastManager.show(
+        backgroundColor: AppColors.greenContainer,
+        textColor: AppColors.white,
+        message: 'Address updated',
+      );
+    } catch (e) {
+      ToastManager.show(
+        backgroundColor: AppColors.darkRed,
+        textColor: AppColors.white,
+        message: 'Failed to update: $e',
+      );
+    }
+  }
+
+  Future<void> removeAddress(String addressId) async {
+    try {
+      // await _addressService.removeAddress(addressId);
+      _reload(selectedCoinSymbol.value);
+      ToastManager.show(
+        backgroundColor: AppColors.greenContainer,
+        textColor: AppColors.white,
+        message: 'Address removed',
+      );
+    } catch (e) {
+      ToastManager.show(
+        backgroundColor: AppColors.darkRed,
+        textColor: AppColors.white,
+        message: 'Failed to remove: $e',
+      );
+    }
+  }
+
+  List<String> getAvailableNetworks(String symbol) {
+    switch (symbol.toUpperCase()) {
+      case 'BTC':   return ['SegWit', 'Bitcoin', 'BEP20'];
+      case 'ETH':   return ['Ethereum', 'Arbitrum', 'Optimism', 'BEP20'];
+      case 'USDT':  return ['TRC20', 'ERC20', 'BEP20', 'Polygon'];
+      case 'BNB':   return ['BEP20', 'BEP2'];
+      case 'USDC':  return ['ERC20', 'BEP20', 'Polygon'];
+      case 'SOL':   return ['Solana', 'BEP20'];
+      case 'XRP':   return ['Ripple', 'BEP20'];
+      case 'ADA':   return ['Cardano', 'BEP20'];
+      case 'DOGE':  return ['Dogecoin', 'BEP20'];
+      case 'MATIC': return ['Polygon', 'BEP20', 'ERC20'];
+      case 'TRX':   return ['TRC20', 'BEP20'];
+      case 'TON':   return ['TON', 'BEP20'];
+      case 'LTC':   return ['Litecoin', 'BEP20'];
+      case 'AVAX':  return ['Avalanche C-Chain', 'BEP20'];
+      case 'LINK':  return ['ERC20', 'BEP20'];
+      case 'UNI':   return ['ERC20', 'BEP20'];
+      case 'ATOM':  return ['Cosmos', 'BEP20'];
+      case 'DOT':   return ['Polkadot', 'BEP20'];
+      case 'SHIB':  return ['ERC20', 'BEP20'];
+      default:      return ['ERC20', 'BEP20'];
+    }
   }
 }

@@ -151,11 +151,10 @@ class UsdMScreen extends StatelessWidget {
                     controller: controller.tabController,
                     dividerColor: Colors.transparent,
                     isScrollable: true,
+                    indicatorPadding: const EdgeInsets.symmetric(horizontal: AppSizes.lg  ),
 
                     indicatorColor: AppColors.yellow,
-                    indicatorSize: TabBarIndicatorSize.label,
-                    indicatorPadding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
-                    indicatorWeight: 1,
+                     indicatorWeight: 1,
                     tabAlignment: TabAlignment.start,
                     labelColor: AppColors.textWhite,
                     labelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),

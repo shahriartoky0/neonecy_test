@@ -51,6 +51,7 @@ class AppIcons {
 
   // Assets Icons
   static String eye = "$baseUrl/eye.svg";
+  static String p2pTrading = "$baseUrl/p2p_trading.svg";
 
   // Navigation Icons
 

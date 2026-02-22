@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
-import 'package:neonecy_test/core/utils/logger_utils.dart';
 import '../../assets/model/coin_model.dart';
 import '../../wallet/controllers/wallet_controller.dart';
 import '../../wallet/models/coin_wallet_model.dart';
@@ -18,6 +17,9 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   final RxString fromAmount = '0'.obs;
   final RxString toAmount = '0'.obs;
 
+  // Text controller for fromAmount field
+  late TextEditingController fromAmountController;
+
   // Selected coin objects
   final Rx<CoinItem?> fromCoin = Rx<CoinItem?>(null);
   final Rx<CoinItem?> toCoin = Rx<CoinItem?>(null);
@@ -30,13 +32,13 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
 
   // Get user's balance for a specific coin
   double getBalanceForCoin(String symbol) {
-    final walletCoin = userWalletCoins.firstWhereOrNull(
-      (coin) => coin.coinDetails.symbol == symbol,
+    final WalletCoinModel? walletCoin = userWalletCoins.firstWhereOrNull(
+          (WalletCoinModel coin) => coin.coinDetails.symbol == symbol,
     );
     return walletCoin?.quantity ?? 0.0;
   }
 
-  void selectOrderType(int index) {
+  Future<void> selectOrderType(int index) async {
     selectedOrderType.value = index;
   }
 
@@ -56,24 +58,40 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
       fromCoinBalance.value = getBalanceForCoin(fromCoin.value!.symbol);
     }
 
-    // Recalculate amounts after swap
+    // Swap amounts
+    final String tempAmount = fromAmount.value;
+    fromAmount.value = toAmount.value;
+    toAmount.value = tempAmount;
+
+    // Update text controller
+    fromAmountController.text = fromAmount.value == '0' ? '' : fromAmount.value;
+
+    // Recalculate with swapped values
     if (fromAmount.value.isNotEmpty && fromAmount.value != '0') {
       _updateConversionRate();
-    } else {
-      fromAmount.value = '0';
-      toAmount.value = '0';
     }
   }
 
   void updateFromAmount(String value) {
-    fromAmount.value = value;
+    // Remove any non-numeric characters except decimal point
+    value = value.replaceAll(RegExp(r'[^0-9.]'), '');
+
+    // Ensure only one decimal point
+    final List<String> parts = value.split('.');
+    if (parts.length > 2) {
+      value = '${parts[0]}.${parts.sublist(1).join('')}';
+    }
+
+    fromAmount.value = value.isEmpty ? '0' : value;
     _updateConversionRate();
   }
 
   void setMaxAmount() {
     if (fromCoin.value != null) {
       final double maxCoins = getBalanceForCoin(fromCoin.value!.symbol);
-      fromAmount.value = formatCoinAmount(maxCoins);
+      final String formattedMax = formatCoinAmount(maxCoins);
+      fromAmount.value = formattedMax;
+      fromAmountController.text = formattedMax;
       _updateConversionRate();
     }
   }
@@ -126,6 +144,18 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     }
   }
 
+  // Check if trade can be executed (reactive getter - no toasts)
+  bool get canTrade {
+    if (fromCoin.value == null || toCoin.value == null) return false;
+    if (fromCoin.value!.symbol == toCoin.value!.symbol) return false;
+
+    final double fromQty = double.tryParse(fromAmount.value) ?? 0;
+    if (fromQty <= 0) return false;
+    if (fromQty > getBalanceForCoin(fromCoin.value!.symbol)) return false;
+
+    return true;
+  }
+
   // Execute the trade
   Future<bool> executeTrade() async {
     if (!validateTrade()) return false;
@@ -135,8 +165,8 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
       final double toQty = double.parse(toAmount.value);
 
       // Remove from coin from wallet
-      final fromWalletCoin = userWalletCoins.firstWhere(
-        (coin) => coin.coinDetails.symbol == fromCoin.value!.symbol,
+      final WalletCoinModel fromWalletCoin = userWalletCoins.firstWhere(
+            (WalletCoinModel coin) => coin.coinDetails.symbol == fromCoin.value!.symbol,
       );
 
       final double newFromBalance = fromWalletCoin.quantity - fromQty;
@@ -151,19 +181,10 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
         // Remove the coin entirely
         await _walletController.removeCoinFromWallet(fromCoin.value!.symbol);
       }
-      if (fromCoin.value != null && toCoin.value != null) {
-        Get.to(
-          () => ConversionSuccessScreen(
-            fromCoin: fromCoin.value!,
-            toCoin: toCoin.value!,
-            fromAmount: fromAmount.value,
-            toAmount: toAmount.value,
-          ),
-        );
-      }
+
       // Add to coin to wallet
-      final existingToCoin = userWalletCoins.firstWhereOrNull(
-        (coin) => coin.coinDetails.symbol == toCoin.value!.symbol,
+      final WalletCoinModel? existingToCoin = userWalletCoins.firstWhereOrNull(
+            (WalletCoinModel coin) => coin.coinDetails.symbol == toCoin.value!.symbol,
       );
 
       if (existingToCoin != null) {
@@ -171,7 +192,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
         await _walletController.updateWalletCoin(
           symbol: toCoin.value!.symbol,
           newQuantity: existingToCoin.quantity + toQty,
-          newAveragePurchasePrice: toCoin.value!.price, // Use current market price
+          newAveragePurchasePrice: toCoin.value!.price,
         );
       } else {
         // Add new coin
@@ -182,39 +203,80 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
         );
       }
 
-      // // Reset amounts after successful trade
-      // fromAmount.value = '0';
-      // toAmount.value = '0';
+      // Show success toast
+      ToastManager.show(
+        message: 'Successfully converted ${formatCoinAmount(fromQty)} ${fromCoin.value!.symbol} to ${formatCoinAmount(toQty)} ${toCoin.value!.symbol}',
+        backgroundColor: AppColors.greenContainer,
+        textColor: AppColors.white,
+        icon: const Icon(Icons.check_circle, color: AppColors.green),
+      );
+
+      // Navigate to success screen
+      if (fromCoin.value != null && toCoin.value != null) {
+        Get.to(
+              () => ConversionSuccessScreen(
+            fromCoin: fromCoin.value!,
+            toCoin: toCoin.value!,
+            fromAmount: fromAmount.value,
+            toAmount: toAmount.value,
+          ),
+        );
+      }
 
       return true;
     } catch (e) {
       print('Error executing trade: $e');
+      ToastManager.show(
+        message: 'Trade failed: ${e.toString()}. Please try again.',
+        backgroundColor: AppColors.red,
+        icon: const Icon(Icons.error_outline, color: AppColors.white),
+      );
       return false;
     }
   }
 
+
+
   bool validateTrade() {
+    // Check if both coins are selected
     if (fromCoin.value == null || toCoin.value == null) {
-      ToastManager.show(message: 'Please select both coins', backgroundColor: AppColors.red);
+      ToastManager.show(
+        message: 'Please select both coins to continue',
+        backgroundColor: AppColors.red,
+        icon: const Icon(Icons.error_outline, color: AppColors.white),
+      );
       return false;
     }
 
+    // Check if trying to convert same coin
     if (fromCoin.value!.symbol == toCoin.value!.symbol) {
-      ToastManager.show(message: 'Cannot convert to the same coin', backgroundColor: AppColors.red);
-
+      ToastManager.show(
+        message: 'Cannot convert ${fromCoin.value!.symbol} to ${toCoin.value!.symbol}. Please select different coins.',
+        backgroundColor: AppColors.red,
+        icon: const Icon(Icons.error_outline, color: AppColors.white),
+      );
       return false;
     }
 
+    // Check if amount is valid
     final double fromQty = double.tryParse(fromAmount.value) ?? 0;
     if (fromQty <= 0) {
-      ToastManager.show(message: 'Please enter a valid amount', backgroundColor: AppColors.red);
-
+      ToastManager.show(
+        message: 'Please enter a valid amount greater than 0',
+        backgroundColor: AppColors.red,
+        icon: const Icon(Icons.error_outline, color: AppColors.white),
+      );
       return false;
     }
 
-    if (fromQty > getBalanceForCoin(fromCoin.value!.symbol)) {
-      ToastManager.show(message: 'Insufficient balance', backgroundColor: AppColors.red);
-
+    // Check if sufficient balance
+    final double availableBalance = getBalanceForCoin(fromCoin.value!.symbol);
+    if (fromQty > availableBalance) {
+      ToastManager.show(
+        message: 'Insufficient balance. Available: ${formatCoinAmount(availableBalance)} ${fromCoin.value!.symbol}',
+        backgroundColor: AppColors.red,
+        icon: const Icon(Icons.error_outline, color: AppColors.white),
+      );
       return false;
     }
 
@@ -223,6 +285,8 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
 
   // Format coin amount with appropriate precision
   String formatCoinAmount(double amount) {
+    if (amount == 0) return '0';
+
     if (amount >= 1000) {
       return amount.toStringAsFixed(2);
     } else if (amount >= 1) {
@@ -231,6 +295,24 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
       return amount.toStringAsFixed(6);
     } else if (amount > 0) {
       return amount.toStringAsFixed(8);
+    }
+    return '0';
+  }
+
+  // Format display numbers (for USD values)
+  String formatDisplayNumber(double value) {
+    if (value >= 1000000000) {
+      return '${(value / 1000000000).toStringAsFixed(2)}B';
+    } else if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(2)}M';
+    } else if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(2)}K';
+    } else if (value >= 1) {
+      return value.toStringAsFixed(2);
+    } else if (value >= 0.01) {
+      return value.toStringAsFixed(4);
+    } else if (value > 0) {
+      return value.toStringAsFixed(6);
     }
     return '0';
   }
@@ -255,12 +337,18 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   @override
   void onInit() {
     super.onInit();
+
+    // Initialize text controller
+    fromAmountController = TextEditingController(text: fromAmount.value == '0' ? '' : fromAmount.value);
+
     tabController = TabController(length: homeTabTitles.length, vsync: this);
 
     tabController.addListener(() {
       selectedIndex.value = tabController.index;
     });
+
     resetTradeForm();
+
     // Listen to fromCoin changes
     ever(fromCoin, (CoinItem? coin) {
       if (coin != null) {
@@ -286,12 +374,16 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     fromAmount.value = '0';
     toAmount.value = '0';
 
+    // Clear text controller
+    fromAmountController.clear();
+
     // Reset balance
     fromCoinBalance.value = 0.0;
   }
 
   @override
   void onClose() {
+    fromAmountController.dispose();
     tabController.dispose();
     super.onClose();
   }

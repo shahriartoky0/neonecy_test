@@ -41,15 +41,10 @@ class FundingCard extends GetView<AssetsController> {
                 Container(
                   width: 32,
                   height: 32,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: const BoxDecoration(shape: BoxShape.circle),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(
-                      imageUrl: iconImage,
-                      fit: BoxFit.cover,
-                    ),
+                    child: CachedNetworkImage(imageUrl: iconImage, fit: BoxFit.cover),
                   ),
                 ),
 
@@ -66,49 +61,52 @@ class FundingCard extends GetView<AssetsController> {
             ),
 
             // Right side - Balance
-            Text(
-              balance,
-              style: const TextStyle(
-                color: AppColors.textWhite,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            Transform.translate(
+              offset: const Offset(0, 8),
+              child: Text(
+                balance,
+                style: const TextStyle(
+                  color: AppColors.textWhite,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
         ),
 
-        const SizedBox(height: 16),
+        // const SizedBox(height: 16),
 
         // Second row with crypto price and USD value
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
-              cryptoSymbol,
+              "           ${cryptoSymbol}",
               style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13),
             ),
-            Text(price, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
+            // Text(price, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
           ],
         ),
 
-        const SizedBox(height: AppSizes.sm),
-
-        // Third row with Today's P&L and percentage change
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const Text("Available\nMarket Cap", style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
-            Text(
-              '$pnl $percentageChange',
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-
+        //
+        // const SizedBox(height: AppSizes.sm),
+        //
+        // // Third row with Today's P&L and percentage change
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: <Widget>[
+        //     const Text("Available\nMarket Cap", style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
+        //     Text(
+        //       '$pnl $percentageChange',
+        //       style: const TextStyle(
+        //         color: AppColors.white,
+        //         fontSize: 13,
+        //         fontWeight: FontWeight.w500,
+        //       ),
+        //     ),
+        //   ],
+        // ),
         const SizedBox(height: AppSizes.md),
       ],
     );
