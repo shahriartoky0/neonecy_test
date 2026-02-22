@@ -51,45 +51,36 @@ class CoinSelectionBottomSheet extends StatelessWidget {
             children: <Widget>[
               // Header
               _buildHeader(controller),
-
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:  AppSizes.lg),
+                child: Obx(
+                      () => Row(
+                    children: <Widget>[
+                      topTabButton(
+                        label: 'Single Coin',
+                        isSelected: controller.isSingleCoinSelected(),
+                        onTap: () {
+                          controller.selectTab(0);
+                        },
+                      ),
+                      topTabButton(
+                        label: 'Multi Coin',
+                        isSelected: controller.isMultipleCoinSelected(),
+                        onTap: () {
+                          controller.selectTab(1);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSizes.md),
               // Search Bar
               _buildSearchBar(controller),
 
               const SizedBox(height: AppSizes.sm),
 
-              // If selecting from wallet, show only wallet coins
-              if (fromWallet) ...<Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenHorizontal),
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSizes.sm),
-                    decoration: BoxDecoration(
-                      color: AppColors.greenContainer,
-                      borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
-                    ),
-                    child: const Row(
-                      children: <Widget>[
-                        Icon(Icons.info_outline, color: AppColors.green, size: 16),
-                        SizedBox(width: AppSizes.sm),
-                        Expanded(
-                          child: Text(
-                            'Showing only coins in your wallet',
-                            style: TextStyle(
-                              color: AppColors.green,
-                              fontSize: AppSizes.fontSizeBodyS,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // const SizedBox(height: AppSizes.md),
-              ] else ...<Widget>[
-                // Tabs for market selection
-                _buildTabs(controller: controller),
-                const SizedBox(height: AppSizes.md),
-              ],
+
 
               // Coin List
               Expanded(
@@ -229,7 +220,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Text(
-            fromWallet ? 'From Wallet' : 'Select Coin',
+            fromWallet ? 'From' : 'Select Coin',
             style: const TextStyle(
               color: AppColors.textWhite,
               fontSize: AppSizes.fontSizeH3,
@@ -254,14 +245,15 @@ class CoinSelectionBottomSheet extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.iconBackground,
           borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
+
         ),
-        child: TextField(
+         child: TextFormField(
           onChanged: controller.searchCoins,
           style: const TextStyle(color: AppColors.textWhite),
           decoration: InputDecoration(
             hintText: 'Search',
-            hintStyle: const TextStyle(color: AppColors.hintText),
-            prefixIcon: const Icon(Icons.search, color: AppColors.textGreyLight),
+            hintStyle: const TextStyle(color: AppColors.hintText,fontSize: 12),
+            prefixIcon: const Icon(Icons.search, color: AppColors.textGreyLight, size: 16,),
             suffixIcon: Obx(
                   () => controller.searchQuery.value.isNotEmpty
                   ? IconButton(
@@ -271,50 +263,13 @@ class CoinSelectionBottomSheet extends StatelessWidget {
                   : const SizedBox.shrink(),
             ),
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.md,
-              vertical: AppSizes.md,
-            ),
+            contentPadding:   EdgeInsets.zero,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTabs({required CoinSelectionController controller}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.screenHorizontal),
-      child: Container(
-        height: 40,
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 4),
-        decoration: BoxDecoration(
-          color: AppColors.primaryColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Obx(
-              () => Row(
-            children: <Widget>[
-              topTabButton(
-                label: 'All Coins',
-                isSelected: controller.isSingleCoinSelected(),
-                onTap: () {
-                  controller.selectTab(0);
-                },
-              ),
-              const SizedBox(width: AppSizes.sm),
-              topTabButton(
-                label: 'Popular',
-                isSelected: controller.isMultipleCoinSelected(),
-                onTap: () {
-                  controller.selectTab(1);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget _buildWalletCoinItem(WalletCoinModel walletCoin, CoinSelectionController controller) {
     final CoinItem coin = walletCoin.coinDetails;
@@ -592,6 +547,8 @@ class CoinSelectionBottomSheet extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           alignment: Alignment.center,
+          padding: EdgeInsets.symmetric(vertical: 6),
+          margin: EdgeInsets.symmetric(horizontal: AppSizes.sm),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.iconBackgroundLight : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
@@ -605,7 +562,7 @@ class CoinSelectionBottomSheet extends StatelessWidget {
             ),
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
-            child: Text(label),
+            child: Text(label,style: TextStyle(fontSize: 12),),
           ),
         ),
       ),
@@ -635,4 +592,5 @@ class CoinSelectionBottomSheet extends StatelessWidget {
       return price.toStringAsFixed(8);
     }
   }
+
 }

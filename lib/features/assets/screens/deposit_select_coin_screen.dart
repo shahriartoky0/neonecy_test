@@ -1,4 +1,5 @@
 // lib/features/assets/screens/deposit/deposit_select_coin_screen.dart
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
@@ -227,8 +228,8 @@ class _DefaultView extends StatelessWidget {
               label: 'History',
               trailing: GestureDetector(
                 onTap: onClearHistory,
-                child: const Icon(Icons.delete_outline,
-                    color: AppColors.textGreyLight, size: 18),
+                child: const Icon(CupertinoIcons.delete,
+                    color: AppColors.textGreyLight, size: 16),
               ),
             ),
           ),
@@ -249,10 +250,10 @@ class _DefaultView extends StatelessWidget {
                     child: Container(
                       alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
+                          horizontal: 16, vertical: 0),
                       decoration: BoxDecoration(
                         color: AppColors.iconBackground,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         coin.symbol,

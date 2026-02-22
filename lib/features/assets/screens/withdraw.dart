@@ -9,7 +9,10 @@ import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/utils/address_storage_service.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/settings/model/crypto_address_model.dart';
+import 'package:neonecy_test/features/wallet/controllers/wallet_controller.dart';
 import 'package:neonecy_test/features/wallet/models/coin_wallet_model.dart';
+
+import '../widgets/network_sheet_content.dart';
 
 class WithdrawScreen extends StatefulWidget {
   final WalletCoinModel coin;
@@ -22,6 +25,7 @@ class WithdrawScreen extends StatefulWidget {
 
 class _WithdrawScreenState extends State<WithdrawScreen> {
   final AddressStorageService _addressService = AddressStorageService();
+  final WalletController _walletController = Get.find<WalletController>();
   final TextEditingController _addressCtrl = TextEditingController();
   final TextEditingController _amountCtrl = TextEditingController();
 
@@ -30,6 +34,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   bool _isAutoNetwork = true;
   double _networkFee = 0.0;
   String? _amountError;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -45,9 +50,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   }
 
   void _loadSavedAddresses() {
-    final List<CryptoAddressModel> addresses = _addressService.getAddressesForCoin(widget.coin.coinDetails.symbol);
+    final List<CryptoAddressModel> addresses =
+    _addressService.getAddressesForCoin(widget.coin.coinDetails.symbol);
     setState(() => _savedAddresses = addresses);
-    // Do NOT auto-fill address — user must choose where to send explicitly
     _calculateNetworkFee();
   }
 
@@ -100,7 +105,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
   bool get _canWithdraw {
     final double amount = double.tryParse(_amountCtrl.text) ?? 0;
-    return _addressCtrl.text.isNotEmpty &&
+    return !_isProcessing &&
+        _addressCtrl.text.isNotEmpty &&
         amount > 0 &&
         amount <= widget.coin.quantity &&
         _amountError == null;
@@ -170,7 +176,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text('One Time', style: TextStyle(color: AppColors.textGreyLight, fontSize: 12)),
+                  Text('One Time',
+                      style: TextStyle(color: AppColors.textGreyLight, fontSize: 12)),
                   Icon(Icons.arrow_drop_down, size: 16, color: AppColors.textGreyLight),
                 ],
               ),
@@ -182,8 +189,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             icon: const Icon(Icons.help_outline, color: AppColors.white),
             onPressed: () => _showNetworkInfo(),
           ),
-        CustomSvgImage(assetName: AppIcons.assetHistory,height: 20,),
-          const SizedBox(width: 8,)
+          CustomSvgImage(assetName: AppIcons.assetHistory, height: 20),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -192,7 +199,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // ── Address ────────────────────────────────────────────────
-            const Text('Address', style: TextStyle(color: AppColors.textGreyLight, fontSize: 12)),
+            const Text('Address',
+                style: TextStyle(color: AppColors.textGreyLight, fontSize: 12)),
             const SizedBox(height: 8),
 
             Container(
@@ -212,7 +220,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   suffixIcon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      // Contacts / saved addresses
                       if (_savedAddresses.isNotEmpty)
                         IconButton(
                           icon: const Icon(
@@ -223,7 +230,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                           onPressed: _showAddressSelector,
                           tooltip: 'Saved addresses',
                         ),
-                      // QR scan
                       IconButton(
                         icon: const Icon(
                           Icons.qr_code_scanner,
@@ -231,9 +237,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                           size: 22,
                         ),
                         onPressed: () {},
-                        // onPressed: () => ToastManager.show(
-                        //     message: 'QR Scanner coming soon'),
-                        // tooltip: 'Scan QR',
                       ),
                     ],
                   ),
@@ -264,7 +267,8 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       color: AppColors.iconBackground,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.info_outline, size: 12, color: AppColors.textGreyLight),
+                    child:
+                    const Icon(Icons.info_outline, size: 12, color: AppColors.textGreyLight),
                   ),
                 ),
               ],
@@ -311,14 +315,14 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       color: AppColors.iconBackground,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.info_outline, size: 12, color: AppColors.textGreyLight),
+                    child:
+                    const Icon(Icons.info_outline, size: 12, color: AppColors.textGreyLight),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
 
-            // Amount field — pixel perfect match to screenshot
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
@@ -333,7 +337,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     style: TextStyle(color: AppColors.textGreyLight, fontSize: 12),
                   ),
                   const Spacer(),
-                  // Amount input
                   SizedBox(
                     width: 100,
                     child: TextField(
@@ -369,7 +372,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  // Max button
                   GestureDetector(
                     onTap: () {
                       _amountCtrl.text = available.toString();
@@ -399,7 +401,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
             const SizedBox(height: 8),
 
-            // Available
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -422,15 +423,13 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
 
             // ── Warnings ─────────────────────────────────────────────────
             _WarningRow(
-              text:
-                  'Do not withdraw directly to a crowdfund or ICO. '
+              text: 'Do not withdraw directly to a crowdfund or ICO. '
                   'We will not credit your account with tokens from that sale.',
             ),
             const SizedBox(height: AppSizes.sm),
             _WarningRow(
               text: 'Do not transact with Sanctioned Entities. ',
               linkText: 'Learn more',
-              // onLinkTap: () => ToastManager.show(message: 'Learn more about sanctions'),
               onLinkTap: () {},
             ),
 
@@ -450,7 +449,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              // Receive amount
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -469,7 +467,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 ],
               ),
               const SizedBox(height: 4),
-              // Network fee
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -484,7 +481,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 ],
               ),
               const SizedBox(height: AppSizes.md),
-              // Withdraw button — always yellow like Binance screenshot
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -502,7 +498,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   onPressed: () {
                     DeviceUtility.hapticFeedback();
                     if (!_canWithdraw) {
-                      // Show specific error toast instead of disabling
                       if (_addressCtrl.text.isEmpty) {
                         ToastManager.show(
                           message: 'Please enter a recipient address',
@@ -527,7 +522,16 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     }
                     _showWithdrawConfirmation();
                   },
-                  child: const Text(
+                  child: _isProcessing
+                      ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.black),
+                    ),
+                  )
+                      : const Text(
                     'Withdraw',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
@@ -541,7 +545,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
-  // ── Address selector sheet ───────────────────────────────────────────────
   void _showAddressSelector() {
     showModalBottomSheet(
       context: context,
@@ -579,7 +582,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             )
           else
             ..._savedAddresses.map(
-              (CryptoAddressModel addr) => ListTile(
+                  (CryptoAddressModel addr) => ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -629,106 +632,31 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
-  // ── Network selector sheet ───────────────────────────────────────────────
   void _showNetworkSelector() {
-    final List<String> networks = _getAvailableNetworks();
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.primaryColor,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
       ),
-      builder: (_) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          const SizedBox(height: AppSizes.sm),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.iconBackgroundLight,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(AppSizes.md),
-            child: Text(
-              'Select Network',
-              style: TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-          // Auto option
-          ListTile(
-            leading: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppColors.iconBackground,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Icon(Icons.auto_awesome, color: AppColors.yellow, size: 18),
-            ),
-            title: const Text(
-              'Automatically match the network',
-              style: TextStyle(color: AppColors.white),
-            ),
-            trailing: _isAutoNetwork
-                ? const Icon(Icons.check_circle, color: AppColors.yellow, size: 18)
-                : null,
-            onTap: () {
-              setState(() {
-                _isAutoNetwork = true;
-                _selectedNetwork = 'Automatically match the network';
-              });
-              Navigator.pop(context);
-              _calculateNetworkFee();
-            },
-          ),
-          const Divider(color: AppColors.iconBackground, height: 1),
-          ...networks.map((String net) {
-            final bool isSelected = !_isAutoNetwork && _selectedNetwork == net;
-            return ListTile(
-              leading: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.iconBackground,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  net,
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              title: Text(
-                net,
-                style: TextStyle(
-                  color: isSelected ? AppColors.yellow : AppColors.white,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              trailing: isSelected
-                  ? const Icon(Icons.check_circle, color: AppColors.yellow, size: 18)
-                  : null,
-              onTap: () {
-                setState(() {
-                  _isAutoNetwork = false;
-                  _selectedNetwork = net;
-                });
-                Navigator.pop(context);
-                _calculateNetworkFee();
-              },
-            );
-          }),
-          const SizedBox(height: AppSizes.xl),
-        ],
+      builder: (_) => NetworkSheetContent(
+        networks: _getAvailableNetworks(),
+        initialNetwork: _isAutoNetwork ? null : _selectedNetwork,
+        coinSymbol: widget.coin.coinDetails.symbol,
+        coinPrice: widget.coin.coinDetails.price,   // double
+        addressService: _addressService,
+        isWithdraw: true,
+        onSelect: (net) {
+          setState(() {
+            _isAutoNetwork = false;
+            _selectedNetwork = net;
+          });
+          _calculateNetworkFee();
+        },
       ),
     );
   }
-
-  // ── Confirm dialog ───────────────────────────────────────────────────────
   void _showWithdrawConfirmation() {
     final double amount = double.parse(_amountCtrl.text);
     showDialog(
@@ -784,17 +712,55 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
-  void _executeWithdraw() {
-    // TODO: connect to backend
-    ToastManager.show(
-      message: 'Withdrawal initiated successfully',
-      backgroundColor: AppColors.greenContainer,
-      textColor: AppColors.white,
-      icon: const Icon(Icons.check_circle, color: AppColors.green),
-    );
-    Future.delayed(const Duration(milliseconds: 400), () {
-      Get.back();
-    });
+  Future<void> _executeWithdraw() async {
+    setState(() => _isProcessing = true);
+
+    try {
+      final double withdrawAmount = double.parse(_amountCtrl.text);
+      final String coinSymbol = widget.coin.coinDetails.symbol;
+      final String toAddress = _addressCtrl.text;
+      final String network = _selectedNetwork;
+
+      // ✅ UPDATE WALLET - Reduce the coin quantity
+      await _walletController.withdrawCoin(
+        coinSymbol: coinSymbol,
+        amount: withdrawAmount,
+      );
+
+      // TODO: Call backend API to process actual blockchain transaction
+      // final response = await withdrawAPI(
+      //   coin: coinSymbol,
+      //   amount: withdrawAmount,
+      //   address: toAddress,
+      //   network: network,
+      // );
+
+      // Show success
+      ToastManager.show(
+        message: 'Withdrawal successful! $withdrawAmount $coinSymbol sent',
+        backgroundColor: AppColors.greenContainer,
+        textColor: AppColors.white,
+        icon: const Icon(Icons.check_circle, color: AppColors.green),
+      );
+
+      // Navigate back after short delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        Get.back(); // Go back to coin selection screen
+      }
+    } catch (e) {
+      // Handle error
+      ToastManager.show(
+        message: 'Withdrawal failed: ${e.toString()}',
+        backgroundColor: AppColors.darkRed,
+        textColor: AppColors.white,
+        icon: const Icon(Icons.error, color: AppColors.red),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+    }
   }
 
   void _showNetworkInfo() {
@@ -814,7 +780,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
         ),
         content: const Text(
           'The network must match the recipient platform\'s network. '
-          'Sending on the wrong network may result in permanent loss of funds.',
+              'Sending on the wrong network may result in permanent loss of funds.',
           style: TextStyle(color: AppColors.textGreyLight, fontSize: 14, height: 1.4),
         ),
         actions: <Widget>[
@@ -873,7 +839,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   }
 }
 
-// ── Helper widgets ─────────────────────────────────────────────────────────
 class _WarningRow extends StatelessWidget {
   final String text;
   final String? linkText;

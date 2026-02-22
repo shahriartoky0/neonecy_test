@@ -1,4 +1,5 @@
 // lib/features/assets/screens/withdraw/withdraw_select_coin_screen.dart
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
@@ -42,19 +43,19 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
   @override
   Widget build(BuildContext context) {
     // Read plain list — no Obx needed, ever() above handles reactivity
-    final walletCoins = _wc.walletCoins.toList();
+    final List<WalletCoinModel> walletCoins = _wc.walletCoins.toList();
 
-    final history = _addressService.getRecentWithdrawSymbols();
-    final historyCo = history
-        .map((s) => walletCoins.firstWhereOrNull((c) => c.coinDetails.symbol == s))
+    final List<String> history = _addressService.getRecentWithdrawSymbols();
+    final List<WalletCoinModel> historyCo = history
+        .map((String s) => walletCoins.firstWhereOrNull((WalletCoinModel c) => c.coinDetails.symbol == s))
         .whereType<WalletCoinModel>()
         .toList();
 
-    final filtered = _query.isEmpty
+    final List<WalletCoinModel> filtered = _query.isEmpty
         ? <WalletCoinModel>[]
         : walletCoins
               .where(
-                (c) =>
+                (WalletCoinModel c) =>
                     c.coinDetails.symbol.toLowerCase().contains(_query) ||
                     c.coinDetails.name.toLowerCase().contains(_query),
               )
@@ -75,14 +76,14 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           // ── Search ──────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.xs, AppSizes.md, AppSizes.sm),
             child: TextField(
               controller: _searchCtrl,
               style: const TextStyle(color: AppColors.white, fontSize: 14),
-              onChanged: (v) => setState(() => _query = v.toLowerCase().trim()),
+              onChanged: (String v) => setState(() => _query = v.toLowerCase().trim()),
               decoration: InputDecoration(
                 hintText: 'Search Coins',
                 hintStyle: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
@@ -150,7 +151,7 @@ class _SearchResults extends StatelessWidget {
     }
     return ListView.builder(
       itemCount: coins.length,
-      itemBuilder: (_, i) => _CoinListTile(coin: coins[i], onTap: onTap),
+      itemBuilder: (_, int i) => _CoinListTile(coin: coins[i], onTap: onTap),
     );
   }
 }
@@ -172,14 +173,14 @@ class _DefaultView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
-      slivers: [
-        if (historyCo.isNotEmpty) ...[
+      slivers: <Widget>[
+        if (historyCo.isNotEmpty) ...<Widget>[
           SliverToBoxAdapter(
             child: _SectionHeader(
               label: 'Search History',
               trailing: GestureDetector(
                 onTap: onClearHistory,
-                child: const Icon(Icons.delete_outline, color: AppColors.textGreyLight, size: 18),
+                child:   const Icon(CupertinoIcons.delete, color: AppColors.textGreyLight, size: 15),
               ),
             ),
           ),
@@ -191,23 +192,23 @@ class _DefaultView extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
                 itemCount: historyCo.length,
                 separatorBuilder: (_, __) => const SizedBox(width: AppSizes.sm),
-                itemBuilder: (_, i) {
-                  final coin = historyCo[i];
+                itemBuilder: (_, int i) {
+                  final WalletCoinModel coin = historyCo[i];
                   return GestureDetector(
                     onTap: () => onTap(coin),
                     child: Container(
                       alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                       decoration: BoxDecoration(
                         color: AppColors.iconBackground,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         coin.coinDetails.symbol,
                         style: const TextStyle(
                           color: AppColors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -228,7 +229,7 @@ class _DefaultView extends StatelessWidget {
 
         SliverList(
           delegate: SliverChildBuilderDelegate(
-            (_, i) => _CoinListTile(coin: allCoins[i], onTap: onTap),
+            (_, int i) => _CoinListTile(coin: allCoins[i], onTap: onTap),
             childCount: allCoins.length,
           ),
         ),
@@ -249,7 +250,7 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.xs),
     child: Row(
-      children: [
+      children: <Widget>[
         Text(
           label,
           style: const TextStyle(color: AppColors.white, fontSize: 15, fontWeight: FontWeight.bold),
@@ -269,13 +270,13 @@ class _CoinListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final usdValue = coin.quantity * coin.coinDetails.price;
+    final double usdValue = coin.quantity * coin.coinDetails.price;
     return InkWell(
       onTap: () => onTap(coin),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 10),
         child: Row(
-          children: [
+          children: <Widget>[
             CircleAvatar(
               radius: 20,
               backgroundColor: AppColors.iconBackgroundLight,
@@ -293,7 +294,7 @@ class _CoinListTile extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   Text(
                     coin.coinDetails.symbol,
                     style: const TextStyle(
@@ -312,7 +313,7 @@ class _CoinListTile extends StatelessWidget {
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
+              children: <Widget>[
                 Text(
                   coin.quantity.toStringAsFixed(coin.quantity >= 1 ? 2 : 8),
                   style: const TextStyle(

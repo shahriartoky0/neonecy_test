@@ -14,6 +14,8 @@ import 'package:neonecy_test/features/assets/model/coin_model.dart';
 import 'package:neonecy_test/features/settings/model/crypto_address_model.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../widgets/network_sheet_content.dart';
+
 class DepositAddressScreen extends StatefulWidget {
   final CoinItem coin;
 
@@ -37,13 +39,13 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
   }
 
   void _initNetworks() {
-    final saved = _addressService
+    final List<String> saved = _addressService
         .getAddressesForCoin(widget.coin.symbol)
-        .map((a) => a.network)
+        .map((CryptoAddressModel a) => a.network)
         .toSet()
         .toList();
-    final defaults = _defaultNetworksFor(widget.coin.symbol);
-    final merged = {...saved, ...defaults}.toList();
+    final List<String> defaults = _defaultNetworksFor(widget.coin.symbol);
+    final List<String> merged = <String>{...saved, ...defaults}.toList();
     _networks = merged;
     _selectedNetwork = merged.isNotEmpty ? merged.first : null;
     if (_selectedNetwork != null) _loadAddress(_selectedNetwork!);
@@ -59,24 +61,24 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
   List<String> _defaultNetworksFor(String symbol) {
     switch (symbol.toUpperCase()) {
       case 'BTC':
-        return ['SegWit', 'Bitcoin', 'BEP20'];
+        return <String>['SegWit', 'Bitcoin', 'BEP20'];
       case 'ETH':
-        return ['Ethereum', 'Arbitrum', 'Optimism', 'BEP20'];
+        return <String>['Ethereum', 'Arbitrum', 'Optimism', 'BEP20'];
       case 'USDT':
-        return ['TRC20', 'ERC20', 'BEP20', 'Polygon'];
+        return <String>['TRC20', 'ERC20', 'BEP20', 'Polygon'];
       case 'BNB':
-        return ['BEP20', 'BEP2'];
+        return <String>['BEP20', 'BEP2'];
       case 'USDC':
-        return ['ERC20', 'BEP20', 'Polygon'];
+        return <String>['ERC20', 'BEP20', 'Polygon'];
       case 'SOL':
-        return ['Solana', 'BEP20'];
+        return <String>['Solana', 'BEP20'];
       default:
-        return ['ERC20', 'BEP20'];
+        return <String>['ERC20', 'BEP20'];
     }
   }
 
   String _networkLabel(String network) {
-    const map = {
+    const Map<String, String> map = <String, String>{
       'SegWit': 'SEGWITBTC',
       'Bitcoin': 'BTC',
       'Ethereum': 'ETH',
@@ -105,7 +107,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
           'Deposit ${widget.coin.symbol}',
           style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
-        actions: [
+        actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.help_outline, color: AppColors.white),
             onPressed: () => _showDepositTips(context),
@@ -117,7 +119,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+          children: <Widget>[
             const SizedBox(height: AppSizes.lg),
 
             // ── QR ────────────────────────────────────────────────────────
@@ -134,7 +136,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
                   const Text(
                     'Network',
                     style: TextStyle(color: AppColors.textGreyLight, fontSize: 12),
@@ -143,11 +145,11 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
                   GestureDetector(
                     onTap: () => _showNetworkSheet(context),
                     child: Row(
-                      children: [
+                      children: <Widget>[
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                            children: <Widget>[
                               Text(
                                 _selectedNetwork != null
                                     ? _networkLabel(_selectedNetwork!)
@@ -197,7 +199,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
               child: _currentAddress == null
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: <Widget>[
                         const Text(
                           'Deposit Address',
                           style: TextStyle(color: AppColors.textGreyLight, fontSize: 12),
@@ -214,7 +216,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
                     )
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: <Widget>[
                         const Text(
                           'Deposit Address',
                           style: TextStyle(color: AppColors.textGreyLight, fontSize: 12),
@@ -222,7 +224,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
                         const SizedBox(height: 6),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                          children: <Widget>[
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
@@ -263,7 +265,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
             const Divider(color: AppColors.iconBackground, height: 1),
 
             // ── More Details ──────────────────────────────────────────────
-            if (_currentAddress != null) ...[
+            if (_currentAddress != null) ...<Widget>[
               GestureDetector(
                 onTap: () => setState(() => _detailsExpanded = !_detailsExpanded),
                 child: Padding(
@@ -273,7 +275,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                    children: <Widget>[
                       const Text(
                         'More Details',
                         style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
@@ -298,7 +300,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
                     //   borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
                     // ),
                     child: Column(
-                      children: [
+                      children: <Widget>[
                         _DetailRow(
                           label: 'Deposit to',
                           value: _currentAddress!.label ?? 'Spot Wallet',
@@ -374,7 +376,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
 
   List<TextSpan> _highlightAddress(String addr) {
     if (addr.length <= 10) {
-      return [
+      return <TextSpan>[
         TextSpan(
           text: addr,
           style: const TextStyle(
@@ -385,7 +387,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
         ),
       ];
     }
-    return [
+    return <TextSpan>[
       TextSpan(
         text: addr.substring(0, 4),
         style: const TextStyle(
@@ -429,90 +431,30 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.primaryColor,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
       ),
-      builder: (_) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: AppSizes.sm),
-          Container(
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.iconBackgroundLight,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(AppSizes.md),
-            child: Text(
-              'Select Network',
-              style: TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ),
-          ..._networks.map((net) {
-            final hasAddr = _addressService
-                .getAddressesForCoinAndNetwork(widget.coin.symbol, net)
-                .isNotEmpty;
-            final isSelected = net == _selectedNetwork;
-            return ListTile(
-              leading: Container(
-                width: 44,
-                height: 34,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.iconBackground,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  _networkLabel(net),
-                  style: TextStyle(
-                    color: isSelected ? AppColors.yellow : AppColors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              title: Text(
-                net,
-                style: TextStyle(
-                  color: isSelected ? AppColors.yellow : AppColors.white,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-              subtitle: Text(
-                hasAddr ? 'Address saved' : 'No address saved',
-                style: TextStyle(
-                  color: hasAddr ? AppColors.green : AppColors.textGreyLight,
-                  fontSize: 11,
-                ),
-              ),
-              trailing: isSelected
-                  ? const Icon(Icons.check_circle, color: AppColors.yellow, size: 18)
-                  : hasAddr
-                  ? const Icon(Icons.check_circle_outline, color: AppColors.green, size: 18)
-                  : null,
-              onTap: () {
-                Navigator.pop(context);
-                _loadAddress(net);
-              },
-            );
-          }),
-          const SizedBox(height: AppSizes.xxxL),
-        ],
+      builder: (_) => NetworkSheetContent(
+        networks: _networks,
+        initialNetwork: _selectedNetwork,
+        coinSymbol: widget.coin.symbol,
+        coinPrice: 0.0,          // deposit doesn't show fee, price unused
+        addressService: _addressService,
+        isWithdraw: false,
+        onSelect: (net) {
+          _loadAddress(net);     // already calls setState inside
+        },
       ),
     );
   }
-
   void _showDepositTips(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppColors.primaryColor,
         title: const Row(
-          children: [
+          children: <Widget>[
             Icon(Icons.info_outline, color: AppColors.yellow, size: 20),
             SizedBox(width: 8),
             Text(
@@ -524,7 +466,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             _TipRow(
               icon: Icons.warning_amber_rounded,
               iconColor: AppColors.yellow,
@@ -545,7 +487,7 @@ class _DepositAddressScreenState extends State<DepositAddressScreen> {
             ),
           ],
         ),
-        actions: [
+        actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
@@ -577,7 +519,7 @@ class _RealQr extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
-        boxShadow: [
+        boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
             blurRadius: 16,
@@ -623,7 +565,7 @@ class _EmptyQr extends StatelessWidget {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             const Icon(Icons.qr_code_2, size: 64, color: AppColors.textGreyLight),
             const SizedBox(height: 8),
             const Text(
@@ -658,7 +600,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-    children: [
+    children: <Widget>[
       Text(label, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
       const Spacer(),
       Text(
@@ -679,7 +621,7 @@ class _TipRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
+    children: <Widget>[
       Icon(icon, color: iconColor, size: 16),
       const SizedBox(width: 8),
       Expanded(

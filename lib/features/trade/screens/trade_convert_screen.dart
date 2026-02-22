@@ -68,12 +68,13 @@ class TradeConvertScreen extends GetView<TradeController> {
               ],
             ),
           ),
-          const SizedBox(width: AppSizes.md),
+          const SizedBox(width: AppSizes.lg),
           Row(
             children: <Widget>[
               appbarIcon(assetPath: AppIcons.filter, onTap: () {}),
               const SizedBox(width: AppSizes.sm),
               appbarIcon(assetPath: AppIcons.assetHistory, onTap: () {}),
+
             ],
           ),
         ],
@@ -87,7 +88,7 @@ class TradeConvertScreen extends GetView<TradeController> {
         onTap: () => controller.selectOrderType(index),
         child: Obx(
               () => Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
             decoration: BoxDecoration(
               color: controller.selectedOrderType.value == index
                   ? AppColors.iconBackground
@@ -104,7 +105,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                 fontWeight: controller.selectedOrderType.value == index
                     ? FontWeight.w600
                     : FontWeight.normal,
-                fontSize: 13,
+                fontSize: 11,
               ),
             ),
           ),
@@ -466,7 +467,7 @@ class TradeConvertScreen extends GetView<TradeController> {
         child: Stack(
           alignment: Alignment.center,
           children: <Widget>[
-            const Divider(color: AppColors.textGreyLight, thickness: 0.5),
+              Divider(color: AppColors.textGreyLight.withValues(alpha: 0.5), thickness: 0.5),
             Container(
               width: 32,
               height: 32,

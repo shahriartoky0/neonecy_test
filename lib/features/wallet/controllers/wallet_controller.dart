@@ -254,4 +254,53 @@ class WalletController extends GetxController {
       return false;
     }
   }
+  /// Withdraw coin - reduces the quantity in wallet
+  Future<void> withdrawCoin({
+    required String coinSymbol,
+    required double amount,
+  }) async {
+    try {
+      // Find the coin in wallet
+      final int index = walletCoins.indexWhere(
+            (WalletCoinModel coin) => coin.coinDetails.symbol.toUpperCase() == coinSymbol.toUpperCase(),
+      );
+
+      if (index == -1) {
+        throw Exception('Coin $coinSymbol not found in wallet');
+      }
+
+      final WalletCoinModel currentCoin = walletCoins[index];
+
+      // Validate amount
+      if (amount > currentCoin.quantity) {
+        throw Exception('Insufficient balance');
+      }
+
+      if (amount <= 0) {
+        throw Exception('Invalid amount');
+      }
+
+      // Calculate new quantity
+      final double newQuantity = currentCoin.quantity - amount;
+
+      if (newQuantity <= 0) {
+        // Remove coin entirely if balance becomes 0
+        walletCoins.removeAt(index);
+        print('🗑️ Removed $coinSymbol from wallet (balance = 0)');
+      } else {
+        // Update coin with new quantity
+        final WalletCoinModel updatedCoin = currentCoin.copyWith(quantity: newQuantity);
+        walletCoins[index] = updatedCoin;
+        print('📤 Withdrawn $amount $coinSymbol. New balance: $newQuantity');
+      }
+
+      // Save to storage
+      // await _saveWalletToStorage();
+
+      print('✅ Withdraw successful: $amount $coinSymbol');
+    } catch (e) {
+      print('❌ Withdraw error: $e');
+      rethrow;
+    }
+  }
 }
