@@ -6,6 +6,8 @@ class CustomGifRefreshWidget extends StatefulWidget {
   final Future<void> Function() onRefresh;
   final String gifAssetPath;
   final double refreshTriggerDistance;
+  final VoidCallback? onRefreshStart;
+  final VoidCallback? onRefreshComplete;
 
   const CustomGifRefreshWidget({
     super.key,
@@ -13,6 +15,8 @@ class CustomGifRefreshWidget extends StatefulWidget {
     required this.onRefresh,
     required this.gifAssetPath,
     this.refreshTriggerDistance = 100.0,
+    this.onRefreshStart,
+    this.onRefreshComplete,
   });
 
   @override
@@ -34,7 +38,7 @@ class _CustomGifRefreshWidgetState extends State<CustomGifRefreshWidget>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
     );
     _scaleAnimation = Tween<double>(
       begin: 0.0,
@@ -51,58 +55,53 @@ class _CustomGifRefreshWidgetState extends State<CustomGifRefreshWidget>
   void _handleRefresh() async {
     if (_isRefreshing) return;
 
-    print("Starting refresh..."); // Debug print
-    setState(() {
-      _isRefreshing = true;
-    });
-
+    setState(() => _isRefreshing = true);
+    widget.onRefreshStart?.call();
     _animationController.forward();
 
-    try {
-      await widget.onRefresh();
-      print("Refresh completed successfully"); // Debug print
-    } catch (error) {
-      print("Refresh failed: $error"); // Debug print
-    } finally {
-      await _animationController.reverse();
+    // ✅ KEY FIX: Fire the API call in the background — don't await it.
+    // The loader hides after a fixed ~800ms instead of blocking on the full API response.
+    widget.onRefresh().catchError((error) {
+      debugPrint("Refresh failed: $error");
+    });
+
+    // ✅ Loader visible for max 800ms regardless of API speed (tune as needed)
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    await _animationController.reverse();
+
+    if (mounted) {
       setState(() {
         _isRefreshing = false;
         _dragDistance = 0.0;
         _canRefresh = false;
       });
-      print("Refresh cycle finished"); // Debug print
     }
+
+    widget.onRefreshComplete?.call();
   }
 
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
-        // Check if we're at the top
         if (notification.metrics.pixels <= 0) {
           _isAtTop = true;
         } else {
           _isAtTop = false;
         }
 
-        // Handle overscroll when at top
         if (notification is OverscrollNotification && _isAtTop) {
           if (notification.overscroll < 0 && !_isRefreshing) {
-            print("Overscroll detected: ${notification.overscroll}"); // Debug print
             setState(() {
-              // Accumulate drag distance instead of replacing it
-              _dragDistance +=
-                  (-notification.overscroll * 5); // Multiply by 5 to make it more sensitive
+              _dragDistance += (-notification.overscroll * 5);
               _dragDistance = _dragDistance.clamp(0.0, widget.refreshTriggerDistance * 2);
               _canRefresh = _dragDistance >= widget.refreshTriggerDistance;
             });
-            print("Drag distance: $_dragDistance, Can refresh: $_canRefresh"); // Debug print
           }
         }
 
-        // Handle scroll end
         if (notification is ScrollEndNotification) {
-          print("Scroll ended. Can refresh: $_canRefresh"); // Debug print
           if (_canRefresh && !_isRefreshing) {
             _handleRefresh();
           } else if (!_isRefreshing) {
@@ -117,51 +116,43 @@ class _CustomGifRefreshWidgetState extends State<CustomGifRefreshWidget>
       },
       child: Column(
         children: <Widget>[
-          // Refresh indicator at the top - takes its own space
           AnimatedContainer(
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-            ),
+            decoration: const BoxDecoration(),
             duration: const Duration(milliseconds: 200),
             height: _dragDistance > 0 || _isRefreshing
                 ? _isRefreshing
-                      ? 80.0
-                      : (_dragDistance * 0.8).clamp(0.0, 80.0)
+                ? 80.0
+                : (_dragDistance * 0.8).clamp(0.0, 80.0)
                 : 0.0,
             width: double.infinity,
-            // You can change this to AppColors.primaryColor if needed
             child: _dragDistance > 0 || _isRefreshing
                 ? AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (BuildContext context, Widget? child) {
-                      return Center(
-                        child: AnimatedScale(
-                          scale: _isRefreshing
-                              ? _scaleAnimation.value
-                              : (0.3 + (_dragDistance / widget.refreshTriggerDistance) * 0.7).clamp(
-                                  0.3,
-                                  1.0,
-                                ),
-                          duration: const Duration(milliseconds: 100),
-                          child: AnimatedOpacity(
-                            opacity: _isRefreshing
-                                ? 1.0
-                                : (_dragDistance / widget.refreshTriggerDistance).clamp(0.3, 1.0),
-                            duration: const Duration(milliseconds: 100),
-                            child: SizedBox(
-                              width: 60,
-                              height: 60,
-                              child: Image.asset(widget.gifAssetPath, fit: BoxFit.contain),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  )
+              animation: _animationController,
+              builder: (BuildContext context, Widget? child) {
+                return Center(
+                  child: AnimatedScale(
+                    scale: _isRefreshing
+                        ? _scaleAnimation.value
+                        : (0.3 + (_dragDistance / widget.refreshTriggerDistance) * 0.7)
+                        .clamp(0.3, 1.0),
+                    duration: const Duration(milliseconds: 100),
+                    child: AnimatedOpacity(
+                      opacity: _isRefreshing
+                          ? 1.0
+                          : (_dragDistance / widget.refreshTriggerDistance).clamp(0.3, 1.0),
+                      duration: const Duration(milliseconds: 100),
+                      child: SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: Image.asset(widget.gifAssetPath, fit: BoxFit.contain),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            )
                 : const SizedBox.shrink(),
           ),
-
-          // Main content - takes remaining space
           Expanded(child: widget.child),
         ],
       ),

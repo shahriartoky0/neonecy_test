@@ -39,7 +39,11 @@ class HomeScreen extends GetView<HomeController> {
             flexibleSpace: Container(
               decoration: BoxDecoration(
                 gradient: controller.showSpace.value
-                    ? AppColors.reversedPrimaryGradient
+                    ?  const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Colors.transparent, Colors.transparent],
+                )
                     : const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -49,7 +53,7 @@ class HomeScreen extends GetView<HomeController> {
             ),
             title: AnimatedOpacity(
               opacity: controller.showSpace.value ? 0.0 : 1.0,
-              duration: const Duration(milliseconds: 800),
+              duration: const Duration(milliseconds: 100),
               child: Row(
                 children: <Widget>[
                   Row(
@@ -169,7 +173,13 @@ class HomeScreen extends GetView<HomeController> {
         onRefresh: () async {
           await controller.onRefresh();
         },
-
+        onRefreshStart: () {
+          controller.showSpace.value = true;
+        },
+        // ✅ NEW: Show AppBar AFTER animation finishes
+        onRefreshComplete: () {
+          controller.showSpace.value = false;
+        },
         gifAssetPath: AppImages.loader, // Your gif asset path
         refreshTriggerDistance: 80.0,
         child: NestedScrollView(

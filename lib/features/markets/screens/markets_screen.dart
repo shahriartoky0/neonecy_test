@@ -28,7 +28,11 @@ class MarketsScreen extends GetView<MarketsController> {
             flexibleSpace: Container(
               decoration: BoxDecoration(
                 gradient: controller.onRefreshState.value
-                    ? AppColors.reversedPrimaryGradient
+                    ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Colors.transparent, Colors.transparent],
+                )
                     : const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
