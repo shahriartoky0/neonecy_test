@@ -18,10 +18,14 @@ class AddressStorageService {
   /// Empty list means "not configured yet — use defaults".
   List<String> getSavedNetworks(String coinSymbol) {
     final dynamic raw = _storage.read(_networksKey);
-    if (raw == null) return [];
+    if (raw == null) {
+      return [];
+    }
     final map = Map<String, dynamic>.from(raw as Map);
     final list = map[coinSymbol.toUpperCase()];
-    if (list == null) return [];
+    if (list == null) {
+      return [];
+    }
     return List<String>.from(list as List);
   }
 
@@ -63,7 +67,9 @@ class AddressStorageService {
 
   List<String> getRecentDepositSymbols() {
     final dynamic data = _storage.read(_depositHistoryKey);
-    if (data == null) return [];
+    if (data == null) {
+      return [];
+    }
     return List<String>.from(data as List);
   }
 
@@ -82,7 +88,9 @@ class AddressStorageService {
 
   List<String> getRecentWithdrawSymbols() {
     final dynamic data = _storage.read(_withdrawHistoryKey);
-    if (data == null) return [];
+    if (data == null) {
+      return [];
+    }
     return List<String>.from(data as List);
   }
 
@@ -108,7 +116,9 @@ class AddressStorageService {
 
   List<CryptoAddressModel> loadAddresses() {
     final dynamic data = _storage.read(_addressesKey);
-    if (data == null) return [];
+    if (data == null) {
+      return [];
+    }
     try {
       return (data as List)
           .map((j) => CryptoAddressModel.fromJson(j as Map<String, dynamic>))
@@ -172,7 +182,9 @@ class AddressStorageService {
 
 extension IterableExtension<T> on Iterable<T> {
   T? firstWhereOrNull(bool Function(T) test) {
-    for (final e in this) { if (test(e)) return e; }
+    for (final e in this) { if (test(e)) {
+      return e;
+    } }
     return null;
   }
 }

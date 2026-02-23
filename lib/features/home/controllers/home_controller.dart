@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,9 @@ import '../../../core/utils/logger_utils.dart';
 import 'crypto_market_controller.dart';
 
 class HomeController extends GetxController with GetSingleTickerProviderStateMixin {
+  /// ===> For the Random Messages  =====>
+  final RxInt messageCount = Random().nextInt(100).obs + 1; // starts with a random 1-100
+  Timer? _messageTimer;
   /// ===> For the top Buttons =====>
   RxInt selectedTab = 0.obs;
   RxBool showSpace = false.obs;
@@ -50,6 +54,9 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     //// ========for balance ======>
     fetchAndSetTheBalance();
     // GetStorageModel().delete(AppConstants.balanceText);
+    _messageTimer = Timer.periodic(const Duration(minutes: 10), (_) {
+      messageCount.value = Random().nextInt(100) + 1; // 1 to 100
+    });
   }
 
   Future<void> onRefresh() async {
@@ -136,6 +143,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   @override
   void onClose() {
     tabController.dispose();
+    _messageTimer?.cancel();
     super.onClose();
   }
 }

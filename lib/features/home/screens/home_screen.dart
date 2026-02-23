@@ -15,6 +15,7 @@ import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
 import 'package:neonecy_test/features/home/controllers/crypto_market_controller.dart';
 import 'package:neonecy_test/features/settings/controllers/settings_bottom_nav.dart';
+import '../../assets/widgets/add_fund_button_modal.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/crypto_market.dart';
 import '../widgets/custom_refresher.dart';
@@ -110,14 +111,17 @@ class HomeScreen extends GetView<HomeController> {
                         },
                         height: 13,
                       ),
-                      IconButton(
+                      Obx(() => IconButton(
                         onPressed: () {},
-                        icon: const Badge(
+                        icon: Badge(
                           backgroundColor: AppColors.yellow,
-                          label: Text('22', style: TextStyle(color: AppColors.black, fontSize: 10)),
-                          child: Icon(Icons.message_outlined, color: AppColors.white, size: 20),
+                          label: Text(
+                            '${controller.messageCount.value}',
+                            style: const TextStyle(color: AppColors.black, fontSize: 10),
+                          ),
+                          child: const Icon(Icons.message_outlined, color: AppColors.white, size: 20),
                         ),
-                      ),
+                      )),
                       const SizedBox(width: 6),
                     ],
                   ),
@@ -246,7 +250,7 @@ class HomeScreen extends GetView<HomeController> {
                             bgColor: AppColors.yellow,
                             textColor: AppColors.black,
                             labelText: 'Add Funds',
-                            onTap: () {},
+                            onTap: () => showAddFundModal(context),
                           ),
                         ],
                       ),
