@@ -1,8 +1,6 @@
-// lib/features/crypto_market/controller/crypto_market_controller.dart
-
 import 'package:get/get.dart';
 import '../../../core/network/network_response.dart';
- import '../../../core/utils/coin_market_service.dart';
+import '../../../core/utils/coin_market_service.dart';
 import '../../../core/utils/logger_utils.dart';
 import '../model/crypto_data_model.dart';
 
@@ -22,6 +20,9 @@ class CryptoMarketController extends GetxController {
   // Track last successful load time per cache key
   final Map<String, DateTime> _lastLoadTimes = <String, DateTime>{};
   static const Duration cacheValidDuration = Duration(minutes: 5);
+
+  // ✅ CHANGED: Define max items to show
+  static const int maxItemsToShow = 6; // Changed from 10 to 5
 
   @override
   void onInit() {
@@ -97,9 +98,9 @@ class CryptoMarketController extends GetxController {
   // Hot: Get trending cryptocurrencies or high volume coins
   Future<List<CryptoData>> _loadHotData() async {
     try {
-      // Try to get trending first
+      // ✅ CHANGED: limit from 10 to 5
       final NetworkResponse trendingResponse = await _cmcService.getTrending(
-        limit: 10,
+        limit: maxItemsToShow,
         timePeriod: '24h',
       );
 
@@ -123,9 +124,9 @@ class CryptoMarketController extends GetxController {
         }
       }
 
-      // Fallback to top coins sorted by volume
+      // ✅ CHANGED: limit from 10 to 5
       final NetworkResponse response = await _cmcService.getLatestListings(
-        limit: 10,
+        limit: maxItemsToShow,
         sort: 'volume_24h',
         sortDir: 'desc',
       );
@@ -158,9 +159,9 @@ class CryptoMarketController extends GetxController {
   // Gainers: Get top gainers
   Future<List<CryptoData>> _loadGainersData() async {
     try {
-      // Try the dedicated gainers endpoint first
+      // ✅ CHANGED: limit from 10 to 5
       final NetworkResponse gainersResponse = await _cmcService.getTopGainers(
-        limit: 10,
+        limit: maxItemsToShow,
         timePeriod: '24h',
       );
 
@@ -194,11 +195,11 @@ class CryptoMarketController extends GetxController {
       if (response.isSuccess && response.jsonResponse != null) {
         final data = response.jsonResponse?['data'] as List? ?? [];
 
-        // Filter for positive changes only
+        // ✅ CHANGED: .take(10) to .take(5)
         final gainers = data.where((coin) {
           final change = coin['quote']?['USD']?['percent_change_24h'] ?? 0;
           return change > 0;
-        }).take(10);
+        }).take(maxItemsToShow);
 
         return gainers.map((coin) {
           final quote = coin['quote']?['USD'] ?? {};
@@ -222,11 +223,12 @@ class CryptoMarketController extends GetxController {
     }
   }
 
-  // Favourite: Top 10 by market cap
+  // Favourite: Top 5 by market cap
   Future<List<CryptoData>> _loadFavouriteData() async {
     try {
+      // ✅ CHANGED: limit from 10 to 5
       final NetworkResponse response = await _cmcService.getLatestListings(
-        limit: 10,
+        limit: maxItemsToShow,
         sort: 'market_cap',
         sortDir: 'desc',
       );
@@ -259,8 +261,9 @@ class CryptoMarketController extends GetxController {
   // New: Recently added coins
   Future<List<CryptoData>> _loadNewData() async {
     try {
+      // ✅ CHANGED: limit from 10 to 5
       final NetworkResponse response = await _cmcService.getNewListings(
-        limit: 10,
+        limit: maxItemsToShow,
       );
 
       if (response.isSuccess && response.jsonResponse != null) {
@@ -283,10 +286,10 @@ class CryptoMarketController extends GetxController {
         }
       }
 
-      // Fallback: Get coins from further pages (newer/smaller market cap)
+      // ✅ CHANGED: limit from 10 to 5
       final fallbackResponse = await _cmcService.getLatestListings(
-        start: 51,  // Start from rank 51
-        limit: 10,
+        start: 51,
+        limit: maxItemsToShow,
         sort: 'date_added',
         sortDir: 'desc',
       );
@@ -330,13 +333,13 @@ class CryptoMarketController extends GetxController {
       if (response.isSuccess && response.jsonResponse != null) {
         final data = response.jsonResponse?['data'] as List? ?? [];
 
-        // Filter for coins with good volume and volatility
+        // ✅ CHANGED: .take(10) to .take(5)
         final alphaCoins = data.where((coin) {
           final quote = coin['quote']?['USD'] ?? {};
           final volume = quote['volume_24h'] ?? 0;
           final change = (quote['percent_change_24h'] ?? 0).abs();
-          return volume > 10000000 && change > 5; // Active coins with >5% movement
-        }).take(10);
+          return volume > 10000000 && change > 5;
+        }).take(maxItemsToShow);
 
         if (alphaCoins.isNotEmpty) {
           return alphaCoins.map((coin) {
@@ -354,8 +357,8 @@ class CryptoMarketController extends GetxController {
           }).toList();
         }
 
-        // If no high volatility coins found, just return top 10 from mid-cap range
-        return data.take(10).map((coin) {
+        // ✅ CHANGED: .take(10) to .take(5)
+        return data.take(maxItemsToShow).map((coin) {
           final quote = coin['quote']?['USD'] ?? {};
           return CryptoData(
             symbol: (coin['symbol'] ?? '').toString().toUpperCase(),

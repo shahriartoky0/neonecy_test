@@ -255,11 +255,15 @@ class WalletController extends GetxController {
     }
   }
   /// Withdraw coin - reduces the quantity in wallet
+  /// Withdraw coin - reduces the quantity in wallet
+  /// FIXED VERSION - Properly saves to storage using WalletService
   Future<void> withdrawCoin({
     required String coinSymbol,
     required double amount,
   }) async {
     try {
+      print('📤 Withdrawing $amount $coinSymbol...');
+
       // Find the coin in wallet
       final int index = walletCoins.indexWhere(
             (WalletCoinModel coin) => coin.coinDetails.symbol.toUpperCase() == coinSymbol.toUpperCase(),
@@ -285,19 +289,37 @@ class WalletController extends GetxController {
 
       if (newQuantity <= 0) {
         // Remove coin entirely if balance becomes 0
+        print('🗑️ Balance will be 0, removing $coinSymbol from wallet');
+
+        // Remove from observable list
         walletCoins.removeAt(index);
-        print('🗑️ Removed $coinSymbol from wallet (balance = 0)');
+
+        // Remove from storage using WalletService
+        await _walletService.removeCoinFromWallet(coinSymbol);
+
+        print('✅ Removed $coinSymbol from wallet');
       } else {
         // Update coin with new quantity
+        print('📊 Updating $coinSymbol balance: ${currentCoin.quantity} → $newQuantity');
+
         final WalletCoinModel updatedCoin = currentCoin.copyWith(quantity: newQuantity);
+
+        // Update observable list
         walletCoins[index] = updatedCoin;
-        print('📤 Withdrawn $amount $coinSymbol. New balance: $newQuantity');
+
+        // Save to storage using WalletService
+        await _walletService.addCoinToWallet(updatedCoin);
+
+        print('✅ Updated $coinSymbol balance in storage');
       }
 
-      // Save to storage
-      // await _saveWalletToStorage();
+      // Recalculate totals
+      calculateTotalValuation();
+      calculateProfitLoss();
 
+      print('💰 New total valuation: \$${totalValuation.value.toStringAsFixed(2)}');
       print('✅ Withdraw successful: $amount $coinSymbol');
+
     } catch (e) {
       print('❌ Withdraw error: $e');
       rethrow;
