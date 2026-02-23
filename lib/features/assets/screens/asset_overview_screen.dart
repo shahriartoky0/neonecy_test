@@ -29,193 +29,186 @@ class AssetOverviewScreen extends GetView<AssetsController> {
     final HomeController homeController = Get.find<HomeController>();
     final WalletController walletController = Get.find<WalletController>();
 
-    return CustomGifRefreshWidget(
-      onRefresh: () async {
-        await controller.onRefresh();
-        await walletController.fetchWalletCoins();
-      },
-      gifAssetPath: AppImages.loader,
-      child: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Row(
-                  spacing: 5,
-                  children: <Widget>[
-                    Text(
-                      'Est.Total Value(USD) ',
-                      style: TextStyle(color: AppColors.textWhite.withOpacity(0.85)),
-                    ),
-                    CustomSvgImage(assetName: AppIcons.eye, height: 12),
-                  ],
-                ),
-                Row(
-                  spacing: AppSizes.md,
-                  children: <Widget>[
-                    clickableIcon(
-                      icon: CustomSvgImage(assetName: AppIcons.assetsGraph, height: 18),
-                      onTap: () {},
-                    ),
-                    clickableIcon(
-                      icon: CustomSvgImage(assetName: AppIcons.assetHistory, height: 18),
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSizes.md),
-
-            /// ========> Total Balance from Wallet =======>
-            Row(
-              children: <Widget>[
-                Obx(() {
-                  // Calculate total wallet value
-                  final double totalValue = walletController.walletCoins.fold(
-                    0.0,
-                    (double sum, WalletCoinModel coin) =>
-                        sum + (coin.quantity * coin.coinDetails.price),
-                  );
-
-                  return Text(
-                    '\$ ${totalValue.toStringAsFixed(2)}',
-                    style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
-                    overflow: TextOverflow.ellipsis,
-                  );
-                }),
-                const SizedBox(width: 5),
-                Text(
-                  'USD',
-                  style: context.txtTheme.headlineMedium?.copyWith(color: AppColors.white),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const Icon(Icons.arrow_drop_down_sharp),
-              ],
-            ),
-            const SizedBox(height: AppSizes.sm),
-
-            /// ========> Total PNL from Wallet =======>
-            Obx(() {
-              // Calculate total PNL
-              final double totalPnl = walletController.walletCoins.fold(
-                0.0,
-                (double sum, WalletCoinModel coin) => sum + coin.profitLoss,
-              );
-
-              final double totalPnlPercent = walletController.walletCoins.isNotEmpty
-                  ? walletController.walletCoins.fold(
-                          0.0,
-                          (double sum, WalletCoinModel coin) => sum + coin.profitLossPercent,
-                        ) /
-                        walletController.walletCoins.length
-                  : 0.0;
-
-              final bool isPositive = totalPnl >= 0;
-
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+    return SingleChildScrollView(
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Row(
+                spacing: 5,
                 children: <Widget>[
-                  const Text(
-                    "Today's PNL ",
-                    style: TextStyle(color: AppColors.white, fontSize: 11),
-                  ),
                   Text(
-                    '${isPositive ? '+' : ''}\$${totalPnl.toStringAsFixed(8)} (${isPositive ? '+' : ''}${totalPnlPercent.toStringAsFixed(2)}%) ',
-                    style: TextStyle(
-                      color: isPositive ? AppColors.greenAccent : AppColors.red,
-                      fontSize: 11,
-                    ),
+                    'Est.Total Value(USD) ',
+                    style: TextStyle(color: AppColors.textWhite.withOpacity(0.85)),
                   ),
-                  const Text(">", style: TextStyle(color: AppColors.grey, fontSize: 11)),
+                  CustomSvgImage(assetName: AppIcons.eye, height: 12),
                 ],
-              );
-            }),
-
-            const SizedBox(height: AppSizes.md),
-
-            /// ==========> Action Buttons ===>
-            Row(
-              spacing: 8,
-              children: <Widget>[
-                Expanded(
-                  child: AppButton(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    bgColor: AppColors.yellow,
-                    textColor: AppColors.black,
-                    labelText: 'Add Funds',
-                    onTap: () => showAddFundModal(context),
-                  ),
-                ),
-                Expanded(
-                  child: AppButton(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    bgColor: AppColors.iconBackgroundLight,
-                    textColor: AppColors.textWhite,
-                    labelText: 'Send',
-                    onTap: () {
-                      sendButtonModal(context);
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: AppButton(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    bgColor: AppColors.iconBackgroundLight,
-                    textColor: AppColors.textWhite,
-                    labelText: 'Transfer',
+              ),
+              Row(
+                spacing: AppSizes.md,
+                children: <Widget>[
+                  clickableIcon(
+                    icon: CustomSvgImage(assetName: AppIcons.assetsGraph, height: 18),
                     onTap: () {},
                   ),
+                  clickableIcon(
+                    icon: CustomSvgImage(assetName: AppIcons.assetHistory, height: 18),
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.md),
+
+          /// ========> Total Balance from Wallet =======>
+          Row(
+            children: <Widget>[
+              Obx(() {
+                // Calculate total wallet value
+                final double totalValue = walletController.walletCoins.fold(
+                  0.0,
+                  (double sum, WalletCoinModel coin) =>
+                      sum + (coin.quantity * coin.coinDetails.price),
+                );
+
+                return Text(
+                  '\$ ${totalValue.toStringAsFixed(2)}',
+                  style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
+                  overflow: TextOverflow.ellipsis,
+                );
+              }),
+              const SizedBox(width: 5),
+              Text(
+                'USD',
+                style: context.txtTheme.headlineMedium?.copyWith(color: AppColors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Icon(Icons.arrow_drop_down_sharp),
+            ],
+          ),
+          const SizedBox(height: AppSizes.sm),
+
+          /// ========> Total PNL from Wallet =======>
+          Obx(() {
+            // Calculate total PNL
+            final double totalPnl = walletController.walletCoins.fold(
+              0.0,
+              (double sum, WalletCoinModel coin) => sum + coin.profitLoss,
+            );
+
+            final double totalPnlPercent = walletController.walletCoins.isNotEmpty
+                ? walletController.walletCoins.fold(
+                        0.0,
+                        (double sum, WalletCoinModel coin) => sum + coin.profitLossPercent,
+                      ) /
+                      walletController.walletCoins.length
+                : 0.0;
+
+            final bool isPositive = totalPnl >= 0;
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  "Today's PNL ",
+                  style: TextStyle(color: AppColors.white, fontSize: 11),
                 ),
+                Text(
+                  '${isPositive ? '+' : ''}\$${totalPnl.toStringAsFixed(8)} (${isPositive ? '+' : ''}${totalPnlPercent.toStringAsFixed(2)}%) ',
+                  style: TextStyle(
+                    color: isPositive ? AppColors.greenAccent : AppColors.red,
+                    fontSize: 11,
+                  ),
+                ),
+                const Text(">", style: TextStyle(color: AppColors.grey, fontSize: 11)),
               ],
-            ),
-            const SizedBox(height: AppSizes.sm),
-            const Divider(),
+            );
+          }),
 
-            /// ==========> Tab Row =========>
-            TabRow(),
+          const SizedBox(height: AppSizes.md),
 
-            /// ==========> Wallet Coins List =========>
-            Obx(() {
-              final RxList<WalletCoinModel> coins = walletController.walletCoins;
+          /// ==========> Action Buttons ===>
+          Row(
+            spacing: 8,
+            children: <Widget>[
+              Expanded(
+                child: AppButton(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  bgColor: AppColors.yellow,
+                  textColor: AppColors.black,
+                  labelText: 'Add Funds',
+                  onTap: () => showAddFundModal(context),
+                ),
+              ),
+              Expanded(
+                child: AppButton(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  bgColor: AppColors.iconBackgroundLight,
+                  textColor: AppColors.textWhite,
+                  labelText: 'Send',
+                  onTap: () {
+                    sendButtonModal(context);
+                  },
+                ),
+              ),
+              Expanded(
+                child: AppButton(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  bgColor: AppColors.iconBackgroundLight,
+                  textColor: AppColors.textWhite,
+                  labelText: 'Transfer',
+                  onTap: () {},
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.sm),
+          const Divider(),
 
-              if (coins.isEmpty) {
-                return _buildEmptyState();
-              }
+          /// ==========> Tab Row =========>
+          TabRow(),
 
-              return ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
-                itemCount: coins.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final WalletCoinModel walletCoin = coins[index];
-                  final bool isPositive = walletCoin.profitLossPercent >= 0;
+          /// ==========> Wallet Coins List =========>
+          Obx(() {
+            final RxList<WalletCoinModel> coins = walletController.walletCoins;
 
-                  return CryptoCard(
-                    cryptoName: walletCoin.coinDetails.name,
-                    cryptoSymbol: walletCoin.coinDetails.symbol,
-                    balance: _formatBalance(walletCoin.quantity),
-                    price: '\$${walletCoin.coinDetails.price.toStringAsFixed(4)}',
-                    pnl: '\$${walletCoin.profitLoss.toStringAsFixed(4)}',
-                    percentageChange:
-                        '(${isPositive ? '+' : ''}${walletCoin.profitLossPercent.toStringAsFixed(2)}%)',
-                    iconImage: walletCoin.coinDetails.thumb,
-                  );
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return const Column(
-                    children: <Widget>[
-                      SizedBox(height: AppSizes.sm),
-                      Divider(),
-                    ],
-                  );
-                },
-              );
-            }),
-          ],
-        ),
+            if (coins.isEmpty) {
+              return _buildEmptyState();
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
+              itemCount: coins.length,
+              itemBuilder: (BuildContext context, int index) {
+                final WalletCoinModel walletCoin = coins[index];
+                final bool isPositive = walletCoin.profitLossPercent >= 0;
+
+                return CryptoCard(
+                  cryptoName: walletCoin.coinDetails.name,
+                  cryptoSymbol: walletCoin.coinDetails.symbol,
+                  balance: _formatBalance(walletCoin.quantity),
+                  price: '\$${walletCoin.coinDetails.price.toStringAsFixed(4)}',
+                  pnl: '\$${walletCoin.profitLoss.toStringAsFixed(4)}',
+                  percentageChange:
+                      '(${isPositive ? '+' : ''}${walletCoin.profitLossPercent.toStringAsFixed(2)}%)',
+                  iconImage: walletCoin.coinDetails.thumb,
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const Column(
+                  children: <Widget>[
+                    SizedBox(height: AppSizes.sm),
+                    Divider(),
+                  ],
+                );
+              },
+            );
+          }),
+        ],
       ),
     );
   }

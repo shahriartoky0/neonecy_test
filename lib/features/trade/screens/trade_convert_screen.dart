@@ -212,7 +212,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                   context,
                   coin: controller.fromCoin.value,
                   token: controller.fromToken.value,
-                  color: AppColors.green,
+                  color: AppColors.iconBackgroundLight,
                   isFromWallet: true,
                   onTap: () async {
                     final CoinItem? selectedCoin = await CoinSelectionBottomSheet.show(
@@ -319,7 +319,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                   context,
                   coin: controller.toCoin.value,
                   token: controller.toToken.value,
-                  color: AppColors.red,
+                  color: AppColors.iconBackgroundLight,
                   onTap: () async {
                     final CoinItem? selectedCoin = await CoinSelectionBottomSheet.show(
                       context,
@@ -406,7 +406,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                       color: color,
                       child: Center(
                         child: Text(
-                          token.isNotEmpty ? token.substring(0, 1) : '?',
+                          token.isNotEmpty ? token.substring(0, 1) : '',
                           style: const TextStyle(
                             color: AppColors.textWhite,
                             fontWeight: FontWeight.bold,
@@ -419,7 +419,7 @@ class TradeConvertScreen extends GetView<TradeController> {
                       color: color,
                       child: Center(
                         child: Text(
-                          token.isNotEmpty ? token.substring(0, 1) : '?',
+                          token.isNotEmpty ? token.substring(0, 1) : '',
                           style: const TextStyle(
                             color: AppColors.textWhite,
                             fontWeight: FontWeight.bold,
@@ -438,14 +438,14 @@ class TradeConvertScreen extends GetView<TradeController> {
                 decoration: BoxDecoration(color: color.withOpacity(0.3), shape: BoxShape.circle),
                 child: Center(
                   child: Text(
-                    token.isNotEmpty && token != 'Select a Coin' ? token.substring(0, 1) : '?',
+                    token.isNotEmpty && token != 'Select a Coin' ? token.substring(0, 1) : '',
                     style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                 ),
               ),
             const SizedBox(width: 6),
             Text(
-              token == 'Select a Coin' ? 'Select' : token,
+              token == 'Select a Coin' ? '-- ' : token,
               style: const TextStyle(
                 color: AppColors.textWhite,
                 fontWeight: FontWeight.w600,
