@@ -11,7 +11,7 @@ class AssetsController extends GetxController {
   RxList<CoinItem> coinItems = <CoinItem>[].obs;
   RxBool isLoadingCoin = false.obs;
   RxBool lessThanDollarItems = false.obs;
-
+  final RxBool onRefreshState = false.obs;
   final CoinMarketCapService _cmcService = CoinMarketCapService();
 
   // Cache for BTC price (to calculate BTC values)
