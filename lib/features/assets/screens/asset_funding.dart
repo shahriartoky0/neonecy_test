@@ -62,7 +62,7 @@ class AssetFundingScreen extends GetView<AssetsController> {
               Obx(() {
                 final double total = walletController.walletCoins.fold(
                   0.0,
-                  (s, c) => s + c.quantity * c.coinDetails.price,
+                      (s, c) => s + c.quantity * c.coinDetails.price,
                 );
                 return Text(
                   '\$ ${total.toStringAsFixed(2)}',
@@ -99,7 +99,7 @@ class AssetFundingScreen extends GetView<AssetsController> {
                 ),
                 Text(
                   '${pos ? '+' : ''}\$${pnl.toStringAsFixed(6)} '
-                  '(${pos ? '+' : ''}${pnlPct.toStringAsFixed(2)}%)',
+                      '(${pos ? '+' : ''}${pnlPct.toStringAsFixed(2)}%)',
                   style: TextStyle(
                     color: pos ? AppColors.greenAccent : AppColors.red,
                     fontSize: 11,
@@ -162,9 +162,14 @@ class AssetFundingScreen extends GetView<AssetsController> {
           // ── Coins list ───────────────────────────────────────────────
           Obx(() {
             final coins = walletController.walletCoins;
-            final filtered = controller.lessThanDollarItems.value
+            final filtered = (controller.lessThanDollarItems.value
                 ? coins.where((c) => c.quantity * c.coinDetails.price >= 1.0).toList()
-                : coins.toList();
+                : coins.toList())
+              ..sort((a, b) {
+                final double aValue = a.quantity * a.coinDetails.price;
+                final double bValue = b.quantity * b.coinDetails.price;
+                return bValue.compareTo(aValue); // highest USDT value first
+              });
 
             if (filtered.isEmpty) return _buildEmptyState();
 
@@ -249,5 +254,3 @@ class AssetFundingScreen extends GetView<AssetsController> {
     );
   }
 }
-
-

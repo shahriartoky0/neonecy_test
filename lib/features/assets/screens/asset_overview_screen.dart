@@ -71,8 +71,8 @@ class AssetOverviewScreen extends GetView<AssetsController> {
                 // Calculate total wallet value
                 final double totalValue = walletController.walletCoins.fold(
                   0.0,
-                  (double sum, WalletCoinModel coin) =>
-                      sum + (coin.quantity * coin.coinDetails.price),
+                      (double sum, WalletCoinModel coin) =>
+                  sum + (coin.quantity * coin.coinDetails.price),
                 );
 
                 return Text(
@@ -97,15 +97,15 @@ class AssetOverviewScreen extends GetView<AssetsController> {
             // Calculate total PNL
             final double totalPnl = walletController.walletCoins.fold(
               0.0,
-              (double sum, WalletCoinModel coin) => sum + coin.profitLoss,
+                  (double sum, WalletCoinModel coin) => sum + coin.profitLoss,
             );
 
             final double totalPnlPercent = walletController.walletCoins.isNotEmpty
                 ? walletController.walletCoins.fold(
-                        0.0,
-                        (double sum, WalletCoinModel coin) => sum + coin.profitLossPercent,
-                      ) /
-                      walletController.walletCoins.length
+              0.0,
+                  (double sum, WalletCoinModel coin) => sum + coin.profitLossPercent,
+            ) /
+                walletController.walletCoins.length
                 : 0.0;
 
             final bool isPositive = totalPnl >= 0;
@@ -174,7 +174,12 @@ class AssetOverviewScreen extends GetView<AssetsController> {
 
           /// ==========> Wallet Coins List =========>
           Obx(() {
-            final RxList<WalletCoinModel> coins = walletController.walletCoins;
+            final List<WalletCoinModel> coins = walletController.walletCoins.toList()
+              ..sort((a, b) {
+                final double aValue = a.quantity * a.coinDetails.price;
+                final double bValue = b.quantity * b.coinDetails.price;
+                return bValue.compareTo(aValue); // highest USD value first
+              });
 
             if (coins.isEmpty) {
               return _buildEmptyState();
@@ -196,7 +201,7 @@ class AssetOverviewScreen extends GetView<AssetsController> {
                   price: '\$${walletCoin.coinDetails.price.toStringAsFixed(4)}',
                   pnl: '\$${walletCoin.profitLoss.toStringAsFixed(4)}',
                   percentageChange:
-                      '(${isPositive ? '+' : ''}${walletCoin.profitLossPercent.toStringAsFixed(2)}%)',
+                  '(${isPositive ? '+' : ''}${walletCoin.profitLossPercent.toStringAsFixed(2)}%)',
                   iconImage: walletCoin.coinDetails.thumb,
                 );
               },
