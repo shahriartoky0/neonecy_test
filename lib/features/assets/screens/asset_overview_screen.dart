@@ -2,15 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
-import 'package:neonecy_test/features/home/widgets/custom_refresher.dart';
+import 'package:neonecy_test/core/routes/app_routes.dart';
 import '../../../core/common/widgets/app_button.dart';
 import '../../../core/common/widgets/custom_svg.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart' show AppColors;
 import '../../../core/design/app_icons.dart';
-import '../../../core/design/app_images.dart';
 import '../../../core/utils/device/device_utility.dart';
-import '../../home/controllers/home_controller.dart';
 import '../../wallet/controllers/wallet_controller.dart';
 import '../../wallet/models/coin_wallet_model.dart';
 import '../controllers/assets_controller.dart';
@@ -19,14 +17,12 @@ import '../widgets/crypto_card.dart';
 import '../widgets/send_button_modal.dart';
 import '../widgets/tab_row.dart';
 import 'asset_funding.dart';
-import 'deposit_select_coin_screen.dart';
 
 class AssetOverviewScreen extends GetView<AssetsController> {
   const AssetOverviewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final HomeController homeController = Get.find<HomeController>();
     final WalletController walletController = Get.find<WalletController>();
 
     return SingleChildScrollView(
@@ -56,7 +52,7 @@ class AssetOverviewScreen extends GetView<AssetsController> {
                   ),
                   clickableIcon(
                     icon: CustomSvgImage(assetName: AppIcons.assetHistory, height: 18),
-                    onTap: () {},
+                    onTap: () => Get.toNamed(AppRoutes.historyScreen),
                   ),
                 ],
               ),
@@ -194,14 +190,19 @@ class AssetOverviewScreen extends GetView<AssetsController> {
                 final WalletCoinModel walletCoin = coins[index];
                 final bool isPositive = walletCoin.profitLossPercent >= 0;
 
+                final double totalValue =
+                    walletCoin.quantity * walletCoin.coinDetails.price;
+                final double pl = walletCoin.profitLoss;
                 return CryptoCard(
                   cryptoName: walletCoin.coinDetails.name,
                   cryptoSymbol: walletCoin.coinDetails.symbol,
                   balance: _formatBalance(walletCoin.quantity),
-                  price: '\$${walletCoin.coinDetails.price.toStringAsFixed(4)}',
-                  pnl: '\$${walletCoin.profitLoss.toStringAsFixed(4)}',
+                  price: '\$${totalValue.toStringAsFixed(2)}',
+                  pnl: pl >= 0
+                      ? '+\$${pl.toStringAsFixed(6)}'
+                      : '-\$${pl.abs().toStringAsFixed(6)}',
                   percentageChange:
-                  '(${isPositive ? '+' : ''}${walletCoin.profitLossPercent.toStringAsFixed(2)}%)',
+                      '(${isPositive ? '+' : '-'}${walletCoin.profitLossPercent.abs().toStringAsFixed(2)}%)',
                   iconImage: walletCoin.coinDetails.thumb,
                 );
               },

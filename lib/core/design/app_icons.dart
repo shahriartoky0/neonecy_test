@@ -68,4 +68,11 @@ class AppIcons {
   static String setting = "$baseUrl/setting.svg";
   static String edit = "$baseUrl/edit.svg";
   static String logOut = "$baseUrl/log_out.svg";
+
+  // TODO: Provide AI/Gemini logo asset at assets/icons/ai_button.svg
+  // The floating AI button widget uses a Material icon fallback until this file is supplied.
+  static String aiFloatingButton = "$baseUrl/ai_button.svg";
+
+  // TODO: Provide trade preview icon asset at assets/icons/trade_preview.svg
+  static String tradePreview = "$baseUrl/trade_preview.svg";
  }

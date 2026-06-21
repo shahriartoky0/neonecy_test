@@ -1,16 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/simple/get_view.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
-import '../controllers/assets_controller.dart';
 
-class FundingCard extends GetView<AssetsController> {
+class FundingCard extends StatelessWidget {
   final String cryptoName;
   final String cryptoSymbol;
+  // quantity of coin held
   final String balance;
+  // total USD value of holdings (e.g. "$59.82")
   final String price;
+  // signed P&L amount (e.g. "+$0.6496" or "-$5.23")
   final String pnl;
+  // PNL percentage including sign (e.g. "(+1.10%)" or "(-49.27%)")
   final String percentageChange;
   final String iconImage;
 
@@ -25,90 +27,127 @@ class FundingCard extends GetView<AssetsController> {
     required this.iconImage,
   });
 
+  bool get _isPositive => pnl.startsWith('+');
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        // Header row with icon, name, and balance
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            // Left side - Icon and name
-            Row(
-              children: <Widget>[
-                // Crypto icon (using a circular container with a background color)
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: const BoxDecoration(shape: BoxShape.circle),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(imageUrl: iconImage, fit: BoxFit.cover),
-                  ),
-                ),
+    final Color pnlColor = _isPositive ? AppColors.greenAccent : AppColors.red;
 
-                const SizedBox(width: 8),
-                Text(
-                  cryptoName,
-                  style: const TextStyle(
-                    color: AppColors.textWhite,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                  ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSizes.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          // Coin icon
+          _buildIcon(),
+          const SizedBox(width: AppSizes.md),
+
+          // All text content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // Row 1: symbol | balance
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      cryptoSymbol,
+                      style: const TextStyle(
+                        color: AppColors.textWhite,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      balance,
+                      style: const TextStyle(
+                        color: AppColors.textWhite,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+
+                // Row 2: name | total value
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      cryptoName,
+                      style: const TextStyle(
+                        color: AppColors.textGreyLight,
+                        fontSize: AppSizes.fontSizeBodyS,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        color: AppColors.textGreyLight,
+                        fontSize: AppSizes.fontSizeBodyS,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+
+                // Row 3: "Floating PNL" label | signed pnl + pct colored
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Text(
+                      'Floating PNL',
+                      style: TextStyle(
+                        color: AppColors.textGreyLight,
+                        fontSize: AppSizes.fontSizeBodyS,
+                      ),
+                    ),
+                    Text(
+                      '$pnl$percentageChange',
+                      style: TextStyle(
+                        color: pnlColor,
+                        fontSize: AppSizes.fontSizeBodyS,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
 
-            // Right side - Balance
-            Transform.translate(
-              offset: const Offset(0, 8),
-              child: Text(
-                balance,
-                style: const TextStyle(
-                  color: AppColors.textWhite,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+  Widget _buildIcon() {
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: const BoxDecoration(
+        color: AppColors.iconBackground,
+        shape: BoxShape.circle,
+      ),
+      child: ClipOval(
+        child: CachedNetworkImage(
+          imageUrl: iconImage,
+          fit: BoxFit.cover,
+          errorWidget: (_, __, ___) => Center(
+            child: Text(
+              cryptoSymbol.isNotEmpty ? cryptoSymbol[0] : '?',
+              style: const TextStyle(
+                color: AppColors.textWhite,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
             ),
-          ],
+          ),
         ),
-
-        // const SizedBox(height: 16),
-
-        // Second row with crypto price and USD value
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Text(
-              "           ${cryptoSymbol}",
-              style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13),
-            ),
-            // Text(price, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
-          ],
-        ),
-
-        //
-        // const SizedBox(height: AppSizes.sm),
-        //
-        // // Third row with Today's P&L and percentage change
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //   children: <Widget>[
-        //     const Text("Available\nMarket Cap", style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
-        //     Text(
-        //       '$pnl $percentageChange',
-        //       style: const TextStyle(
-        //         color: AppColors.white,
-        //         fontSize: 13,
-        //         fontWeight: FontWeight.w500,
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        const SizedBox(height: AppSizes.md),
-      ],
+      ),
     );
   }
 }

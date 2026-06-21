@@ -204,12 +204,12 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
       }
 
       // Show success toast
-      ToastManager.show(
-        message: 'Successfully converted ${formatCoinAmount(fromQty)} ${fromCoin.value!.symbol} to ${formatCoinAmount(toQty)} ${toCoin.value!.symbol}',
-        backgroundColor: AppColors.greenContainer,
-        textColor: AppColors.white,
-        icon: const Icon(Icons.check_circle, color: AppColors.green),
-      );
+      // ToastManager.show(
+      //   message: 'Successfully converted ${formatCoinAmount(fromQty)} ${fromCoin.value!.symbol} to ${formatCoinAmount(toQty)} ${toCoin.value!.symbol}',
+      //   backgroundColor: AppColors.greenContainer,
+      //   textColor: AppColors.white,
+      //   icon: const Icon(Icons.check_circle, color: AppColors.green),
+      // );
 
       // Navigate to success screen
       if (fromCoin.value != null && toCoin.value != null) {

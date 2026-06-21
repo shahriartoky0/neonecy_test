@@ -24,4 +24,7 @@ class AppRoutes {
   static const String editProfile = "/edit-profile-screen";
   static const String editCoins = "/edit-coins";
   static const String changeAddress = "/change-address-screen";
+
+  // history screen
+  static const String historyScreen = "/history-screen";
 }

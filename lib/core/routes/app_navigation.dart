@@ -7,13 +7,13 @@ import 'package:neonecy_test/features/home/screens/home_screen.dart';
 import 'package:neonecy_test/features/mainBottomNav/bindings/mainbottomnav_binding.dart';
 import 'package:neonecy_test/features/mainBottomNav/screens/main_bottom_nav_screen.dart';
 import 'package:neonecy_test/features/settings/bindings/settings_binding.dart';
-import 'package:neonecy_test/features/settings/controllers/settings_controller.dart';
 import 'package:neonecy_test/features/settings/screens/change_address.dart';
 import 'package:neonecy_test/features/settings/screens/edit_coins.dart';
 import 'package:neonecy_test/features/settings/screens/edit_profile_screen.dart';
 import 'package:neonecy_test/features/settings/screens/settings_main_bottom.dart';
- import 'package:neonecy_test/features/splash/bindings/splash_binding.dart';
+import 'package:neonecy_test/features/splash/bindings/splash_binding.dart';
 import 'package:neonecy_test/features/splash/screens/splash_screen.dart';
+import 'package:neonecy_test/features/wallet/screens/history_screen.dart';
 import '../../features/home/bindings/home_binding.dart';
 import 'app_routes.dart';
 
@@ -81,6 +81,11 @@ class AppNavigation {
       page: () => const SettingsMainBottomNav(),
       transition: Transition.rightToLeft,
       binding: SettingsBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.historyScreen,
+      page: () => const HistoryScreen(),
+      transition: Transition.rightToLeft,
     ),
   ];
 }

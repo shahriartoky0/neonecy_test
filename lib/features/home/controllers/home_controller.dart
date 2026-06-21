@@ -4,18 +4,18 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_constants.dart';
-import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/utils/get_storage.dart';
 import 'package:neonecy_test/features/wallet/controllers/wallet_controller.dart';
 
-import '../../../core/utils/coin_gecko.dart';
 import '../../../core/utils/logger_utils.dart';
+import '../models/mock_post_model.dart';
 import 'crypto_market_controller.dart';
 
 class HomeController extends GetxController with GetSingleTickerProviderStateMixin {
   /// ===> For the Random Messages  =====>
-  final RxInt messageCount = Random().nextInt(100).obs + 1; // starts with a random 1-100
+  final RxInt messageCount = Random().nextInt(100).obs + 1;
   Timer? _messageTimer;
+
   /// ===> For the top Buttons =====>
   RxInt selectedTab = 0.obs;
   RxBool showSpace = false.obs;
@@ -40,42 +40,58 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     'Announcement',
   ];
 
+  /// ===> Mock posts for Discover tab =====>
+  final RxList<MockPost> displayedPosts = <MockPost>[].obs;
+
+  /// ===> Floating button visibility =====>
+  final RxBool showFloatingPlus = false.obs;
+  final RxBool showFloatingAi = true.obs;
+
+  void onDiscoverScroll(double offset) {
+    final bool inPosts = offset > 180;
+    showFloatingPlus.value = inPosts;
+    showFloatingAi.value = !inPosts;
+  }
+
+  void randomizePosts() {
+    final List<MockPost> shuffled = List<MockPost>.from(kMockPosts)..shuffle(Random());
+    displayedPosts.value = shuffled.take(5).toList();
+  }
+
   @override
   void onInit() {
     super.onInit();
 
-    /// ==============> for the tabs ==========>
     tabController = TabController(length: homeTabTitles.length, vsync: this);
-
-    // Listen to tab changes
     tabController.addListener(() {
       selectedIndex.value = tabController.index;
+      if (tabController.index != 0) {
+        showFloatingPlus.value = false;
+        showFloatingAi.value = true;
+      }
     });
-    //// ========for balance ======>
+
     fetchAndSetTheBalance();
-    // GetStorageModel().delete(AppConstants.balanceText);
+    randomizePosts();
+
     _messageTimer = Timer.periodic(const Duration(minutes: 10), (_) {
-      messageCount.value = Random().nextInt(100) + 1; // 1 to 100
+      messageCount.value = Random().nextInt(100) + 1;
     });
   }
 
   Future<void> onRefresh() async {
     showSpace.value = true;
-    LoggerUtils.debug("Refreshing...${showSpace.value}"); // Debug
-    // Add your refresh logic here
+    LoggerUtils.debug('Refreshing...${showSpace.value}');
     for (int i = 0; i < 8; i++) {
       await Future<void>.delayed(const Duration(milliseconds: 200));
     }
     showSpace.value = false;
-    LoggerUtils.debug("Refresh completed ${showSpace.value}");
+    LoggerUtils.debug('Refresh completed ${showSpace.value}');
 
-    /// =====> for the balance =====>
     fetchAndSetTheBalance();
-
-    /// =====> for the hintText =====>
     hintText.value = _generateRandomHint();
+    randomizePosts();
 
-    /// ====== for the refresh ====>
     final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
     await cryptoMarketController.refreshCurrentTab();
   }
@@ -86,44 +102,30 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   /// ==========> For the balance ======>
   final RxString balance = '0.00'.obs;
 
-  // Existing code...
-
   final WalletController _walletController = Get.find<WalletController>();
 
   void fetchAndSetTheBalance() {
     try {
-      // Calculate total balance from wallet coins
       final double totalBalance = _calculateTotalWalletBalance();
-
-      // Save to GetStorage
       GetStorageModel().save(AppConstants.balanceText, totalBalance.toStringAsFixed(3));
-
-      // Update balance observable
       balance.value = totalBalance.toStringAsFixed(2);
     } catch (e) {
-      // Fallback to stored balance or default
       final bool isBalanceStored = GetStorageModel().exists(AppConstants.balanceText);
       if (isBalanceStored) {
         balance.value = GetStorageModel().read(AppConstants.balanceText);
       } else {
         balance.value = '0.00';
       }
-
       LoggerUtils.debug('Error fetching wallet balance: $e');
     }
   }
 
   double _calculateTotalWalletBalance() {
-    double totalBalance = 0.0;
-
-    // Assuming walletCoins is an observable list in WalletController
-    totalBalance = Get.find<WalletController>().totalValuation.value;
-
-    return totalBalance;
+    return Get.find<WalletController>().totalValuation.value;
   }
 
-  /// =========> for randomly generated hint texts ===========>
-  // List of possible hint texts
+  WalletController get walletController => _walletController;
+
   final List<String> hintOptions = <String>[
     '#BinanceHODLerPLUME',
     '#CryptoRisingStar',
@@ -133,11 +135,8 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     '#FutureOfFinance',
   ];
 
-  // Randomly generate hint text
   String _generateRandomHint() {
-    final Random random = Random();
-    final int randomIndex = random.nextInt(hintOptions.length);
-    return hintOptions[randomIndex];
+    return hintOptions[Random().nextInt(hintOptions.length)];
   }
 
   @override

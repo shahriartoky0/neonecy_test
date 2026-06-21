@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
+import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/features/home/widgets/custom_refresher.dart';
 import '../../../core/common/widgets/custom_svg.dart';
 import '../../../core/config/app_sizes.dart';
@@ -42,7 +43,9 @@ class TradeConvertScreen extends GetView<TradeController> {
                 _buildOrderTypeSelector(),
                 const SizedBox(height: 20),
                 _buildSwapContainer(context),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                _buildRateLine(),
+                const SizedBox(height: 16),
                 _buildPreviewButton(),
                 SizedBox(height: context.screenHeight * 0.3),
               ],
@@ -73,7 +76,10 @@ class TradeConvertScreen extends GetView<TradeController> {
             children: <Widget>[
               appbarIcon(assetPath: AppIcons.filter, onTap: () {}),
               const SizedBox(width: AppSizes.sm),
-              appbarIcon(assetPath: AppIcons.assetHistory, onTap: () {}),
+              appbarIcon(
+                assetPath: AppIcons.assetHistory,
+                onTap: () => Get.toNamed(AppRoutes.historyScreen),
+              ),
 
             ],
           ),
@@ -238,7 +244,9 @@ class TradeConvertScreen extends GetView<TradeController> {
                   ),
                   decoration: InputDecoration(
                     hintText: '0',
-                    hintStyle: TextStyle(color: AppColors.grey.withOpacity(0.5), fontSize: 18),
+                    hintStyle: TextStyle(
+                        color: AppColors.grey.withValues(alpha: 0.5),
+                        fontSize: 18),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -251,24 +259,10 @@ class TradeConvertScreen extends GetView<TradeController> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              Obx(() {
-                if (controller.fromCoin.value != null &&
-                    controller.fromAmount.value.isNotEmpty &&
-                    controller.fromAmount.value != '0') {
-                  final double amount = double.tryParse(controller.fromAmount.value) ?? 0;
-                  final double usdValue = amount * controller.fromCoin.value!.price;
-                  return Text(
-                    '~ ${controller.formatDisplayNumber(usdValue)}',
-                    style: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-              const Spacer(),
               GestureDetector(
                 onTap: () {
                   if (controller.fromCoin.value != null) {
@@ -333,42 +327,25 @@ class TradeConvertScreen extends GetView<TradeController> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Obx(() {
-                      final String displayAmount =
-                      controller.toAmount.value.isEmpty || controller.toAmount.value == '0'
+                child: Obx(() {
+                  final String displayAmount =
+                      controller.toAmount.value.isEmpty ||
+                              controller.toAmount.value == '0'
                           ? '0'
                           : controller.toAmount.value;
-                      return Text(
-                        displayAmount,
-                        style: TextStyle(
-                          color:
-                          controller.toAmount.value == '0' || controller.toAmount.value.isEmpty
-                              ? AppColors.grey.withOpacity(0.5)
-                              : AppColors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 8),
-                    Obx(() {
-                      if (controller.toCoin.value != null &&
-                          controller.toAmount.value.isNotEmpty &&
-                          controller.toAmount.value != '0') {
-                        final double amount = double.tryParse(controller.toAmount.value) ?? 0;
-                        final double usdValue = amount * controller.toCoin.value!.price;
-                        return Text(
-                          '~ ${controller.formatDisplayNumber(usdValue)}',
-                          style: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }),
-                  ],
-                ),
+                  return Text(
+                    displayAmount,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: controller.toAmount.value == '0' ||
+                              controller.toAmount.value.isEmpty
+                          ? AppColors.grey.withValues(alpha: 0.5)
+                          : AppColors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  );
+                }),
               ),
             ],
           ),
@@ -485,6 +462,34 @@ class TradeConvertScreen extends GetView<TradeController> {
         ),
       ),
     );
+  }
+
+  Widget _buildRateLine() {
+    return Obx(() {
+      final double from =
+          double.tryParse(controller.fromAmount.value) ?? 0;
+      final double to = double.tryParse(controller.toAmount.value) ?? 0;
+      final CoinItem? fromCoin = controller.fromCoin.value;
+      final CoinItem? toCoin = controller.toCoin.value;
+
+      if (from <= 0 || to <= 0 || fromCoin == null || toCoin == null) {
+        return const SizedBox.shrink();
+      }
+
+      final double rate = from / to;
+      final String rateStr = rate >= 1
+          ? rate.toStringAsFixed(6)
+          : rate.toStringAsFixed(8);
+
+      return Text(
+        '1 ${toCoin.symbol} = $rateStr ${fromCoin.symbol}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: AppColors.textGreyLight,
+          fontSize: 13,
+        ),
+      );
+    });
   }
 
   Widget _buildPreviewButton() {
