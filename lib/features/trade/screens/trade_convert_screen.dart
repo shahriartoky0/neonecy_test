@@ -62,7 +62,7 @@ class TradeConvertScreen extends GetView<TradeController> {
       child: Row(
         children: <Widget>[
           Expanded(
-            flex: 4,
+            flex: 3,
             child: Row(
               children: <Widget>[
                 _buildOrderTypeTab('Instant', 0),
@@ -72,16 +72,19 @@ class TradeConvertScreen extends GetView<TradeController> {
             ),
           ),
           const SizedBox(width: AppSizes.lg),
-          Row(
-            children: <Widget>[
-              appbarIcon(assetPath: AppIcons.filter, onTap: () {}),
-              const SizedBox(width: AppSizes.sm),
-              appbarIcon(
-                assetPath: AppIcons.assetHistory,
-                onTap: () => Get.toNamed(AppRoutes.historyScreen),
-              ),
-
-            ],
+          Expanded(
+            flex: 2,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                appbarIcon(assetPath: AppIcons.filter, onTap: () {}),
+                const SizedBox(width: AppSizes.sm),
+                appbarIcon(
+                  assetPath: AppIcons.assetHistory,
+                  onTap: () => Get.toNamed(AppRoutes.historyScreen),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -93,13 +96,13 @@ class TradeConvertScreen extends GetView<TradeController> {
       child: GestureDetector(
         onTap: () => controller.selectOrderType(index),
         child: Obx(
-              () => Container(
+          () => Container(
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
             decoration: BoxDecoration(
               color: controller.selectedOrderType.value == index
                   ? AppColors.iconBackground
                   : Colors.transparent,
-              borderRadius: BorderRadius.circular(AppSizes.borderRadiusLg),
+              borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
             ),
             child: Text(
               title,
@@ -156,6 +159,11 @@ class TradeConvertScreen extends GetView<TradeController> {
 
                 return Row(
                   children: <Widget>[
+                    CustomSvgImage(
+                      assetName: AppIcons.navAsset,
+                      color: AppColors.white.withValues(alpha: 0.8),
+                    ),
+                    const SizedBox(width: 4),
                     Text(
                       'Available ',
                       style: TextStyle(
@@ -214,7 +222,7 @@ class TradeConvertScreen extends GetView<TradeController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Obx(
-                    () => _buildTokenSelector(
+                () => _buildTokenSelector(
                   context,
                   coin: controller.fromCoin.value,
                   token: controller.fromToken.value,
@@ -239,14 +247,15 @@ class TradeConvertScreen extends GetView<TradeController> {
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   style: const TextStyle(
                     color: AppColors.white,
-                    fontSize: 18,
+                    fontSize: 21,
                     fontWeight: FontWeight.w600,
                   ),
                   decoration: InputDecoration(
                     hintText: '0',
                     hintStyle: TextStyle(
-                        color: AppColors.grey.withValues(alpha: 0.5),
-                        fontSize: 18),
+                      color: AppColors.grey.withValues(alpha: 0.5),
+                      fontSize: 21,
+                    ),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -309,7 +318,7 @@ class TradeConvertScreen extends GetView<TradeController> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Obx(
-                    () => _buildTokenSelector(
+                () => _buildTokenSelector(
                   context,
                   coin: controller.toCoin.value,
                   token: controller.toToken.value,
@@ -329,19 +338,17 @@ class TradeConvertScreen extends GetView<TradeController> {
               Expanded(
                 child: Obx(() {
                   final String displayAmount =
-                      controller.toAmount.value.isEmpty ||
-                              controller.toAmount.value == '0'
-                          ? '0'
-                          : controller.toAmount.value;
+                      controller.toAmount.value.isEmpty || controller.toAmount.value == '0'
+                      ? '0'
+                      : controller.toAmount.value;
                   return Text(
                     displayAmount,
                     textAlign: TextAlign.right,
                     style: TextStyle(
-                      color: controller.toAmount.value == '0' ||
-                              controller.toAmount.value.isEmpty
+                      color: controller.toAmount.value == '0' || controller.toAmount.value.isEmpty
                           ? AppColors.grey.withValues(alpha: 0.5)
                           : AppColors.white,
-                      fontSize: 18,
+                      fontSize: 21,
                       fontWeight: FontWeight.w600,
                     ),
                   );
@@ -355,13 +362,13 @@ class TradeConvertScreen extends GetView<TradeController> {
   }
 
   Widget _buildTokenSelector(
-      BuildContext context, {
-        required CoinItem? coin,
-        required String token,
-        required Color color,
-        bool isFromWallet = false,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required CoinItem? coin,
+    required String token,
+    required Color color,
+    bool isFromWallet = false,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
@@ -444,17 +451,17 @@ class TradeConvertScreen extends GetView<TradeController> {
         child: Stack(
           alignment: Alignment.center,
           children: <Widget>[
-              Divider(color: AppColors.textGreyLight.withValues(alpha: 0.5), thickness: 0.5),
+            Divider(color: AppColors.textGreyLight.withValues(alpha: 0.5), thickness: 0.5),
             Container(
-              width: 32,
-              height: 32,
+              width: 30,
+              height: 30,
               decoration: BoxDecoration(
                 color: AppColors.bgColor,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.textGreyLight.withOpacity(0.3), width: 1.5),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(6.0),
+                padding: const EdgeInsets.all(5.0),
                 child: CustomSvgImage(assetName: AppIcons.exchange, color: AppColors.white),
               ),
             ),
@@ -466,8 +473,7 @@ class TradeConvertScreen extends GetView<TradeController> {
 
   Widget _buildRateLine() {
     return Obx(() {
-      final double from =
-          double.tryParse(controller.fromAmount.value) ?? 0;
+      final double from = double.tryParse(controller.fromAmount.value) ?? 0;
       final double to = double.tryParse(controller.toAmount.value) ?? 0;
       final CoinItem? fromCoin = controller.fromCoin.value;
       final CoinItem? toCoin = controller.toCoin.value;
@@ -477,17 +483,30 @@ class TradeConvertScreen extends GetView<TradeController> {
       }
 
       final double rate = from / to;
-      final String rateStr = rate >= 1
-          ? rate.toStringAsFixed(6)
-          : rate.toStringAsFixed(8);
+      final String rateStr = rate >= 1 ? rate.toStringAsFixed(6) : rate.toStringAsFixed(8);
 
-      return Text(
-        '1 ${toCoin.symbol} = $rateStr ${fromCoin.symbol}',
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppColors.textGreyLight,
-          fontSize: 13,
-        ),
+      return Row(
+        spacing: 8,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            '1 ${toCoin.symbol} = $rateStr ${fromCoin.symbol}',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.white.withValues(alpha: 0.8), fontSize: 13),
+          ),
+          Obx(() {
+            if (!controller.showRateSpinner.value) return const SizedBox.shrink();
+            return SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                color: AppColors.yellow,
+                strokeWidth: 2,
+                backgroundColor: AppColors.yellow.withValues(alpha: 0.5),
+              ),
+            );
+          }),
+        ],
       );
     });
   }
@@ -496,56 +515,45 @@ class TradeConvertScreen extends GetView<TradeController> {
     return Obx(() {
       final bool isEnabled = controller.canTrade;
 
-      return Container(
-        decoration: BoxDecoration(
-          boxShadow: isEnabled ? <BoxShadow>[
-            BoxShadow(
-              color: AppColors.yellow.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ] : null,
-        ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            onPressed: isEnabled ? () async {
-              if (!controller.validateTrade()) {
-                return;
-              }
+      return SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: ElevatedButton(
+          onPressed: isEnabled
+              ? () async {
+                  if (!controller.validateTrade()) {
+                    return;
+                  }
 
-              final bool? confirmed = await ConfirmOrderDialog.show(
-                Get.context!,
-                fromCoin: controller.fromCoin.value!,
-                toCoin: controller.toCoin.value!,
-                fromAmount: controller.fromAmount.value,
-                toAmount: controller.toAmount.value,
-              );
+                  final bool? confirmed = await ConfirmOrderDialog.show(
+                    Get.context!,
+                    fromCoin: controller.fromCoin.value!,
+                    toCoin: controller.toCoin.value!,
+                    fromAmount: controller.fromAmount.value,
+                    toAmount: controller.toAmount.value,
+                  );
 
-              if (confirmed == true) {
-                await controller.executeTrade();
-              }
-            } :(){
-              controller.validateTrade();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isEnabled
-                  ? AppColors.yellow
-                  : AppColors.yellow.withOpacity(0.4),
-              foregroundColor: AppColors.black,
-              disabledBackgroundColor: AppColors.yellow.withOpacity(0.4),
-              disabledForegroundColor: AppColors.textGreyLight,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              elevation: 0,
-            ),
-            child: Text(
-              'Preview',
-              style: TextStyle(
-                color: isEnabled ? AppColors.black : AppColors.textGreyLight,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+                  if (confirmed == true) {
+                    await controller.executeTrade();
+                  }
+                }
+              : () {
+                  controller.validateTrade();
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isEnabled ? AppColors.yellow : AppColors.yellow.withOpacity(0.4),
+            foregroundColor: AppColors.black,
+            disabledBackgroundColor: AppColors.yellow.withOpacity(0.4),
+            disabledForegroundColor: AppColors.textGreyLight,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            elevation: 0,
+          ),
+          child: Text(
+            'Preview',
+            style: TextStyle(
+              color: isEnabled ? AppColors.black : AppColors.textGreyLight,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

@@ -1,4 +1,6 @@
 // lib/features/trade/controllers/trade_controller.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
@@ -26,6 +28,9 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
 
   // User's actual coin balance from wallet
   final RxDouble fromCoinBalance = 0.0.obs;
+
+  final RxBool showRateSpinner = false.obs;
+  Timer? _spinnerTimer;
 
   // Available coins in wallet
   RxList<WalletCoinModel> get userWalletCoins => _walletController.walletCoins;
@@ -136,12 +141,21 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
         final double fromValueInUSD = amount * fromPrice;
         final double convertedAmount = fromValueInUSD / toPrice;
         toAmount.value = formatCoinAmount(convertedAmount);
+        _restartSpinnerTimer();
       } else {
         toAmount.value = '0';
       }
     } else {
       toAmount.value = '0';
     }
+  }
+
+  void _restartSpinnerTimer() {
+    _spinnerTimer?.cancel();
+    showRateSpinner.value = true;
+    _spinnerTimer = Timer(const Duration(seconds: 6), () {
+      showRateSpinner.value = false;
+    });
   }
 
   // Check if trade can be executed (reactive getter - no toasts)
@@ -220,6 +234,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
             fromAmount: fromAmount.value,
             toAmount: toAmount.value,
           ),
+
         );
       }
 
@@ -383,6 +398,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
 
   @override
   void onClose() {
+    _spinnerTimer?.cancel();
     fromAmountController.dispose();
     tabController.dispose();
     super.onClose();

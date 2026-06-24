@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
 import '../../assets/model/coin_model.dart';
@@ -50,6 +51,7 @@ class _ConfirmOrderBottomSheetState extends State<_ConfirmOrderBottomSheet> {
   static const int _totalSeconds = 10;
   int _secondsLeft = _totalSeconds;
   Timer? _timer;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -59,7 +61,7 @@ class _ConfirmOrderBottomSheetState extends State<_ConfirmOrderBottomSheet> {
       setState(() => _secondsLeft--);
       if (_secondsLeft <= 0) {
         t.cancel();
-        if (mounted) Navigator.pop(context, true);
+        if (mounted) _confirm();
       }
     });
   }
@@ -68,6 +70,14 @@ class _ConfirmOrderBottomSheetState extends State<_ConfirmOrderBottomSheet> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _confirm() async {
+    if (_isLoading) return;
+    _timer?.cancel();
+    setState(() => _isLoading = true);
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+    if (mounted) Navigator.pop(context, true);
   }
 
   @override
@@ -112,8 +122,8 @@ class _ConfirmOrderBottomSheetState extends State<_ConfirmOrderBottomSheet> {
               const SizedBox(height: AppSizes.lg),
 
               // ── From section ─────────────────────────────────────
-              Text('From',
-                  style: const TextStyle(
+              const Text('From',
+                  style: TextStyle(
                       color: AppColors.textGreyLight,
                       fontSize: AppSizes.fontSizeBodyS)),
               const SizedBox(height: AppSizes.sm),
@@ -211,10 +221,11 @@ class _ConfirmOrderBottomSheetState extends State<_ConfirmOrderBottomSheet> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context, true),
+                  onPressed: _isLoading ? null : _confirm,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.yellow,
                     foregroundColor: AppColors.black,
+                    disabledBackgroundColor: AppColors.yellow,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius:
@@ -222,12 +233,17 @@ class _ConfirmOrderBottomSheetState extends State<_ConfirmOrderBottomSheet> {
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
-                    'Confirm (${_secondsLeft}s)',
-                    style: const TextStyle(
-                        fontSize: AppSizes.fontSizeBodyM,
-                        fontWeight: FontWeight.w600),
-                  ),
+                  child: _isLoading
+                      ? LoadingAnimationWidget.staggeredDotsWave(
+                          color: AppColors.black,
+                          size: 28,
+                        )
+                      : Text(
+                          'Confirm (${_secondsLeft}s)',
+                          style: const TextStyle(
+                              fontSize: AppSizes.fontSizeBodyM,
+                              fontWeight: FontWeight.w600),
+                        ),
                 ),
               ),
             ],

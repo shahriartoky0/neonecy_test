@@ -23,6 +23,7 @@ dependencies:
   intl: ^0.20.2
   #for loader :
   flutter_spinkit:
+  loading_animation_widget: ^1.2.1
   #for internet connection :
   connectivity_plus:
   #for logging the error :
