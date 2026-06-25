@@ -48,7 +48,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
   final RxBool showFloatingAi = true.obs;
 
   void onDiscoverScroll(double offset) {
-    final bool inPosts = offset > 180;
+    final bool inPosts = offset > 0;
     showFloatingPlus.value = inPosts;
     showFloatingAi.value = !inPosts;
   }

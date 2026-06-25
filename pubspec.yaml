@@ -53,6 +53,8 @@ flutter:
     - assets/fonts/
     - assets/images/
     - assets/icons/
+    - assets/posts_images/
+    - assets/posts_images/user_images/
 
 
   fonts:

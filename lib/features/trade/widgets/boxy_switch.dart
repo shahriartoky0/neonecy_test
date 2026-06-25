@@ -18,9 +18,9 @@ class BoxySwitch extends StatelessWidget {
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 46,
-        height: 26,
-        padding: const EdgeInsets.all(3),
+        width: 35,
+        height: 20,
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           color: value ? AppColors.yellow : AppColors.textGreyLight,
           borderRadius: BorderRadius.circular(7), // boxy feel
@@ -29,8 +29,8 @@ class BoxySwitch extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           alignment: value ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
-            width: 20,
-            height: 20,
+            width: 16,
+            height: 16,
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(5), // boxy thumb

@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
+import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_controller.dart';
 import '../../../core/config/app_sizes.dart';
@@ -55,12 +57,12 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
         onTap: () {},
         child: Container(
           margin: const EdgeInsets.only(bottom: 40),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(Icons.share_outlined, color: AppColors.textGreyLight, size: 16),
-              SizedBox(width: 6),
-              Text(
+              CustomSvgImage(assetName: AppIcons.confirmTradeShareIcon, height: 20),
+              const SizedBox(width: 6),
+              const Text(
                 'Share on Binance Square',
                 style: TextStyle(
                   color: AppColors.textGreyLight,
@@ -223,19 +225,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                       ),
                       child: Row(
                         children: <Widget>[
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: AppColors.yellow.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.savings_outlined,
-                              color: AppColors.yellow,
-                              size: 20,
-                            ),
-                          ),
+                          CustomSvgImage(assetName: AppIcons.confirmTradeBitCoinBag, height: 30),
                           const SizedBox(width: AppSizes.md),
                           const Expanded(
                             child: Text(
@@ -243,7 +233,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                               style: TextStyle(color: AppColors.white, fontSize: 11),
                             ),
                           ),
-                          const SizedBox(width: AppSizes.sm),
+                          const SizedBox(width: 20),
 
                           BoxySwitch(
                             value: _autoSave,
@@ -252,8 +242,6 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                         ],
                       ),
                     ),
-
-
                   ],
                 ),
               ),

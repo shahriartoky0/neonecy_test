@@ -7,4 +7,6 @@ class AppConstants {
   static const String usernameKey = 'user_name';
   static const String binanceIdKey = 'binance_id';
   static const String profileImageKey = 'profile_image';
+  static const String tradeFromCoin = 'trade_from_coin';
+  static const String tradeToCoin = 'trade_to_coin';
 }

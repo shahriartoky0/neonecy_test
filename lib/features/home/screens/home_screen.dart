@@ -42,9 +42,7 @@ class HomeScreen extends GetView<HomeController> {
             surfaceTintColor: Colors.transparent,
             flexibleSpace: const DecoratedBox(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: <Color>[Colors.transparent, Colors.transparent],
-                ),
+                gradient: LinearGradient(colors: <Color>[Colors.transparent, Colors.transparent]),
               ),
             ),
             title: AnimatedOpacity(
@@ -85,8 +83,9 @@ class HomeScreen extends GetView<HomeController> {
                                         child: AppButton(
                                           labelText: 'Yes',
                                           onTap: () {
-                                            final LoginController loginController =
-                                                Get.put(LoginController());
+                                            final LoginController loginController = Get.put(
+                                              LoginController(),
+                                            );
                                             loginController.logOut();
                                           },
                                           bgColor: AppColors.red,
@@ -102,18 +101,23 @@ class HomeScreen extends GetView<HomeController> {
                         },
                         height: 13,
                       ),
-                      Obx(() => IconButton(
-                            onPressed: () {},
-                            icon: Badge(
-                              backgroundColor: AppColors.yellow,
-                              label: Text(
-                                '${controller.messageCount.value}',
-                                style: const TextStyle(color: AppColors.black, fontSize: 10),
-                              ),
-                              child: const Icon(Icons.message_outlined,
-                                  color: AppColors.white, size: 20),
+                      Obx(
+                        () => IconButton(
+                          onPressed: () {},
+                          icon: Badge(
+                            backgroundColor: AppColors.yellow,
+                            label: Text(
+                              '${controller.messageCount.value}',
+                              style: const TextStyle(color: AppColors.black, fontSize: 10),
                             ),
-                          )),
+                            child: const Icon(
+                              Icons.message_outlined,
+                              color: AppColors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(width: 6),
                     ],
                   ),
@@ -189,7 +193,9 @@ class HomeScreen extends GetView<HomeController> {
                               style: const TextStyle(color: AppColors.textWhite),
                               decoration: InputDecoration(
                                 contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 0, horizontal: AppSizes.sm),
+                                  vertical: 0,
+                                  horizontal: AppSizes.sm,
+                                ),
                                 hint: Obx(
                                   () => AnimatedOpacity(
                                     opacity: controller.showSpace.value ? 0.0 : 1.0,
@@ -197,12 +203,16 @@ class HomeScreen extends GetView<HomeController> {
                                     child: Text(
                                       controller.hintText.value,
                                       style: const TextStyle(
-                                          fontSize: 12, color: AppColors.hintText),
+                                        fontSize: 12,
+                                        color: AppColors.hintText,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                suffixIcon: const Icon(CupertinoIcons.search,
-                                    color: AppColors.textGreyLight),
+                                suffixIcon: const Icon(
+                                  CupertinoIcons.search,
+                                  color: AppColors.textGreyLight,
+                                ),
                               ),
                             ),
                           ),
@@ -211,8 +221,7 @@ class HomeScreen extends GetView<HomeController> {
                           // ── Est. Total Value label ──────────────────
                           Text(
                             'Est.Total Value(USD) ^',
-                            style: TextStyle(
-                                color: AppColors.textWhite.withValues(alpha: 0.85)),
+                            style: TextStyle(color: AppColors.textWhite.withValues(alpha: 0.85)),
                           ),
                           const SizedBox(height: AppSizes.md),
 
@@ -224,8 +233,7 @@ class HomeScreen extends GetView<HomeController> {
                                 child: Obx(
                                   () => Text(
                                     '\$ ${controller.balance.value}',
-                                    style: context.txtTheme.displayMedium
-                                        ?.copyWith(fontSize: 26),
+                                    style: context.txtTheme.displayMedium?.copyWith(fontSize: 26),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -244,35 +252,27 @@ class HomeScreen extends GetView<HomeController> {
                           // ── Dynamic PNL row ─────────────────────────
                           Obx(() {
                             final coins = walletController.walletCoins;
-                            final double pnl =
-                                coins.fold(0.0, (s, c) => s + c.profitLoss);
+                            final double pnl = coins.fold(0.0, (s, c) => s + c.profitLoss);
                             final double pnlPct = coins.isNotEmpty
-                                ? coins.fold(
-                                        0.0,
-                                        (s, c) => s + c.profitLossPercent) /
-                                    coins.length
+                                ? coins.fold(0.0, (s, c) => s + c.profitLossPercent) / coins.length
                                 : 0.0;
                             final bool isPos = pnl >= 0;
                             return Row(
                               children: <Widget>[
                                 const Text(
                                   "Today's PNL ",
-                                  style: TextStyle(
-                                      color: AppColors.textGreyLight, fontSize: 11),
+                                  style: TextStyle(color: AppColors.textGreyLight, fontSize: 11),
                                 ),
                                 Text(
                                   '${isPos ? '+' : ''}\$${pnl.abs().toStringAsFixed(4)} '
                                   '(${isPos ? '+' : ''}${pnlPct.toStringAsFixed(2)}%)',
                                   style: TextStyle(
-                                    color:
-                                        isPos ? AppColors.greenAccent : AppColors.red,
+                                    color: isPos ? AppColors.greenAccent : AppColors.red,
                                     fontSize: 10,
                                   ),
                                 ),
                                 Icon(
-                                  isPos
-                                      ? Icons.keyboard_arrow_up
-                                      : Icons.keyboard_arrow_down,
+                                  isPos ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                                   color: isPos ? AppColors.greenAccent : AppColors.red,
                                   size: 14,
                                 ),
@@ -336,13 +336,11 @@ class HomeScreen extends GetView<HomeController> {
                         isScrollable: true,
                         indicatorColor: AppColors.yellow,
                         indicatorSize: TabBarIndicatorSize.label,
-                        indicatorPadding:
-                            const EdgeInsets.symmetric(horizontal: AppSizes.sm),
+                        indicatorPadding: const EdgeInsets.symmetric(horizontal: AppSizes.sm),
                         indicatorWeight: 1,
                         tabAlignment: TabAlignment.center,
                         labelColor: AppColors.textWhite,
-                        labelStyle: const TextStyle(
-                            fontWeight: FontWeight.w500, fontSize: 17),
+                        labelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 17),
                         unselectedLabelStyle: const TextStyle(
                           fontWeight: FontWeight.w400,
                           fontSize: 16,
@@ -370,30 +368,32 @@ class HomeScreen extends GetView<HomeController> {
                         children: <Widget>[
                           const SizedBox(height: AppSizes.sm),
                           const Divider(),
-                          Obx(() => Column(
-                                children: controller.displayedPosts
-                                    .map(
-                                      (post) => Column(
-                                        children: <Widget>[
-                                          StockCard(
-                                            username: post.username,
-                                            timeAgo: post.timeAgo,
-                                            symbol: post.symbol,
-                                            question: post.question,
-                                            imagePath: post.imagePath,
-                                            priceChange: post.priceChange,
-                                            isPositive: post.isPositive,
-                                            comments: post.comments,
-                                            likes: post.likes,
-                                            reposts: post.reposts,
-                                            shares: post.shares,
-                                          ),
-                                          const Divider(),
-                                        ],
-                                      ),
-                                    )
-                                    .toList(),
-                              )),
+                          Obx(
+                            () => Column(
+                              children: controller.displayedPosts
+                                  .map(
+                                    (post) => Column(
+                                      children: <Widget>[
+                                        StockCard(
+                                          username: post.username,
+                                          timeAgo: post.timeAgo,
+                                          symbol: post.symbol,
+                                          question: post.question,
+                                          imagePath: post.imagePath,
+                                          priceChange: post.priceChange,
+                                          isPositive: post.isPositive,
+                                          comments: post.comments,
+                                          likes: post.likes,
+                                          reposts: post.reposts,
+                                          shares: post.shares,
+                                        ),
+                                        const Divider(),
+                                      ],
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
                           // Bottom padding so content clears the floating buttons
                           const SizedBox(height: 80),
                         ],
@@ -435,7 +435,7 @@ class HomeScreen extends GetView<HomeController> {
               () => IgnorePointer(
                 ignoring: !controller.showFloatingAi.value,
                 child: AnimatedOpacity(
-                  opacity: controller.showFloatingAi.value ? 1.0 : 0.0,
+                  opacity: controller.showFloatingAi.value ? 0.72 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: const _FloatingAiButton(),
                 ),
@@ -454,8 +454,8 @@ class HomeScreen extends GetView<HomeController> {
         clipBehavior: Clip.none,
         children: <Widget>[
           Container(
-            width: 60,
-            height: 60,
+            width: 54,
+            height: 54,
             decoration: BoxDecoration(
               color: AppColors.yellow,
               shape: BoxShape.circle,
@@ -476,18 +476,11 @@ class HomeScreen extends GetView<HomeController> {
             child: Container(
               width: 22,
               height: 22,
-              decoration: const BoxDecoration(
-                color: AppColors.red,
-                shape: BoxShape.circle,
-              ),
+              decoration: const BoxDecoration(color: AppColors.red, shape: BoxShape.circle),
               child: const Center(
                 child: Text(
                   '7',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -581,7 +574,6 @@ class HomeScreen extends GetView<HomeController> {
 }
 
 // ── Floating AI button widget ──────────────────────────────────────────────────
-// TODO: Replace emoji avatar with CustomSvgImage(AppIcons.aiFloatingButton)
 // once assets/icons/ai_button.svg is provided.
 class _FloatingAiButton extends StatelessWidget {
   const _FloatingAiButton();
@@ -591,10 +583,10 @@ class _FloatingAiButton extends StatelessWidget {
     return GestureDetector(
       onTap: () {},
       child: Container(
-        width: 56,
-        height: 56,
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(16),
           boxShadow: <BoxShadow>[
             BoxShadow(
@@ -604,9 +596,7 @@ class _FloatingAiButton extends StatelessWidget {
             ),
           ],
         ),
-        child: const Center(
-          child: Text('🤖', style: TextStyle(fontSize: 26)),
-        ),
+        child: CustomSvgImage(assetName: AppIcons.aiFloatingButton),
       ),
     );
   }

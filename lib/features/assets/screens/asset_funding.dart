@@ -227,9 +227,11 @@ class AssetFundingScreen extends GetView<AssetsController> {
   }
 
   Widget _buildEmptyState() => Container(
+    width: double.infinity,
     padding: const EdgeInsets.all(AppSizes.xl),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Icon(
           Icons.account_balance_wallet_outlined,

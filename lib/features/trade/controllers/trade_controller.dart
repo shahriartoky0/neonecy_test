@@ -1,10 +1,13 @@
 // lib/features/trade/controllers/trade_controller.dart
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
+import 'package:neonecy_test/core/config/app_constants.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
+import 'package:neonecy_test/core/utils/get_storage.dart';
 import '../../assets/model/coin_model.dart';
 import '../../wallet/controllers/wallet_controller.dart';
 import '../../wallet/models/coin_wallet_model.dart';
@@ -38,7 +41,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   // Get user's balance for a specific coin
   double getBalanceForCoin(String symbol) {
     final WalletCoinModel? walletCoin = userWalletCoins.firstWhereOrNull(
-          (WalletCoinModel coin) => coin.coinDetails.symbol == symbol,
+      (WalletCoinModel coin) => coin.coinDetails.symbol == symbol,
     );
     return walletCoin?.quantity ?? 0.0;
   }
@@ -109,6 +112,8 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     // Get actual balance from wallet
     fromCoinBalance.value = getBalanceForCoin(coin.symbol);
 
+    GetStorageModel().save(AppConstants.tradeFromCoin, jsonEncode(coin.toMap()));
+
     // Recalculate if amount exists
     if (fromAmount.value.isNotEmpty && fromAmount.value != '0') {
       _updateConversionRate();
@@ -120,9 +125,36 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     toCoin.value = coin;
     toToken.value = coin.symbol;
 
+    GetStorageModel().save(AppConstants.tradeToCoin, jsonEncode(coin.toMap()));
+
     // Recalculate if amount exists
     if (fromAmount.value.isNotEmpty && fromAmount.value != '0') {
       _updateConversionRate();
+    }
+  }
+
+  void _restoreLastCoins() {
+    final storage = GetStorageModel();
+    try {
+      if (storage.exists(AppConstants.tradeFromCoin)) {
+        final dynamic raw = storage.read(AppConstants.tradeFromCoin);
+        if (raw is String) {
+          final coin = CoinItem.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+          fromCoin.value = coin;
+          fromToken.value = coin.symbol;
+          fromCoinBalance.value = getBalanceForCoin(coin.symbol);
+        }
+      }
+      if (storage.exists(AppConstants.tradeToCoin)) {
+        final dynamic raw = storage.read(AppConstants.tradeToCoin);
+        if (raw is String) {
+          final coin = CoinItem.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+          toCoin.value = coin;
+          toToken.value = coin.symbol;
+        }
+      }
+    } catch (_) {
+      // Ignore restore errors — stale data, just start fresh
     }
   }
 
@@ -180,7 +212,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
 
       // Remove from coin from wallet
       final WalletCoinModel fromWalletCoin = userWalletCoins.firstWhere(
-            (WalletCoinModel coin) => coin.coinDetails.symbol == fromCoin.value!.symbol,
+        (WalletCoinModel coin) => coin.coinDetails.symbol == fromCoin.value!.symbol,
       );
 
       final double newFromBalance = fromWalletCoin.quantity - fromQty;
@@ -198,7 +230,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
 
       // Add to coin to wallet
       final WalletCoinModel? existingToCoin = userWalletCoins.firstWhereOrNull(
-            (WalletCoinModel coin) => coin.coinDetails.symbol == toCoin.value!.symbol,
+        (WalletCoinModel coin) => coin.coinDetails.symbol == toCoin.value!.symbol,
       );
 
       if (existingToCoin != null) {
@@ -225,17 +257,19 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
       //   icon: const Icon(Icons.check_circle, color: AppColors.green),
       // );
 
-      // Navigate to success screen
+      // Push success screen immediately (non-blocking) so the caller can
+      // close the confirm sheet without revealing the trade screen first.
+      // Reset amounts only when the user closes the success screen.
       if (fromCoin.value != null && toCoin.value != null) {
+
         Get.to(
-              () => ConversionSuccessScreen(
+          () => ConversionSuccessScreen(
             fromCoin: fromCoin.value!,
             toCoin: toCoin.value!,
             fromAmount: fromAmount.value,
             toAmount: toAmount.value,
           ),
-
-        );
+        )?.then((_) => resetTradeForm());
       }
 
       return true;
@@ -250,12 +284,11 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     }
   }
 
-
-
   bool validateTrade() {
     // Check if both coins are selected
     if (fromCoin.value == null || toCoin.value == null) {
       ToastManager.show(
+        duration: const Duration(milliseconds: 700),
         message: 'Please select both coins to continue',
         backgroundColor: AppColors.red,
         icon: const Icon(Icons.error_outline, color: AppColors.white),
@@ -266,7 +299,8 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     // Check if trying to convert same coin
     if (fromCoin.value!.symbol == toCoin.value!.symbol) {
       ToastManager.show(
-        message: 'Cannot convert ${fromCoin.value!.symbol} to ${toCoin.value!.symbol}. Please select different coins.',
+        message:
+            'Cannot convert ${fromCoin.value!.symbol} to ${toCoin.value!.symbol}. Please select different coins.',
         backgroundColor: AppColors.red,
         icon: const Icon(Icons.error_outline, color: AppColors.white),
       );
@@ -288,7 +322,8 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     final double availableBalance = getBalanceForCoin(fromCoin.value!.symbol);
     if (fromQty > availableBalance) {
       ToastManager.show(
-        message: 'Insufficient balance. Available: ${formatCoinAmount(availableBalance)} ${fromCoin.value!.symbol}',
+        message:
+            'Insufficient balance. Available: ${formatCoinAmount(availableBalance)} ${fromCoin.value!.symbol}',
         backgroundColor: AppColors.red,
         icon: const Icon(Icons.error_outline, color: AppColors.white),
       );
@@ -354,7 +389,9 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     super.onInit();
 
     // Initialize text controller
-    fromAmountController = TextEditingController(text: fromAmount.value == '0' ? '' : fromAmount.value);
+    fromAmountController = TextEditingController(
+      text: fromAmount.value == '0' ? '' : fromAmount.value,
+    );
 
     tabController = TabController(length: homeTabTitles.length, vsync: this);
 
@@ -363,6 +400,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
     });
 
     resetTradeForm();
+    _restoreLastCoins();
 
     // Listen to fromCoin changes
     ever(fromCoin, (CoinItem? coin) {
@@ -377,23 +415,13 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   }
 
   void resetTradeForm() {
-    // Reset selected tokens
-    fromToken.value = 'Select a Coin';
-    toToken.value = 'Select a Coin';
-
-    // Reset coin objects
-    fromCoin.value = null;
-    toCoin.value = null;
-
-    // Reset amounts
     fromAmount.value = '0';
     toAmount.value = '0';
-
-    // Clear text controller
     fromAmountController.clear();
-
-    // Reset balance
-    fromCoinBalance.value = 0.0;
+    // Refresh balance so it reflects the post-trade wallet state
+    if (fromCoin.value != null) {
+      fromCoinBalance.value = getBalanceForCoin(fromCoin.value!.symbol);
+    }
   }
 
   @override

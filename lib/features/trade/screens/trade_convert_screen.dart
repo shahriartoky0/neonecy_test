@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
 import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/routes/app_routes.dart';
@@ -20,6 +19,7 @@ import '../controllers/trade_controller.dart';
 import '../widgets/coin_selection_modal.dart';
 import '../widgets/confirm_order_modal.dart';
 import '../widgets/conversion_details_screen.dart';
+import '../widgets/trade_preview_loader.dart';
 
 class TradeConvertScreen extends GetView<TradeController> {
   const TradeConvertScreen({super.key});
@@ -272,26 +272,25 @@ class TradeConvertScreen extends GetView<TradeController> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  if (controller.fromCoin.value != null) {
-                    controller.setMaxAmount();
-                  } else {
-                    ToastManager.show(message: 'Please select a coin first');
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  child: const Text(
-                    'Max',
-                    style: TextStyle(
-                      color: AppColors.yellow,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
+              Obx(() {
+                final bool hasCoin = controller.fromCoin.value != null;
+                return GestureDetector(
+                  onTap: hasCoin ? controller.setMaxAmount : null,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    child: Text(
+                      'Max',
+                      style: TextStyle(
+                        color: hasCoin
+                            ? AppColors.yellow
+                            : AppColors.textGreyLight.withValues(alpha: 0.35),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
-                ),
-              ),
+                );
+              }),
             ],
           ),
         ],
@@ -525,17 +524,16 @@ class TradeConvertScreen extends GetView<TradeController> {
                     return;
                   }
 
-                  final bool? confirmed = await ConfirmOrderDialog.show(
+                  await TradePreviewLoader.show(Get.context!);
+
+                  await ConfirmOrderDialog.show(
                     Get.context!,
                     fromCoin: controller.fromCoin.value!,
                     toCoin: controller.toCoin.value!,
                     fromAmount: controller.fromAmount.value,
                     toAmount: controller.toAmount.value,
+                    onConfirm: controller.executeTrade,
                   );
-
-                  if (confirmed == true) {
-                    await controller.executeTrade();
-                  }
                 }
               : () {
                   controller.validateTrade();

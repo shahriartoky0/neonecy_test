@@ -8,14 +8,15 @@ import '../../../core/design/app_colors.dart';
 import '../../assets/model/coin_model.dart';
 
 class ConfirmOrderDialog {
-  static Future<bool?> show(
-      BuildContext context, {
-        required CoinItem fromCoin,
-        required CoinItem toCoin,
-        required String fromAmount,
-        required String toAmount,
-      }) {
-    return showModalBottomSheet<bool>(
+  static Future<void> show(
+    BuildContext context, {
+    required CoinItem fromCoin,
+    required CoinItem toCoin,
+    required String fromAmount,
+    required String toAmount,
+    required Future<void> Function() onConfirm,
+  }) {
+    return showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -24,6 +25,7 @@ class ConfirmOrderDialog {
         toCoin: toCoin,
         fromAmount: fromAmount,
         toAmount: toAmount,
+        onConfirm: onConfirm,
       ),
     );
   }
@@ -34,12 +36,14 @@ class _ConfirmOrderBottomSheet extends StatefulWidget {
   final CoinItem toCoin;
   final String fromAmount;
   final String toAmount;
+  final Future<void> Function() onConfirm;
 
   const _ConfirmOrderBottomSheet({
     required this.fromCoin,
     required this.toCoin,
     required this.fromAmount,
     required this.toAmount,
+    required this.onConfirm,
   });
 
   @override
@@ -75,9 +79,22 @@ class _ConfirmOrderBottomSheetState extends State<_ConfirmOrderBottomSheet> {
   Future<void> _confirm() async {
     if (_isLoading) return;
     _timer?.cancel();
+
+    // Capture this route before any async gap so we can remove it precisely later.
+    final ModalRoute<Object?>? myRoute = ModalRoute.of(context);
+
     setState(() => _isLoading = true);
     await Future<void>.delayed(const Duration(milliseconds: 1500));
-    if (mounted) Navigator.pop(context, true);
+
+    // onConfirm does wallet updates then calls Get.to(ConversionSuccessScreen)
+    // non-blocking — the success screen is pushed ON TOP of this sheet.
+    await widget.onConfirm();
+
+    // Remove THIS modal route specifically. Using Navigator.pop here would
+    // close the success screen (now the top route) instead of this sheet.
+    if (myRoute != null && myRoute.isActive) {
+      Navigator.of(context, rootNavigator: true).removeRoute(myRoute);
+    }
   }
 
   @override

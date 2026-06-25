@@ -96,6 +96,42 @@ class CoinItem {
     return (usdPrice ?? 0.0) / btcPrice;
   }
 
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'coinId': coinId,
+    'name': name,
+    'symbol': symbol,
+    'marketCapRank': marketCapRank,
+    'thumb': thumb,
+    'small': small,
+    'large': large,
+    'slug': slug,
+    'price': price,
+    'priceBtc': priceBtc,
+    'marketCap': marketCap,
+    'totalVolume': totalVolume,
+    'sparkline': sparkline,
+    'percentChange24h': percentChange24h,
+  };
+
+  factory CoinItem.fromMap(Map<String, dynamic> map) => CoinItem(
+    id: map['id'] as String,
+    coinId: (map['coinId'] as num).toInt(),
+    name: map['name'] as String,
+    symbol: map['symbol'] as String,
+    marketCapRank: (map['marketCapRank'] as num).toInt(),
+    thumb: map['thumb'] as String,
+    small: map['small'] as String,
+    large: map['large'] as String,
+    slug: map['slug'] as String,
+    price: (map['price'] as num).toDouble(),
+    priceBtc: (map['priceBtc'] as num).toDouble(),
+    marketCap: map['marketCap'] as String,
+    totalVolume: map['totalVolume'] as String,
+    sparkline: map['sparkline'] as String,
+    percentChange24h: (map['percentChange24h'] as num?)?.toDouble() ?? 0.0,
+  );
+
   // Helper method to format large numbers
   static String _formatLargeNumber(dynamic number) {
     if (number == null) return 'N/A';
