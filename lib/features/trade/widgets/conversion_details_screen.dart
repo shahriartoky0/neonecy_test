@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
+import 'package:neonecy_test/core/common/widgets/draggable_ai_button.dart';
 import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_controller.dart';
@@ -75,10 +76,12 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterDocked,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
+      body: Stack(
+        children: <Widget>[
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
             // ── Header ────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: AppSizes.sm),
@@ -248,6 +251,9 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
             ),
           ],
         ),
+      ),
+          const DraggableAiButton(),
+        ],
       ),
     );
   }

@@ -1,5 +1,5 @@
-// Enhanced Crypto Data Model
 class EnhancedCryptoData {
+  final int coinId;
   final String symbol;
   final String name;
   final double price;
@@ -9,6 +9,7 @@ class EnhancedCryptoData {
   final bool isFavorite;
 
   EnhancedCryptoData({
+    this.coinId = 0,
     required this.symbol,
     required this.name,
     required this.price,
@@ -18,9 +19,13 @@ class EnhancedCryptoData {
     this.isFavorite = false,
   });
 
+  String get logoUrl => 'https://s2.coinmarketcap.com/static/img/coins/64x64/$coinId.png';
+
   String get formattedPrice {
     if (price >= 1000) {
-      return price.toStringAsFixed(2);
+      return price
+          .toStringAsFixed(2)
+          .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
     } else if (price >= 1) {
       return price.toStringAsFixed(2);
     } else if (price >= 0.01) {
@@ -47,8 +52,8 @@ class EnhancedCryptoData {
     return '$sign${changePercent.toStringAsFixed(2)}%';
   }
 
-  // Copy with method for updates
   EnhancedCryptoData copyWith({
+    int? coinId,
     String? symbol,
     String? name,
     double? price,
@@ -58,6 +63,7 @@ class EnhancedCryptoData {
     bool? isFavorite,
   }) {
     return EnhancedCryptoData(
+      coinId: coinId ?? this.coinId,
       symbol: symbol ?? this.symbol,
       name: name ?? this.name,
       price: price ?? this.price,

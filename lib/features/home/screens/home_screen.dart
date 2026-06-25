@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/app_button.dart';
+import 'package:neonecy_test/core/common/widgets/draggable_ai_button.dart';
 import 'package:neonecy_test/core/common/widgets/custom_modal.dart';
 import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
@@ -432,19 +433,12 @@ class HomeScreen extends GetView<HomeController> {
             ),
           ),
 
-          // ── Floating AI button (visible when at top content) ──────
-          Positioned(
-            right: 16,
-            bottom: 20,
-            child: Obx(
-              () => IgnorePointer(
-                ignoring: !controller.showFloatingAi.value,
-                child: AnimatedOpacity(
-                  opacity: controller.showFloatingAi.value ? 0.72 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: const _FloatingAiButton(),
-                ),
-              ),
+          // ── Floating AI button (draggable) ──────────────────────
+          Obx(
+            () => DraggableAiButton(
+              key: const ValueKey('home-ai-fab'),
+              visible: controller.showFloatingAi.value,
+              buttonOpacity: 0.72,
             ),
           ),
         ],
@@ -573,35 +567,6 @@ class HomeScreen extends GetView<HomeController> {
           padding: const EdgeInsets.all(2.0),
           child: CustomSvgImage(assetName: assetPath, height: height),
         ),
-      ),
-    );
-  }
-}
-
-// ── Floating AI button widget ──────────────────────────────────────────────────
-// once assets/icons/ai_button.svg is provided.
-class _FloatingAiButton extends StatelessWidget {
-  const _FloatingAiButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: CustomSvgImage(assetName: AppIcons.aiFloatingButton),
       ),
     );
   }

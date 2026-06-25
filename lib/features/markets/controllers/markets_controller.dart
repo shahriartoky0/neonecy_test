@@ -9,12 +9,11 @@ class MarketsController extends GetxController with GetSingleTickerProviderState
   RxInt selectedIndex = 0.obs;
 
   final List<String> homeTabTitles = <String>[
-    'Favourites',
-    'Market',
+    'Favorites',
+    'Crypto',
+    'TradFi',
     'Alpha',
-    'Grow',
-    'Square',
-    'Database',
+    'Prediction',
   ];
 
   @override

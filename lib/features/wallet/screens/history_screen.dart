@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:neonecy_test/core/common/widgets/draggable_ai_button.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
 import '../models/transaction_history.dart';
@@ -67,9 +68,12 @@ class HistoryScreen extends StatelessWidget {
           const SizedBox(width: AppSizes.md,)
         ],
       ),
-      body: transactions.isEmpty
-          ? _buildEmptyState()
-          : ListView.separated(
+      body: Stack(
+        children: <Widget>[
+          if (transactions.isEmpty)
+            _buildEmptyState()
+          else
+            ListView.separated(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSizes.screenHorizontal,
                 vertical: AppSizes.sm,
@@ -81,6 +85,9 @@ class HistoryScreen extends StatelessWidget {
                 return _TransactionTile(tx: transactions[index]);
               },
             ),
+          const DraggableAiButton(),
+        ],
+      ),
     );
   }
 
