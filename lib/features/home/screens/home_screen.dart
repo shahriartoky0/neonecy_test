@@ -374,18 +374,23 @@ class HomeScreen extends GetView<HomeController> {
                                   .map(
                                     (post) => Column(
                                       children: <Widget>[
-                                        StockCard(
+                                        // Changed: imagePath → postImages; added avatar + isLiked + isVerified
+                                      StockCard(
                                           username: post.username,
                                           timeAgo: post.timeAgo,
                                           symbol: post.symbol,
                                           question: post.question,
-                                          imagePath: post.imagePath,
+                                          postImages: post.postImages,
+                                          avatarLocalPath: post.avatarLocalPath,
+                                          avatarNetworkUrl: post.avatarNetworkUrl,
                                           priceChange: post.priceChange,
                                           isPositive: post.isPositive,
                                           comments: post.comments,
                                           likes: post.likes,
                                           reposts: post.reposts,
                                           shares: post.shares,
+                                          isLiked: post.isLiked,
+                                          isVerified: post.isVerified,
                                         ),
                                         const Divider(),
                                       ],

@@ -11,6 +11,7 @@ import 'package:neonecy_test/core/utils/get_storage.dart';
 import '../../assets/model/coin_model.dart';
 import '../../wallet/controllers/wallet_controller.dart';
 import '../../wallet/models/coin_wallet_model.dart';
+import '../../wallet/models/transaction_history.dart';
 import '../widgets/conversion_details_screen.dart';
 
 class TradeController extends GetxController with GetSingleTickerProviderStateMixin {
@@ -256,6 +257,14 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
       //   textColor: AppColors.white,
       //   icon: const Icon(Icons.check_circle, color: AppColors.green),
       // );
+
+      // Record the trade in persistent history.
+      TransactionHistoryService.logConvert(
+        fromSymbol: fromCoin.value!.symbol,
+        toSymbol: toCoin.value!.symbol,
+        fromAmount: fromQty,
+        toAmount: toQty,
+      );
 
       // Push success screen immediately (non-blocking) so the caller can
       // close the confirm sheet without revealing the trade screen first.

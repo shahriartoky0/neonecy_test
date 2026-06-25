@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/utils/coin_market_service.dart';
 import '../../assets/model/coin_model.dart';
 import '../models/coin_wallet_model.dart';
+import '../models/transaction_history.dart';
 import '../wallet_service.dart';
 
 class WalletController extends GetxController {
@@ -319,6 +320,9 @@ class WalletController extends GetxController {
 
       print('💰 New total valuation: \$${totalValuation.value.toStringAsFixed(2)}');
       print('✅ Withdraw successful: $amount $coinSymbol');
+
+      // Record the withdrawal in persistent history.
+      TransactionHistoryService.logWithdraw(symbol: coinSymbol, amount: amount);
 
     } catch (e) {
       print('❌ Withdraw error: $e');

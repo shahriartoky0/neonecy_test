@@ -53,9 +53,10 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
     showFloatingAi.value = !inPosts;
   }
 
-  void randomizePosts() {
-    final List<MockPost> shuffled = List<MockPost>.from(kMockPosts)..shuffle(Random());
-    displayedPosts.value = shuffled.take(5).toList();
+  // Changed: now async; calls generatePosts() instead of shuffling kMockPosts.
+  // Produces exactly 12 posts with randomised content on every call.
+  Future<void> randomizePosts() async {
+    displayedPosts.value = await generatePosts();
   }
 
   @override
@@ -90,7 +91,7 @@ class HomeController extends GetxController with GetSingleTickerProviderStateMix
 
     fetchAndSetTheBalance();
     hintText.value = _generateRandomHint();
-    randomizePosts();
+    await randomizePosts(); // Changed: awaited so posts load before refresh completes
 
     final CryptoMarketController cryptoMarketController = Get.put(CryptoMarketController());
     await cryptoMarketController.refreshCurrentTab();
