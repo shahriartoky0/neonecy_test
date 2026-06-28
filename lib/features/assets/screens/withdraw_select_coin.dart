@@ -1,5 +1,4 @@
-// lib/features/assets/screens/withdraw/withdraw_select_coin_screen.dart
-import 'package:flutter/cupertino.dart';
+// lib/features/assets/screens/withdraw_select_coin.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
@@ -21,14 +20,12 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
   final AddressStorageService _addressService = AddressStorageService();
   late final WalletController _wc;
   String _query = '';
+  bool _searchVisible = false;
 
   @override
   void initState() {
     super.initState();
     _wc = Get.find<WalletController>();
-    // ✅ Use ever() to call setState when walletCoins changes.
-    // This avoids Obx entirely — Obx inside a StatefulWidget with
-    // conditional early-returns loses track of observables and crashes.
     ever(_wc.walletCoins, (_) {
       if (mounted) setState(() {});
     });
@@ -42,17 +39,10 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Read plain list — no Obx needed, ever() above handles reactivity
     final List<WalletCoinModel> walletCoins = _wc.walletCoins.toList();
 
-    final List<String> history = _addressService.getRecentWithdrawSymbols();
-    final List<WalletCoinModel> historyCo = history
-        .map((String s) => walletCoins.firstWhereOrNull((WalletCoinModel c) => c.coinDetails.symbol == s))
-        .whereType<WalletCoinModel>()
-        .toList();
-
     final List<WalletCoinModel> filtered = _query.isEmpty
-        ? <WalletCoinModel>[]
+        ? walletCoins
         : walletCoins
               .where(
                 (WalletCoinModel c) =>
@@ -73,52 +63,98 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
           'Select Coin',
           style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 18),
         ),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.search, color: AppColors.white),
+            onPressed: () => setState(() {
+              _searchVisible = !_searchVisible;
+              if (!_searchVisible) {
+                _query = '';
+                _searchCtrl.clear();
+              }
+            }),
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // ── Search ──────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.xs, AppSizes.md, AppSizes.sm),
-            child: TextField(
-              controller: _searchCtrl,
-              style: const TextStyle(color: AppColors.white, fontSize: 14),
-              onChanged: (String v) => setState(() => _query = v.toLowerCase().trim()),
-              decoration: InputDecoration(
-                hintText: 'Search Coins',
-                hintStyle: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
-                prefixIcon: const Icon(Icons.search, color: AppColors.textGreyLight, size: 20),
-                filled: true,
-                fillColor: AppColors.iconBackground,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(color: AppColors.yellow, width: 1),
-                ),
+          // ── Wallet filter chip ─────────────────────────────────────────
+          GestureDetector(
+            onTap: () => _showAccountSelector(context),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(AppSizes.md, 0, AppSizes.md, AppSizes.sm),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: AppColors.iconBackground,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      Icons.account_balance_wallet_outlined,
+                      color: AppColors.white,
+                      size: 15,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Spot + Funding + Earn Flexible',
+                    style: TextStyle(color: AppColors.white, fontSize: 13),
+                  ),
+                  const SizedBox(width: 2),
+                  const Icon(Icons.arrow_drop_down, color: AppColors.white, size: 18),
+                ],
               ),
             ),
           ),
 
-          // ── Body — no Obx, ever() in initState handles reactivity ────
+          // ── Toggleable search bar ──────────────────────────────────────
+          if (_searchVisible)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(AppSizes.md, 0, AppSizes.md, AppSizes.sm),
+              child: TextField(
+                controller: _searchCtrl,
+                autofocus: true,
+                style: const TextStyle(color: AppColors.white, fontSize: 14),
+                onChanged: (String v) => setState(() => _query = v.toLowerCase().trim()),
+                decoration: InputDecoration(
+                  hintText: 'Search Coins',
+                  hintStyle: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
+                  prefixIcon: const Icon(Icons.search, color: AppColors.textGreyLight, size: 20),
+                  filled: true,
+                  fillColor: AppColors.iconBackground,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: const BorderSide(color: AppColors.yellow, width: 1),
+                  ),
+                ),
+              ),
+            ),
+
+          // ── Coin list ──────────────────────────────────────────────────
           Expanded(
-            child: _query.isNotEmpty
-                ? _SearchResults(coins: filtered, onTap: _navigate)
-                : _DefaultView(
-                    historyCo: historyCo,
-                    allCoins: walletCoins,
-                    onTap: _navigate,
-                    onClearHistory: () {
-                      _addressService.clearWithdrawHistory();
-                      setState(() {});
-                    },
+            child: filtered.isEmpty
+                ? Center(
+                    child: Text(
+                      _query.isEmpty ? 'No coins in your wallet' : 'No coins found',
+                      style: const TextStyle(color: AppColors.textGreyLight),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (_, int i) => _CoinListTile(coin: filtered[i], onTap: _navigate),
                   ),
           ),
         ],
@@ -130,138 +166,135 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
     _addressService.addToWithdrawHistory(coin.coinDetails.symbol);
     Get.to(() => WithdrawScreen(coin: coin), transition: Transition.rightToLeft);
   }
-}
 
-// ── Search Results ─────────────────────────────────────────────────────────
-class _SearchResults extends StatelessWidget {
-  final List<WalletCoinModel> coins;
-  final void Function(WalletCoinModel) onTap;
-
-  const _SearchResults({required this.coins, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    if (coins.isEmpty) {
-      return const Center(
-        child: Text(
-          'No coins found in your wallet',
-          style: TextStyle(color: AppColors.textGreyLight),
-        ),
-      );
-    }
-    return ListView.builder(
-      itemCount: coins.length,
-      itemBuilder: (_, int i) => _CoinListTile(coin: coins[i], onTap: onTap),
+  void _showAccountSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.primaryColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.borderRadiusLg)),
+      ),
+      builder: (_) => const _AccountSelectorSheet(),
     );
   }
 }
 
-// ── Default View ───────────────────────────────────────────────────────────
-class _DefaultView extends StatelessWidget {
-  final List<WalletCoinModel> historyCo;
-  final List<WalletCoinModel> allCoins;
-  final void Function(WalletCoinModel) onTap;
-  final VoidCallback onClearHistory;
+// ── Account selector bottom sheet ─────────────────────────────────────────────
+class _AccountSelectorSheet extends StatefulWidget {
+  const _AccountSelectorSheet();
 
-  const _DefaultView({
-    required this.historyCo,
-    required this.allCoins,
-    required this.onTap,
-    required this.onClearHistory,
-  });
+  @override
+  State<_AccountSelectorSheet> createState() => _AccountSelectorSheetState();
+}
+
+class _AccountSelectorSheetState extends State<_AccountSelectorSheet> {
+  bool _spot = true;
+  bool _funding = true;
+  bool _earn = true;
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: <Widget>[
-        if (historyCo.isNotEmpty) ...<Widget>[
-          SliverToBoxAdapter(
-            child: _SectionHeader(
-              label: 'Search History',
-              trailing: GestureDetector(
-                onTap: onClearHistory,
-                child:   const Icon(CupertinoIcons.delete, color: AppColors.textGreyLight, size: 15),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.md),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: AppSizes.md),
+              decoration: BoxDecoration(
+                color: AppColors.iconBackgroundLight,
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 44,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
-                itemCount: historyCo.length,
-                separatorBuilder: (_, __) => const SizedBox(width: AppSizes.sm),
-                itemBuilder: (_, int i) {
-                  final WalletCoinModel coin = historyCo[i];
-                  return GestureDetector(
-                    onTap: () => onTap(coin),
-                    child: Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                      decoration: BoxDecoration(
-                        color: AppColors.iconBackground,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        coin.coinDetails.symbol,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+          const Text(
+            'Select withdrawal account',
+            style: TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: AppSizes.md),
+          _AccountCheckbox(
+            label: 'Spot Account',
+            value: _spot,
+            onChanged: (bool? v) => setState(() => _spot = v ?? true),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          _AccountCheckbox(
+            label: 'Funding Account',
+            value: _funding,
+            onChanged: (bool? v) => setState(() => _funding = v ?? true),
+          ),
+          const SizedBox(height: AppSizes.sm),
+          _AccountCheckbox(
+            label: 'Earn - Flexible Assets',
+            value: _earn,
+            onChanged: (bool? v) => setState(() => _earn = v ?? true),
+          ),
+          const SizedBox(height: AppSizes.lg),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.yellow,
+                foregroundColor: AppColors.black,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
+                ),
               ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Confirm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: AppSizes.md)),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSizes.xs),
         ],
-
-        SliverToBoxAdapter(
-          child: _SectionHeader(
-            label: 'Coin List',
-            trailing: const Icon(Icons.sort_by_alpha, color: AppColors.textGreyLight, size: 18),
-          ),
-        ),
-
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (_, int i) => _CoinListTile(coin: allCoins[i], onTap: onTap),
-            childCount: allCoins.length,
-          ),
-        ),
-
-        const SliverToBoxAdapter(child: SizedBox(height: AppSizes.xxxL)),
-      ],
+      ),
     );
   }
 }
 
-class _SectionHeader extends StatelessWidget {
+class _AccountCheckbox extends StatelessWidget {
   final String label;
-  final Widget? trailing;
+  final bool value;
+  final ValueChanged<bool?> onChanged;
 
-  const _SectionHeader({required this.label, this.trailing});
+  const _AccountCheckbox({required this.label, required this.value, required this.onChanged});
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.sm, AppSizes.md, AppSizes.xs),
-    child: Row(
-      children: <Widget>[
-        Text(
-          label,
-          style: const TextStyle(color: AppColors.white, fontSize: 15, fontWeight: FontWeight.bold),
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.iconBackground,
+          borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
         ),
-        const Spacer(),
-        if (trailing != null) trailing!,
-      ],
-    ),
-  );
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.textGreyLight, width: 1.5),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: value ? const Icon(Icons.check, size: 16, color: AppColors.white) : null,
+            ),
+            const SizedBox(width: 12),
+            Text(label, style: const TextStyle(color: AppColors.white, fontSize: 15)),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
+// ── Coin list tile ─────────────────────────────────────────────────────────────
 class _CoinListTile extends StatelessWidget {
   final WalletCoinModel coin;
   final void Function(WalletCoinModel) onTap;
@@ -270,11 +303,11 @@ class _CoinListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double usdValue = coin.quantity * coin.coinDetails.price;
+    final double bdtValue = coin.quantity * coin.coinDetails.price;
     return InkWell(
       onTap: () => onTap(coin),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 12),
         child: Row(
           children: <Widget>[
             CircleAvatar(
@@ -315,7 +348,7 @@ class _CoinListTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
                 Text(
-                  coin.quantity.toStringAsFixed(coin.quantity >= 1 ? 2 : 8),
+                  coin.quantity.toStringAsFixed(8),
                   style: const TextStyle(
                     color: AppColors.white,
                     fontWeight: FontWeight.bold,
@@ -324,7 +357,7 @@ class _CoinListTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '≈ \$${usdValue.toStringAsFixed(2)}',
+                  '≈ ৳${bdtValue.toStringAsFixed(2)}',
                   style: const TextStyle(color: AppColors.textGreyLight, fontSize: 12),
                 ),
               ],

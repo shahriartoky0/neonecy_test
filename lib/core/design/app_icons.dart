@@ -73,4 +73,5 @@ class AppIcons {
 
    static String confirmTradeBitCoinBag = "$baseUrl/bit_coin_bag.svg";
    static String confirmTradeShareIcon = "$baseUrl/share_bitcoin.svg";
+   static String downLoadIcon = "$baseUrl/download.svg";
  }

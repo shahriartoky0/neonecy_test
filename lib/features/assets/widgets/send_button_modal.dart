@@ -74,9 +74,9 @@ void sendButtonModal(BuildContext context) {
                     transition: Transition.rightToLeft,
                   );
                 },
-                title: 'Withdraw Crypto',
+                title: 'Withdraw Asset',
                 subTitle:
-                'Withdraw crypto to other exchanges/wallets',
+                'Withdraw crypto from Binance to other exchanges/wallets',
                 leadingWidget: const Icon(
                   CupertinoIcons.arrow_up_to_line_alt,
                   color: AppColors.white,
@@ -89,7 +89,7 @@ void sendButtonModal(BuildContext context) {
               AddFundModalTile(
                 onTap: () {},
                 title: 'Withdraw USD',
-                subTitle: 'Sell crypto for USD and withdraw via SWIFT',
+                subTitle: 'Sell crypto for USD and withdraw via SWIFT bank transfer',
                 leadingWidget: const Icon(
                     Icons.attach_money, color: AppColors.white),
               ),
@@ -101,7 +101,7 @@ void sendButtonModal(BuildContext context) {
               AddFundModalTile(
                 onTap: () {},
                 title: 'P2P Trading',
-                subTitle: 'Sell directly to users. Competitive pricing.',
+                subTitle: 'Sell directly to users. Competitive pricing. Local Payments',
                 leadingWidget: const Icon(
                     Icons.people_alt_outlined, color: AppColors.white),
               ),

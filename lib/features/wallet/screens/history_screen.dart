@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/common/widgets/draggable_ai_button.dart';
+import 'package:neonecy_test/core/design/app_icons.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
 import '../models/transaction_history.dart';
@@ -57,14 +59,7 @@ class HistoryScreen extends StatelessWidget {
           ],
         ),
         actions: <Widget>[
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.white),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Icon(CupertinoIcons.arrow_down, color: AppColors.textWhite, size: 14),
-          ),
+          CustomSvgImage(assetName: AppIcons.downLoadIcon,height: 20,),
           const SizedBox(width: AppSizes.md,)
         ],
       ),
