@@ -319,7 +319,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       ),
                       const SizedBox(width: AppSizes.sm),
                       _PillButton(
-                        icon: CustomSvgImage(assetName: AppIcons.scanIcon, color: AppColors.white ,height: 12,),
+                        icon: CustomSvgImage(
+                          assetName: AppIcons.scanIcon,
+                          color: AppColors.white,
+                          height: 12,
+                        ),
                         label: 'Scan',
                         onTap: () {},
                       ),
@@ -438,7 +442,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                         style: const TextStyle(color: AppColors.white, fontSize: 13),
                       ),
                       const SizedBox(width: 6),
-                       CustomSvgImage(assetName: AppIcons.editIcon, height: 13)
+                      CustomSvgImage(assetName: AppIcons.editIcon, height: 13),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -909,10 +913,9 @@ class _AddressBookSheetState extends State<_AddressBookSheet> with SingleTickerP
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.md, AppSizes.md, 0),
             child: Row(
-
               children: <Widget>[
                 CustomSvgImage(assetName: AppIcons.editIcon, height: 22),
-                   Expanded(
+                Expanded(
                   child: const Text(
                     'Select Address',
                     style: TextStyle(
@@ -956,6 +959,7 @@ class _AddressBookSheetState extends State<_AddressBookSheet> with SingleTickerP
               ],
             ),
           ),
+
           // ── Add New Address button ────────────────────────────────────
           Padding(
             padding: EdgeInsets.fromLTRB(
@@ -984,9 +988,9 @@ class _AddressBookSheetState extends State<_AddressBookSheet> with SingleTickerP
                   );
                   widget.onAddressAdded();
                 },
-                child:   Text(
+                child: Text(
                   'Add New Address',
-                  style: const TextStyle(fontSize: 16 ).copyWith(fontWeight: FontWeight.w400),
+                  style: const TextStyle(fontSize: 16).copyWith(fontWeight: FontWeight.w400),
                 ),
               ),
             ),

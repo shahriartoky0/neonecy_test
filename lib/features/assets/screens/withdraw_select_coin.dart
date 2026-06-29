@@ -67,7 +67,7 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.search, color: AppColors.white),
+            icon: CustomSvgImage(assetName: AppIcons.search, color: AppColors.white, height: 20),
             onPressed: () => setState(() {
               _searchVisible = !_searchVisible;
               if (!_searchVisible) {
@@ -114,7 +114,10 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search Coins',
                   hintStyle: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.textGreyLight, size: 20),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: CustomSvgImage(assetName: AppIcons.search, color: AppColors.textGreyLight, height: 18),
+                  ),
                   filled: true,
                   fillColor: AppColors.iconBackground,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
