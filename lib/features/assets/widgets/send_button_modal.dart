@@ -77,10 +77,7 @@ void sendButtonModal(BuildContext context) {
                 title: 'Withdraw Asset',
                 subTitle:
                 'Withdraw crypto from Binance to other exchanges/wallets',
-                leadingWidget: const Icon(
-                  CupertinoIcons.arrow_up_to_line_alt,
-                  color: AppColors.white,
-                ),
+                leadingWidget: CustomSvgImage(assetName: AppIcons.withdrawAssetIcon,height: 20,),
               ),
 
               const SizedBox(height: 10),
@@ -90,8 +87,7 @@ void sendButtonModal(BuildContext context) {
                 onTap: () {},
                 title: 'Withdraw USD',
                 subTitle: 'Sell crypto for USD and withdraw via SWIFT bank transfer',
-                leadingWidget: const Icon(
-                    Icons.attach_money, color: AppColors.white),
+                leadingWidget: CustomSvgImage(assetName: AppIcons.withdrawAssetIcon,height: 20,),
               ),
 
               const SizedBox(height: 10),
@@ -102,8 +98,7 @@ void sendButtonModal(BuildContext context) {
                 onTap: () {},
                 title: 'P2P Trading',
                 subTitle: 'Sell directly to users. Competitive pricing. Local Payments',
-                leadingWidget: const Icon(
-                    Icons.people_alt_outlined, color: AppColors.white),
+                leadingWidget: CustomSvgImage(assetName: AppIcons.p2pIcon,height: 22,),
               ),
 
               const SizedBox(height: AppSizes.xxxL),

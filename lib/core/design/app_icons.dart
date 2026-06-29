@@ -10,7 +10,6 @@ class AppIcons {
   static String pointer = "$baseUrl/point.svg";
   static String profile = "$baseUrl/profile.svg";
 
-
   // Appbar Icons
   static String appbarCoin = "$baseUrl/appbar_coin.svg";
   static String appbarHeadphone = "$baseUrl/appbar_headphone.svg";
@@ -69,9 +68,16 @@ class AppIcons {
   static String edit = "$baseUrl/edit.svg";
   static String logOut = "$baseUrl/log_out.svg";
 
-   static String aiFloatingButton = "$baseUrl/ai_button.svg";
+  static String aiFloatingButton = "$baseUrl/ai_button.svg";
 
-   static String confirmTradeBitCoinBag = "$baseUrl/bit_coin_bag.svg";
-   static String confirmTradeShareIcon = "$baseUrl/share_bitcoin.svg";
-   static String downLoadIcon = "$baseUrl/download.svg";
- }
+  static String confirmTradeBitCoinBag = "$baseUrl/bit_coin_bag.svg";
+  static String confirmTradeShareIcon = "$baseUrl/share_bitcoin.svg";
+  static String downLoadIcon = "$baseUrl/download.svg";
+
+  // Withdraw Icons
+  static String editIcon = "$baseUrl/edit_icon.svg";
+  static String helpIcon = "$baseUrl/help_icon.svg";
+  static String p2pIcon = "$baseUrl/p2p_icon.svg";
+  static String scanIcon = "$baseUrl/scan_icon.svg";
+  static String withdrawAssetIcon = "$baseUrl/withdraw_asset_icon.svg";
+}

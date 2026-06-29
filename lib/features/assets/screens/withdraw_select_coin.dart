@@ -1,8 +1,10 @@
 // lib/features/assets/screens/withdraw_select_coin.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
+import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/utils/address_storage_service.dart';
 import 'package:neonecy_test/features/assets/screens/withdraw.dart';
 import 'package:neonecy_test/features/wallet/controllers/wallet_controller.dart';
@@ -87,18 +89,7 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: AppColors.iconBackground,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_wallet_outlined,
-                      color: AppColors.white,
-                      size: 15,
-                    ),
-                  ),
+                  CustomSvgImage(assetName: AppIcons.navAsset, color: AppColors.white),
                   const SizedBox(width: 8),
                   const Text(
                     'Spot + Funding + Earn Flexible',
@@ -247,7 +238,10 @@ class _AccountSelectorSheetState extends State<_AccountSelectorSheet> {
                 ),
               ),
               onPressed: () => Navigator.pop(context),
-              child: const Text('Confirm', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Confirm',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           SizedBox(height: MediaQuery.of(context).padding.bottom + AppSizes.xs),
@@ -280,10 +274,11 @@ class _AccountCheckbox extends StatelessWidget {
               width: 22,
               height: 22,
               decoration: BoxDecoration(
-                border: Border.all(color: AppColors.textGreyLight, width: 1.5),
+                border: Border.all(color: AppColors.iconBackgroundLight, width: 1),
                 borderRadius: BorderRadius.circular(4),
+                color: value ? AppColors.white : Colors.transparent,
               ),
-              child: value ? const Icon(Icons.check, size: 16, color: AppColors.white) : null,
+              child: value ? const Icon(Icons.check, size: 16, color: AppColors.primaryColor) : null,
             ),
             const SizedBox(width: 12),
             Text(label, style: const TextStyle(color: AppColors.white, fontSize: 15)),

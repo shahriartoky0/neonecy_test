@@ -8,6 +8,7 @@ import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/design/app_icons.dart';
+import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/utils/address_storage_service.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/assets/screens/add_new_address_screen.dart';
@@ -53,8 +54,9 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   }
 
   void _loadSavedAddresses() {
-    final List<CryptoAddressModel> addresses =
-        _addressService.getAddressesForCoin(widget.coin.coinDetails.symbol);
+    final List<CryptoAddressModel> addresses = _addressService.getAddressesForCoin(
+      widget.coin.coinDetails.symbol,
+    );
     setState(() => _savedAddresses = addresses);
     _calculateNetworkFee();
   }
@@ -202,10 +204,16 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           ],
         ),
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.help_outline, color: AppColors.white),
-            onPressed: _showNetworkInfo,
+          // IconButton(
+          //   icon: const Icon(Icons.help_outline, color: AppColors.white),
+          //   onPressed: _showNetworkInfo,
+          // ),
+          InkWell(
+            onTap: _showNetworkInfo,
+            child: CustomSvgImage(assetName: AppIcons.helpIcon, height: 20),
           ),
+          const SizedBox(width: 8),
+
           CustomSvgImage(assetName: AppIcons.assetHistory, height: 20),
           const SizedBox(width: 8),
         ],
@@ -266,7 +274,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 children: <Widget>[
                   const Text(
                     'Address',
-                    style: TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   GestureDetector(
@@ -285,7 +297,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                             )
                           : Text(
                               _address,
-                              style: const TextStyle(color: AppColors.white, fontSize: 14, height: 1.4),
+                              style: const TextStyle(
+                                color: AppColors.white,
+                                fontSize: 14,
+                                height: 1.4,
+                              ),
                             ),
                     ),
                   ),
@@ -293,13 +309,17 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   Row(
                     children: <Widget>[
                       _PillButton(
-                        icon: CupertinoIcons.person_circle,
+                        icon: const Icon(
+                          CupertinoIcons.person_circle,
+                          color: AppColors.white,
+                          size: 16,
+                        ),
                         label: 'Address book',
                         onTap: () => _showAddressBook(context),
                       ),
                       const SizedBox(width: AppSizes.sm),
                       _PillButton(
-                        icon: Icons.crop,
+                        icon: CustomSvgImage(assetName: AppIcons.scanIcon, color: AppColors.white ,height: 12,),
                         label: 'Scan',
                         onTap: () {},
                       ),
@@ -316,9 +336,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
               decoration: BoxDecoration(
                 color: AppColors.iconBackground,
                 borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
-                border: _amountError != null
-                    ? Border.all(color: AppColors.red, width: 1)
-                    : null,
+                border: _amountError != null ? Border.all(color: AppColors.red, width: 1) : null,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,12 +345,20 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     children: <Widget>[
                       const Text(
                         'Withdrawal Amount',
-                        style: TextStyle(color: AppColors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: _showAmountInfo,
-                        child: const Icon(Icons.info_outline, size: 18, color: AppColors.textGreyLight),
+                        child: const Icon(
+                          Icons.info_outline,
+                          size: 18,
+                          color: AppColors.textGreyLight,
+                        ),
                       ),
                     ],
                   ),
@@ -409,10 +435,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     children: <Widget>[
                       Text(
                         '≈ ৳${_fiatValue.toStringAsFixed(2)}',
-                        style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+                        style: const TextStyle(color: AppColors.white, fontSize: 13),
                       ),
                       const SizedBox(width: 6),
-                      const Icon(Icons.edit_outlined, size: 13, color: AppColors.textGreyLight),
+                       CustomSvgImage(assetName: AppIcons.editIcon, height: 13)
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -519,12 +545,19 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     children: <Widget>[
                       Icon(Icons.call_received, color: AppColors.textGreyLight, size: 16),
                       SizedBox(width: 6),
-                      Text('Receive amount', style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
+                      Text(
+                        'Receive amount',
+                        style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+                      ),
                     ],
                   ),
                   Text(
                     '${_receiveAmount.toStringAsFixed(8)} $symbol',
-                    style: const TextStyle(color: AppColors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -536,7 +569,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     children: <Widget>[
                       Icon(Icons.percent, color: AppColors.textGreyLight, size: 16),
                       SizedBox(width: 6),
-                      Text('Network fee', style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
+                      Text(
+                        'Network fee',
+                        style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+                      ),
                     ],
                   ),
                   Text(
@@ -746,7 +782,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           children: <Widget>[
             Icon(Icons.info_outline, color: AppColors.yellow, size: 20),
             SizedBox(width: 8),
-            Text('Network Info', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              'Network Info',
+              style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
           ],
         ),
         content: const Text(
@@ -773,7 +812,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
           children: <Widget>[
             Icon(Icons.info_outline, color: AppColors.yellow, size: 20),
             SizedBox(width: 8),
-            Text('Withdrawal Amount', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              'Withdrawal Amount',
+              style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
           ],
         ),
         content: Column(
@@ -827,8 +869,7 @@ class _AddressBookSheet extends StatefulWidget {
   State<_AddressBookSheet> createState() => _AddressBookSheetState();
 }
 
-class _AddressBookSheetState extends State<_AddressBookSheet>
-    with SingleTickerProviderStateMixin {
+class _AddressBookSheetState extends State<_AddressBookSheet> with SingleTickerProviderStateMixin {
   late TabController _tabCtrl;
 
   @override
@@ -868,14 +909,18 @@ class _AddressBookSheetState extends State<_AddressBookSheet>
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSizes.md, AppSizes.md, AppSizes.md, 0),
             child: Row(
+
               children: <Widget>[
-                const Icon(Icons.edit_outlined, color: AppColors.white, size: 20),
-                const SizedBox(width: AppSizes.sm),
-                const Expanded(
-                  child: Text(
+                CustomSvgImage(assetName: AppIcons.editIcon, height: 22),
+                   Expanded(
+                  child: const Text(
                     'Select Address',
-                    style: TextStyle(color: AppColors.white, fontSize: 17, fontWeight: FontWeight.bold),
-                  ),
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ).centered,
                 ),
               ],
             ),
@@ -883,32 +928,31 @@ class _AddressBookSheetState extends State<_AddressBookSheet>
           // ── Tabs ──────────────────────────────────────────────────────
           TabBar(
             controller: _tabCtrl,
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
             indicatorColor: AppColors.yellow,
+            dividerColor: AppColors.iconBackground,
+            dividerHeight: 1,
             indicatorSize: TabBarIndicatorSize.label,
             indicatorWeight: 2,
             labelColor: AppColors.white,
             unselectedLabelColor: AppColors.textGreyLight,
-            labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            unselectedLabelStyle: const TextStyle(fontSize: 14),
+            labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            unselectedLabelStyle: const TextStyle(fontSize: 15),
             tabs: const <Widget>[
               Tab(text: 'Address book'),
               Tab(text: 'Recently'),
             ],
           ),
-          const Divider(height: 1, color: AppColors.iconBackground),
+          // const Divider(height: 1, color: AppColors.iconBackground),
           // ── Tab views ────────────────────────────────────────────────
           Expanded(
             child: TabBarView(
               controller: _tabCtrl,
               children: <Widget>[
-                _AddressListTab(
-                  addresses: widget.savedAddresses,
-                  onSelect: widget.onSelect,
-                ),
-                _AddressListTab(
-                  addresses: const <CryptoAddressModel>[],
-                  onSelect: widget.onSelect,
-                ),
+                _AddressListTab(addresses: widget.savedAddresses, onSelect: widget.onSelect),
+                _AddressListTab(addresses: const <CryptoAddressModel>[], onSelect: widget.onSelect),
               ],
             ),
           ),
@@ -940,9 +984,9 @@ class _AddressBookSheetState extends State<_AddressBookSheet>
                   );
                   widget.onAddressAdded();
                 },
-                child: const Text(
+                child:   Text(
                   'Add New Address',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16 ).copyWith(fontWeight: FontWeight.w400),
                 ),
               ),
             ),
@@ -996,7 +1040,11 @@ class _AddressListTab extends StatelessWidget {
                     color: AppColors.iconBackgroundLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.account_balance_wallet, color: AppColors.yellow, size: 18),
+                  child: const Icon(
+                    Icons.account_balance_wallet,
+                    color: AppColors.yellow,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1005,7 +1053,11 @@ class _AddressListTab extends StatelessWidget {
                     children: <Widget>[
                       Text(
                         addr.label ?? addr.network,
-                        style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.w500, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -1037,7 +1089,7 @@ class _AddressListTab extends StatelessWidget {
 
 // ── Shared Pill Button ─────────────────────────────────────────────────────────
 class _PillButton extends StatelessWidget {
-  final IconData icon;
+  final Widget icon;
   final String label;
   final VoidCallback onTap;
 
@@ -1048,17 +1100,17 @@ class _PillButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.primaryColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(4),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(icon, color: AppColors.white, size: 16),
+            icon,
             const SizedBox(width: 6),
-            Text(label, style: const TextStyle(color: AppColors.white, fontSize: 13)),
+            Text(label, style: const TextStyle(color: AppColors.white, fontSize: 11)),
           ],
         ),
       ),
