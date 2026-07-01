@@ -212,7 +212,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
             onTap: _showNetworkInfo,
             child: CustomSvgImage(assetName: AppIcons.helpIcon, height: 20),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSizes.lg),
 
           CustomSvgImage(assetName: AppIcons.assetHistory, height: 20),
           const SizedBox(width: 8),
@@ -548,13 +548,14 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  const Row(
+                  Row(
                     children: <Widget>[
-                      Icon(Icons.call_received, color: AppColors.textGreyLight, size: 16),
-                      SizedBox(width: 6),
-                      Text(
+                      CustomSvgImage(assetName: AppIcons.receiveAmountIcon, height: 18),
+
+                      const SizedBox(width: 6),
+                      const Text(
                         'Receive amount',
-                        style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+                        style: TextStyle(color: AppColors.textWhite, fontSize: 13),
                       ),
                     ],
                   ),
@@ -574,11 +575,11 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                 children: <Widget>[
                   const Row(
                     children: <Widget>[
-                      Icon(Icons.percent, color: AppColors.textGreyLight, size: 16),
+                      Icon(Icons.percent, color: AppColors.white, size: 18),
                       SizedBox(width: 6),
                       Text(
                         'Network fee',
-                        style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+                        style: TextStyle(color: AppColors.textWhite, fontSize: 13),
                       ),
                     ],
                   ),

@@ -1,9 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/extensions/context_extensions.dart';
- import '../../../core/utils/custom_loader.dart';
+import '../../../core/utils/custom_loader.dart';
 import '../controllers/crypto_market_controller.dart';
 import '../model/crypto_data_model.dart';
 
@@ -114,49 +115,71 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
   }
 
   Widget _buildCryptoList() {
-    return Obx(
-          ()   {
-        // if (controller.isLoading.value) {
-        //   return const SizedBox(
-        //     height: 200,
-        //     child: Center(
-        //       child: Column(
-        //         mainAxisAlignment: MainAxisAlignment.center,
-        //         children: <Widget>[
-        //           CustomLoading(),
-        //           SizedBox(height: 16),
-        //           Text(
-        //             'Loading trending cryptocurrencies...',
-        //             style: TextStyle(color: AppColors.textGreyLight),
-        //           ),
-        //         ],
-        //       ),
-        //     ),
-        //  );
-        // }
+    return Obx(() {
+      // if (controller.isLoading.value) {
+      //   return const SizedBox(
+      //     height: 200,
+      //     child: Center(
+      //       child: Column(
+      //         mainAxisAlignment: MainAxisAlignment.center,
+      //         children: <Widget>[
+      //           CustomLoading(),
+      //           SizedBox(height: 16),
+      //           Text(
+      //             'Loading trending cryptocurrencies...',
+      //             style: TextStyle(color: AppColors.textGreyLight),
+      //           ),
+      //         ],
+      //       ),
+      //     ),
+      //  );
+      // }
 
-        if (controller.cryptoList.isEmpty) {
-          return const SizedBox(
-            height: 100,
-            child: Center(
-              child: Text(
-                'No data available',
-                style: TextStyle(color: AppColors.textGreyLight),
-              ),
-            ),
-          );
-        }
-
-        return Column(
-          children: controller.cryptoList
-              .map((CryptoData crypto) => _buildCryptoItem(crypto))
-              .toList(),
+      if (controller.cryptoList.isEmpty) {
+        return const SizedBox(
+          height: 100,
+          child: Center(
+            child: Text('No data available', style: TextStyle(color: AppColors.textGreyLight)),
+          ),
         );
-      },
+      }
+
+      return Column(
+        children: controller.cryptoList
+            .map((CryptoData crypto) => _buildCryptoItem(crypto))
+            .toList(),
+      );
+    });
+  }
+
+  Widget _buildCoinIcon(CryptoData crypto) {
+    const double size = 28;
+    return Container(
+      width: size,
+      height: size,
+      decoration: const BoxDecoration(color: AppColors.iconBackground, shape: BoxShape.circle),
+      child: ClipOval(
+        child: crypto.imageUrl != null
+            ? CachedNetworkImage(
+                imageUrl: crypto.imageUrl!,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => _coinInitial(crypto),
+              )
+            : _coinInitial(crypto),
+      ),
     );
   }
 
-// Updated crypto item with additional data
+  Widget _coinInitial(CryptoData crypto) {
+    return Center(
+      child: Text(
+        crypto.symbol.isNotEmpty ? crypto.symbol[0] : '?',
+        style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 12),
+      ),
+    );
+  }
+
+  // Updated crypto item with additional data
   Widget _buildCryptoItem(CryptoData crypto) {
     final Color changeColor = crypto.changePercent >= 0 ? AppColors.green : AppColors.red;
 
@@ -164,29 +187,31 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: AppSizes.sm),
       child: Row(
         children: <Widget>[
-          // Symbol and name
+          // Icon, symbol and name
           Expanded(
             flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  crypto.symbol,
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w600,
+            child: Row(
+              children: <Widget>[
+                _buildCoinIcon(crypto),
+                const SizedBox(width: AppSizes.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        crypto.symbol,
+                        style: const TextStyle(color: AppColors.white, fontWeight: FontWeight.w600),
+                      ),
+                      if (crypto.name != null)
+                        Text(
+                          crypto.name!,
+                          style: const TextStyle(color: AppColors.textGreyLight, fontSize: 11),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
                   ),
                 ),
-                if (crypto.name != null)
-                  Text(
-                    crypto.name!,
-                    style: const TextStyle(
-                      color: AppColors.textGreyLight,
-                      fontSize: 11,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
               ],
             ),
           ),
@@ -205,10 +230,7 @@ class CryptoMarketWidget extends GetView<CryptoMarketController> {
                 if (crypto.subText != null)
                   Text(
                     crypto.subText!,
-                    style: const TextStyle(
-                      color: AppColors.textGreyLight,
-                      fontSize: 11,
-                    ),
+                    style: const TextStyle(color: AppColors.textGreyLight, fontSize: 11),
                     textAlign: TextAlign.right,
                   ),
               ],

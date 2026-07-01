@@ -119,6 +119,7 @@ class CryptoMarketController extends GetxController {
               volume: quote['volume_24h']?.toDouble(),
               marketCap: quote['market_cap']?.toDouble(),
               subText: _formatVolume(quote['volume_24h']),
+              imageUrl: _logoUrl(coin['id']),
             );
           }).toList();
         }
@@ -145,6 +146,7 @@ class CryptoMarketController extends GetxController {
             volume: quote['volume_24h']?.toDouble(),
             marketCap: quote['market_cap']?.toDouble(),
             subText: _formatVolume(quote['volume_24h']),
+            imageUrl: _logoUrl(coin['id']),
           );
         }).toList();
       }
@@ -180,6 +182,7 @@ class CryptoMarketController extends GetxController {
               volume: quote['volume_24h']?.toDouble(),
               marketCap: quote['market_cap']?.toDouble(),
               subText: _formatMarketCap(quote['market_cap']),
+              imageUrl: _logoUrl(coin['id']),
             );
           }).toList();
         }
@@ -212,6 +215,7 @@ class CryptoMarketController extends GetxController {
             volume: quote['volume_24h']?.toDouble(),
             marketCap: quote['market_cap']?.toDouble(),
             subText: _formatMarketCap(quote['market_cap']),
+            imageUrl: _logoUrl(coin['id']),
           );
         }).toList();
       }
@@ -247,6 +251,7 @@ class CryptoMarketController extends GetxController {
             volume: quote['volume_24h']?.toDouble(),
             marketCap: quote['market_cap']?.toDouble(),
             subText: _formatMarketCap(quote['market_cap']),
+            imageUrl: _logoUrl(coin['id']),
           );
         }).toList();
       }
@@ -281,6 +286,7 @@ class CryptoMarketController extends GetxController {
               volume: quote['volume_24h']?.toDouble(),
               marketCap: quote['market_cap']?.toDouble(),
               subText: 'Rank #${coin['cmc_rank'] ?? 'N/A'}',
+              imageUrl: _logoUrl(coin['id']),
             );
           }).toList();
         }
@@ -308,6 +314,7 @@ class CryptoMarketController extends GetxController {
             volume: quote['volume_24h']?.toDouble(),
             marketCap: quote['market_cap']?.toDouble(),
             subText: 'Rank #${coin['cmc_rank'] ?? 'N/A'}',
+            imageUrl: _logoUrl(coin['id']),
           );
         }).toList();
       }
@@ -353,6 +360,7 @@ class CryptoMarketController extends GetxController {
               volume: quote['volume_24h']?.toDouble(),
               marketCap: quote['market_cap']?.toDouble(),
               subText: _formatMarketCap(quote['market_cap']),
+              imageUrl: _logoUrl(coin['id']),
             );
           }).toList();
         }
@@ -369,6 +377,7 @@ class CryptoMarketController extends GetxController {
             volume: quote['volume_24h']?.toDouble(),
             marketCap: quote['market_cap']?.toDouble(),
             subText: _formatMarketCap(quote['market_cap']),
+            imageUrl: _logoUrl(coin['id']),
           );
         }).toList();
       }
@@ -381,6 +390,11 @@ class CryptoMarketController extends GetxController {
   }
 
   // Helper methods
+  String? _logoUrl(dynamic id) {
+    if (id == null) return null;
+    return 'https://s2.coinmarketcap.com/static/img/coins/64x64/$id.png';
+  }
+
   String _formatPrice(dynamic price) {
     if (price == null) return '0';
     final double p = price is double ? price : (price is int ? price.toDouble() : 0.0);

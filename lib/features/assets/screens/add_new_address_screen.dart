@@ -2,9 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
+import 'package:neonecy_test/core/design/app_icons.dart';
 import 'package:neonecy_test/core/utils/address_storage_service.dart';
 import 'package:neonecy_test/features/settings/model/crypto_address_model.dart';
 import 'package:neonecy_test/features/wallet/models/coin_wallet_model.dart';
@@ -120,14 +122,22 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                     child: widget.coin.coinDetails.thumb.isEmpty
                         ? Text(
                             symbol[0],
-                            style: const TextStyle(color: AppColors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           )
                         : null,
                   ),
                   const SizedBox(width: 10),
                   Text(
                     symbol,
-                    style: const TextStyle(color: AppColors.white, fontSize: 15, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const Spacer(),
                   const Icon(Icons.chevron_right, color: AppColors.textGreyLight, size: 20),
@@ -160,8 +170,13 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                       text: TextSpan(
                         children: <InlineSpan>[
                           const TextSpan(
-                            text: 'Set as a universal address, without specific coins. Choose this option for Alpha tokens. ',
-                            style: TextStyle(color: AppColors.textGreyLight, fontSize: 12, height: 1.5),
+                            text:
+                                'Set as a universal address, without specific coins. Choose this option for Alpha tokens. ',
+                            style: TextStyle(
+                              color: AppColors.textGreyLight,
+                              fontSize: 12,
+                              height: 1.5,
+                            ),
                           ),
                           WidgetSpan(
                             child: GestureDetector(
@@ -202,14 +217,27 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                   style: const TextStyle(color: AppColors.white, fontSize: 14),
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
+
                     hintText: 'Long press to paste',
                     hintStyle: const TextStyle(color: AppColors.textGreyLight, fontSize: 14),
                     filled: true,
                     fillColor: Colors.transparent,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.md, vertical: 14),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.crop_free, color: AppColors.textGreyLight, size: 20),
-                      onPressed: () {},
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.md,
+                      vertical: 18,
+                    ),
+                    // suffix: CustomSvgImage(
+                    //   assetName: AppIcons.scanIcon,
+                    //   color: AppColors.textGreyLight,
+                    //   height: 10,
+                    // ),
+                    suffixIcon: Padding(
+                      padding: const EdgeInsets.all(14.0),
+                      child: CustomSvgImage(
+                        assetName: AppIcons.scanIcon,
+                        color: AppColors.textGreyLight,
+                        height: 10,
+                      ),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSizes.borderRadiusMd),
@@ -222,7 +250,10 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
             const SizedBox(height: AppSizes.lg),
 
             // ── Select Network ────────────────────────────────────────────
-            const Text('Select Network', style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
+            const Text(
+              'Select Network',
+              style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+            ),
             const SizedBox(height: AppSizes.sm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
@@ -236,7 +267,10 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                   isExpanded: true,
                   dropdownColor: AppColors.iconBackground,
                   iconEnabledColor: AppColors.textGreyLight,
-                  hint: const Text('Select Network', style: TextStyle(color: AppColors.textGreyLight, fontSize: 14)),
+                  hint: const Text(
+                    'Select Network',
+                    style: TextStyle(color: AppColors.textGreyLight, fontSize: 14),
+                  ),
                   style: const TextStyle(color: AppColors.white, fontSize: 14),
                   items: _networks
                       .map(
@@ -253,7 +287,10 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
             const SizedBox(height: AppSizes.lg),
 
             // ── Address Origin ────────────────────────────────────────────
-            const Text('Address Origin', style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
+            const Text(
+              'Address Origin',
+              style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+            ),
             const SizedBox(height: AppSizes.sm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: AppSizes.md),
@@ -267,7 +304,10 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                   isExpanded: true,
                   dropdownColor: AppColors.iconBackground,
                   iconEnabledColor: AppColors.textGreyLight,
-                  hint: const Text('Select Platform', style: TextStyle(color: AppColors.textGreyLight, fontSize: 14)),
+                  hint: const Text(
+                    'Select Platform',
+                    style: TextStyle(color: AppColors.textGreyLight, fontSize: 14),
+                  ),
                   style: const TextStyle(color: AppColors.white, fontSize: 14),
                   items: _platforms
                       .map(
@@ -284,7 +324,10 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
             const SizedBox(height: AppSizes.lg),
 
             // ── Wallet Label ──────────────────────────────────────────────
-            const Text('Wallet Label (Optional)', style: TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
+            const Text(
+              'Wallet Label (Optional)',
+              style: TextStyle(color: AppColors.textGreyLight, fontSize: 13),
+            ),
             const SizedBox(height: AppSizes.sm),
             Container(
               decoration: BoxDecoration(
@@ -320,7 +363,10 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                   ),
                 ),
                 onPressed: _canSave ? _save : null,
-                child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],
