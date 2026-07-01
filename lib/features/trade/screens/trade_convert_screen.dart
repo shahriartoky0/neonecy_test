@@ -160,10 +160,10 @@ class TradeConvertScreen extends GetView<TradeController> {
                 return Row(
                   children: <Widget>[
                     CustomSvgImage(
-                      assetName: AppIcons.navAsset,
-                      color: AppColors.white.withValues(alpha: 0.8),
+                      assetName: AppIcons.walletIcon,
+                      color: AppColors.white.withValues(alpha: 1),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 6),
                     Text(
                       'Available ',
                       style: TextStyle(

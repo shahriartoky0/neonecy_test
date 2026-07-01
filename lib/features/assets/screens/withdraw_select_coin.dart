@@ -89,7 +89,7 @@ class _WithdrawSelectCoinScreenState extends State<WithdrawSelectCoinScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  CustomSvgImage(assetName: AppIcons.navAsset, color: AppColors.white),
+                  CustomSvgImage(assetName: AppIcons.walletIcon, color: AppColors.white),
                   const SizedBox(width: 8),
                   const Text(
                     'Spot + Funding + Earn Flexible',

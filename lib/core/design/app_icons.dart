@@ -62,6 +62,7 @@ class AppIcons {
 
   // Search Icon
   static String search = "$baseUrl/search.svg";
+  static String walletIcon = "$baseUrl/wallet_icon.svg";
 
   // Setting Icon
   static String setting = "$baseUrl/setting.svg";
@@ -80,4 +81,7 @@ class AppIcons {
   static String p2pIcon = "$baseUrl/p2p_icon.svg";
   static String scanIcon = "$baseUrl/scan_icon.svg";
   static String withdrawAssetIcon = "$baseUrl/withdraw_asset_icon.svg";
+  static String receiveAmountIcon = "$baseUrl/receive_amount.svg";
+  static String noAddressIcon = "$baseUrl/no_address_icon.svg";
+  static String networkIcon = "$baseUrl/network_icon.svg";
 }

@@ -237,7 +237,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        const Icon(Icons.language, color: AppColors.textGreyLight, size: 16),
+                        CustomSvgImage(
+                          assetName: AppIcons.networkIcon,
+                          color: AppColors.textGreyLight,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           _isAutoNetwork ? 'Select Network' : _selectedNetwork,
@@ -1010,12 +1013,16 @@ class _AddressListTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (addresses.isEmpty) {
-      return const Column(
+      return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Icon(Icons.find_in_page_outlined, size: 64, color: AppColors.textGreyLight),
-          SizedBox(height: AppSizes.md),
-          Text(
+          CustomSvgImage(
+            assetName: AppIcons.noAddressIcon,
+            color: AppColors.textGreyLight.withValues(alpha: 0.7),
+            height: 90,
+          ),
+          const SizedBox(height: AppSizes.md),
+          const Text(
             'No available address',
             style: TextStyle(color: AppColors.textGreyLight, fontSize: 14),
           ),
