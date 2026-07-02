@@ -6,13 +6,13 @@ import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
-import 'package:neonecy_test/core/utils/custom_loader.dart';
 import 'package:neonecy_test/core/utils/validators/app_validation.dart';
 import 'package:neonecy_test/features/auth/controllers/register_controller.dart';
 import 'package:neonecy_test/features/auth/widgets/auth_checkbox.dart';
 import 'package:neonecy_test/features/auth/widgets/auth_top_bar.dart';
 import 'package:neonecy_test/features/auth/widgets/or_divider.dart';
 import 'package:neonecy_test/features/auth/widgets/social_auth_button.dart';
+import 'package:neonecy_test/features/auth/widgets/terms_and_conditions_dialog.dart';
 
 /// Matches the "Welcome to Binance" reference screen: email entry step.
 class RegisterScreen extends StatelessWidget {
@@ -90,8 +90,11 @@ class RegisterScreen extends StatelessWidget {
                                   decoration: TextDecoration.underline,
                                 ),
                                 recognizer: TapGestureRecognizer()
-                                  ..onTap = () => ToastManager.show(
-                                        message: 'Privacy Notice coming soon',
+                                  ..onTap = () => showDialog<void>(
+                                        context: context,
+                                        barrierColor: Colors.black54,
+                                        builder: (BuildContext _) =>
+                                            const TermsAndConditionsDialog(),
                                       ),
                               ),
                               const TextSpan(text: '.'),
@@ -104,36 +107,33 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSizes.xl),
                 Obx(
-                  () => Visibility(
-                    replacement: const CustomLoading(),
-                    visible: controller.isLoading.value == false,
-                    child: AppButton(
-                      labelText: 'Register',
-                      bgColor: AppColors.yellow,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      onTap: () {
-                        if (!controller.emailFormKey.currentState!.validate()) {
-                          return;
-                        }
-                        if (!controller.acceptTerms.value) {
-                          ToastManager.show(message: 'Please accept the Privacy Notice');
-                          return;
-                        }
-                        FocusScope.of(context).unfocus();
-                        Get.toNamed(
-                          AppRoutes.registerPasswordScreen,
-                          arguments: <String, dynamic>{
-                            'email': controller.emailTEController.text.trim(),
-                            'accept_terms_and_condition': controller.acceptTerms.value,
-                          },
-                        );
-                      },
+                  () => AppButton(
+                    labelText: 'Register',
+                    isLoading: controller.isLoading.value,
+                    bgColor: AppColors.yellow,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
+                    onTap: () {
+                      if (!controller.emailFormKey.currentState!.validate()) {
+                        return;
+                      }
+                      if (!controller.acceptTerms.value) {
+                        ToastManager.show(message: 'Please accept the Privacy Notice');
+                        return;
+                      }
+                      FocusScope.of(context).unfocus();
+                      Get.toNamed(
+                        AppRoutes.registerPasswordScreen,
+                        arguments: <String, dynamic>{
+                          'email': controller.emailTEController.text.trim(),
+                          'accept_terms_and_condition': controller.acceptTerms.value,
+                        },
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: AppSizes.xl),

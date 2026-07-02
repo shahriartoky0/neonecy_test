@@ -1,10 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
-
-import '../../../core/design/app_icons.dart';
 
 class SocialAuthButton extends StatelessWidget {
   final Widget icon;

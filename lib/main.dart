@@ -16,6 +16,7 @@ import 'package:neonecy_test/features/wallet/screens/wallet_screen.dart';
 import 'core/design/app_theme.dart';
 import 'core/routes/app_navigation.dart';
 import 'core/routes/app_routes.dart';
+import 'core/services/session_watcher_service.dart';
 import 'features/assets/controllers/assets_controller.dart';
 import 'features/markets/controllers/enhanced_market_controller.dart';
 import 'features/settings/screens/edit_coin_page.dart';
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       theme: AppTheme.defaultThemeData,
       navigatorKey: navigatorKey,
-      initialRoute: AppRoutes.mainBottomScreen,
+      initialRoute: AppRoutes.firstSplashScreen,
       getPages: AppNavigation.routes,
       // home: const CoinAmountListPage(),
       // home:   SettingsScreen(),
@@ -50,6 +51,7 @@ class ControllerBinder extends Bindings {
   /// GLOBAL controller ====>
   @override
   void dependencies() {
+    Get.put(SessionWatcherService(), permanent: true);
     Get.put(MainBottomNavController());
     Get.put(SettingsBottomNavController());
     Get.put(HomeController());

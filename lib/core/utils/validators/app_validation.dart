@@ -23,9 +23,6 @@ class AppValidation {
     if (!RegExp(r'[A-Z]').hasMatch(password)) {
       return "Password must contain at least one uppercase letter";
     }
-    if (!RegExp(r'[a-z]').hasMatch(password)) {
-      return "Password must contain at least one lowercase letter";
-    }
     if (!RegExp(r'[0-9]').hasMatch(password)) {
       return "Password must contain at least one number";
     }

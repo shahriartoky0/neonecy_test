@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/custom_toast.dart';
 import 'package:neonecy_test/core/config/app_constants.dart';
@@ -27,6 +26,7 @@ class RegisterController extends GetxController {
   /// Step 3 - profile details
   final TextEditingController nameTEController = TextEditingController();
   final TextEditingController mobileTEController = TextEditingController();
+  final TextEditingController telegramIdTEController = TextEditingController();
   final GlobalKey<FormState> detailsFormKey = GlobalKey<FormState>();
   final RxnString selectedCountry = RxnString();
   final RxnString selectedGender = RxnString();
@@ -47,23 +47,47 @@ class RegisterController extends GetxController {
   Future<void> handleRegister({required Map<String, dynamic> formData}) async {
     try {
       isLoading.value = true;
-      final NetworkResponse response = await NetworkCaller().postFormData(
+      final NetworkResponse response = await NetworkCaller().postRequest(
         AppUrl.signUp,
-        formData: formData,
+        body: formData,
       );
+      LoggerUtils.info(formData);
       LoggerUtils.debug(response.jsonResponse);
+      final String message = response.jsonResponse?['message']?.toString() ?? '';
+      final Map<String, dynamic>? data = response.jsonResponse?['data'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? user = data?['user'] as Map<String, dynamic>?;
+      final String? token = data?['token']?.toString();
+
       if (response.isSuccess) {
         ToastManager.show(
+          duration: const Duration(seconds: 4),
           icon: const Icon(CupertinoIcons.check_mark_circled, color: AppColors.white),
-          message: response.jsonResponse?['message'] ?? 'Registration Successful',
+          message: message.isNotEmpty ? message : 'Registration Successful',
         );
-        await GetStorageModel().save(AppConstants.token, response.jsonResponse?['token'] ?? '');
-        Get.offAllNamed(AppRoutes.mainBottomScreen);
+        if (token != null && token.isNotEmpty) {
+          /// Account is immediately active - log the user straight in.
+          await GetStorageModel().save(AppConstants.token, token);
+          await GetStorageModel().save(
+            AppConstants.lastLoginAt,
+            (user?['last_login_at'] as String?) ?? DateTime.now().toIso8601String(),
+          );
+          final String? email = (user?['email'] ?? formData['email'])?.toString();
+          if (email != null && email.isNotEmpty) {
+            await GetStorageModel().save(AppConstants.lastLoginEmail, email);
+          }
+          Get.offAllNamed(AppRoutes.mainBottomScreen);
+        } else {
+          /// Account created but awaiting admin approval (e.g. status
+          /// "not_approved") - send the user to log in once approved.
+          Get.offAllNamed(AppRoutes.loginScreen);
+        }
+        LoggerUtils.debug('Registered user status: ${user?['status']}');
       } else {
         ToastManager.show(
           backgroundColor: AppColors.darkRed,
           textColor: AppColors.white,
-          message: response.jsonResponse?['message'] ?? 'Registration failed. Please try again.',
+          duration: const Duration(seconds: 4),
+          message: message.isNotEmpty ? message : 'Registration failed. Please try again.',
         );
       }
     } catch (e) {
@@ -85,6 +109,7 @@ class RegisterController extends GetxController {
     confirmPasswordTEController.dispose();
     nameTEController.dispose();
     mobileTEController.dispose();
+    telegramIdTEController.dispose();
     super.dispose();
   }
 }

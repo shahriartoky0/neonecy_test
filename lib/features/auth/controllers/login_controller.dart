@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/config/app_constants.dart';
 import 'package:neonecy_test/core/routes/app_routes.dart';
+import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/core/utils/get_storage.dart';
 import 'package:neonecy_test/core/utils/logger_utils.dart';
 
@@ -42,27 +42,51 @@ class LoginController extends GetxController {
       }
 
       isLoading.value = true;
-      final NetworkResponse response = await NetworkCaller().postFormData(
+
+      final String identifier = emailPhoneTEController.text.trim();
+      final Map<String, dynamic> loginBody = <String, dynamic>{
+        'email_or_phone': identifier,
+        'password': passwordTEController.text,
+        'device_name': await DeviceUtility.getDeviceName(),
+        'device_type': DeviceUtility.getDeviceType(),
+      };
+
+      final NetworkResponse response = await NetworkCaller().postRequest(
         AppUrl.login,
-        formData: <String, String>{
-          'email': emailPhoneTEController.text.trim(),
-          'password': passwordTEController.text,
-        },
+        body: loginBody,
         isLogin: true,
       );
-      if (response.isSuccess) {
-        await GetStorageModel().save(AppConstants.token, response.jsonResponse?['token'] ?? '');
+
+      final Map<String, dynamic>? data = response.jsonResponse?['data'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? user = data?['user'] as Map<String, dynamic>?;
+      final String? status = (user?['status'] ?? response.jsonResponse?['status'])?.toString();
+      final String message = response.jsonResponse?['message']?.toString() ?? '';
+      final String? token = data?['token']?.toString();
+
+      if (response.isSuccess && token != null && token.isNotEmpty) {
+        await GetStorageModel().save(AppConstants.token, token);
+        await GetStorageModel().save(
+          AppConstants.lastLoginAt,
+          (user?['last_login_at'] as String?) ?? DateTime.now().toIso8601String(),
+        );
+        await GetStorageModel().save(AppConstants.lastLoginEmail, identifier);
         clearFields();
         ToastManager.show(
           icon: const Icon(CupertinoIcons.check_mark_circled, color: AppColors.white),
-          message: 'Login Successful',
+          message: message.isNotEmpty ? message : 'Login Successful',
         );
         Get.offAllNamed(AppRoutes.mainBottomScreen);
+      } else if (status == 'not_approved') {
+        ToastManager.show(
+          backgroundColor: AppColors.orange,
+          textColor: AppColors.white,
+          message: message.isNotEmpty ? message : 'Your account is pending approval.',
+        );
       } else {
         ToastManager.show(
           backgroundColor: AppColors.darkRed,
           textColor: AppColors.white,
-          message: response.jsonResponse?['message'] ?? 'Incorrect email/phone or password',
+          message: message.isNotEmpty ? message : 'Incorrect email/phone or password',
         );
         passwordTEController.clear();
       }
@@ -77,6 +101,7 @@ class LoginController extends GetxController {
     try {
       isLoading.value = true;
       GetStorageModel().delete(AppConstants.token);
+      GetStorageModel().delete(AppConstants.lastLoginAt);
       ToastManager.show(message: 'Logout Successful');
       Get.offAllNamed(AppRoutes.loginScreen);
     } catch (e) {

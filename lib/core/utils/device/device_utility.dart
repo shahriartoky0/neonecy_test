@@ -1,9 +1,36 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 
 class DeviceUtility {
   DeviceUtility._();
+
+  /// Human readable device model, e.g. "iPhone 15" or "Pixel 7".
+  static Future<String> getDeviceName() async {
+    try {
+      final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      if (Platform.isIOS) {
+        final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        return iosInfo.utsname.machine;
+      }
+      if (Platform.isAndroid) {
+        final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        return '${androidInfo.manufacturer} ${androidInfo.model}';
+      }
+      return 'Unknown Device';
+    } catch (_) {
+      return 'Unknown Device';
+    }
+  }
+
+  /// Coarse device category expected by the backend ("mobile"/"web"/"desktop").
+  static String getDeviceType() {
+    if (Platform.isAndroid || Platform.isIOS) {
+      return 'mobile';
+    }
+    return 'desktop';
+  }
 
   // Set Status Bar Color
   static void setStatusBarColor(Color color) {

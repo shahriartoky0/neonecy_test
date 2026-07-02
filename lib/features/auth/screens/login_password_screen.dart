@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/app_button.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
-import 'package:neonecy_test/core/utils/custom_loader.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
 import 'package:neonecy_test/features/auth/widgets/auth_top_bar.dart';
 
@@ -61,23 +60,20 @@ class LoginPasswordScreen extends GetView<LoginController> {
                 ),
                 const SizedBox(height: AppSizes.xl),
                 Obx(
-                  () => Visibility(
-                    replacement: const CustomLoading(),
-                    visible: controller.isLoading.value == false,
-                    child: AppButton(
-                      labelText: 'Continue',
-                      bgColor: AppColors.yellow,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      onTap: () {
-                        FocusScope.of(context).unfocus();
-                        controller.handleLogin();
-                      },
+                  () => AppButton(
+                    labelText: 'Continue',
+                    isLoading: controller.isLoading.value,
+                    bgColor: AppColors.yellow,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      controller.handleLogin();
+                    },
                   ),
                 ),
                 const SizedBox(height: AppSizes.md),

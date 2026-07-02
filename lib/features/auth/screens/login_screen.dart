@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/app_button.dart';
+import 'package:neonecy_test/core/config/app_constants.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
 import 'package:neonecy_test/core/routes/app_routes.dart';
-import 'package:neonecy_test/core/utils/custom_loader.dart';
+import 'package:neonecy_test/core/utils/get_storage.dart';
 import 'package:neonecy_test/core/utils/validators/app_validation.dart';
 import 'package:neonecy_test/features/auth/controllers/login_controller.dart';
 import 'package:neonecy_test/features/auth/widgets/auth_top_bar.dart';
@@ -18,6 +19,11 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final LoginController controller = Get.put(LoginController());
+    final String? savedIdentifier =
+        GetStorageModel().read(AppConstants.lastLoginEmail) as String?;
+    if (savedIdentifier != null && savedIdentifier.isNotEmpty) {
+      controller.emailPhoneTEController.text = savedIdentifier;
+    }
 
     return Scaffold(
       appBar: const AuthTopBar(isRoot: true),
@@ -52,26 +58,23 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSizes.xl),
                 Obx(
-                  () => Visibility(
-                    replacement: const CustomLoading(),
-                    visible: controller.isLoading.value == false,
-                    child: AppButton(
-                      labelText: 'Log In',
-                      bgColor: AppColors.yellow,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      onTap: () {
-                        if (!controller.emailFormKey.currentState!.validate()) {
-                          return;
-                        }
-                        FocusScope.of(context).unfocus();
-                        Get.toNamed(AppRoutes.loginPasswordScreen);
-                      },
+                  () => AppButton(
+                    labelText: 'Log In',
+                    isLoading: controller.isLoading.value,
+                    bgColor: AppColors.yellow,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
+                    onTap: () {
+                      if (!controller.emailFormKey.currentState!.validate()) {
+                        return;
+                      }
+                      FocusScope.of(context).unfocus();
+                      Get.toNamed(AppRoutes.loginPasswordScreen);
+                    },
                   ),
                 ),
                 const SizedBox(height: AppSizes.xl),

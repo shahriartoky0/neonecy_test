@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:neonecy_test/core/common/widgets/app_button.dart';
 import 'package:neonecy_test/core/config/app_sizes.dart';
 import 'package:neonecy_test/core/design/app_colors.dart';
-import 'package:neonecy_test/core/utils/custom_loader.dart';
 import 'package:neonecy_test/core/utils/validators/app_validation.dart';
 import 'package:neonecy_test/features/auth/controllers/register_controller.dart';
 import 'package:neonecy_test/features/auth/utils/auth_options.dart';
@@ -83,6 +82,17 @@ class RegisterDetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSizes.md),
 
+                const _FieldLabel('Telegram ID'),
+                CustomTextField(
+                  controller: controller.telegramIdTEController,
+                  hintText: 'Enter your Telegram username or ID',
+                  fillColor: AppColors.iconBackgroundLight,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: AppSizes.sm),
+                  validator: (String? v) =>
+                      AppValidation.validateRequired(v, fieldName: 'Telegram ID'),
+                ),
+                const SizedBox(height: AppSizes.md),
+
                 const _FieldLabel('Gender'),
                 Obx(
                   () => AuthPickerField(
@@ -124,37 +134,35 @@ class RegisterDetailsScreen extends StatelessWidget {
                 const SizedBox(height: AppSizes.xl),
 
                 Obx(
-                  () => Visibility(
-                    replacement: const CustomLoading(),
-                    visible: controller.isLoading.value == false,
-                    child: AppButton(
-                      labelText: 'Complete Registration',
-                      bgColor: AppColors.yellow,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      onTap: () {
-                        if (!controller.detailsFormKey.currentState!.validate()) {
-                          return;
-                        }
-                        FocusScope.of(context).unfocus();
-                        controller.handleRegister(
-                          formData: <String, dynamic>{
-                            ...previousMap,
-                            'name': controller.nameTEController.text.trim(),
-                            'country': controller.selectedCountry.value,
-                            'mobile': controller.mobileTEController.text.trim(),
-                            'gender': controller.selectedGender.value?.toLowerCase(),
-                            'preferred_language':
-                                AuthOptions.languages[controller.selectedLanguage.value] ?? 'en',
-                            'date_of_birth': controller.selectedDob.value,
-                          },
-                        );
-                      },
+                  () => AppButton(
+                    labelText: 'Complete Registration',
+                    isLoading: controller.isLoading.value,
+                    bgColor: AppColors.yellow,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.w600,
                     ),
+                    onTap: () {
+                      if (!controller.detailsFormKey.currentState!.validate()) {
+                        return;
+                      }
+                      FocusScope.of(context).unfocus();
+                      controller.handleRegister(
+                        formData: <String, dynamic>{
+                          ...previousMap,
+                          'name': controller.nameTEController.text.trim(),
+                          'country': controller.selectedCountry.value,
+                          'mobile': controller.mobileTEController.text.trim(),
+                          'telegram_id': controller.telegramIdTEController.text.trim(),
+                          'gender': controller.selectedGender.value?.toLowerCase(),
+                          'preferred_language':
+                              AuthOptions.languages[controller.selectedLanguage.value] ?? 'en',
+                          'date_of_birth': controller.selectedDob.value,
+                        },
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: AppSizes.xl),
