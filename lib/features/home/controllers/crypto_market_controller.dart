@@ -19,7 +19,7 @@ class CryptoMarketController extends GetxController {
 
   // Track last successful load time per cache key
   final Map<String, DateTime> _lastLoadTimes = <String, DateTime>{};
-  static const Duration cacheValidDuration = Duration(minutes: 5);
+  static const Duration cacheValidDuration = Duration(minutes: 1);
 
   // ✅ CHANGED: Define max items to show
   static const int maxItemsToShow = 6; // Changed from 10 to 5
@@ -421,15 +421,15 @@ class CryptoMarketController extends GetxController {
     final double v = volume is double ? volume : (volume is int ? volume.toDouble() : 0.0);
 
     if (v >= 1e12) {
-      return 'Vol: \$${(v / 1e12).toStringAsFixed(1)}T';
+      return '\$${(v / 1e12).toStringAsFixed(1)}T';
     } else if (v >= 1e9) {
-      return 'Vol: \$${(v / 1e9).toStringAsFixed(1)}B';
+      return '\$${(v / 1e9).toStringAsFixed(1)}B';
     } else if (v >= 1e6) {
-      return 'Vol: \$${(v / 1e6).toStringAsFixed(1)}M';
+      return '\$${(v / 1e6).toStringAsFixed(1)}M';
     } else if (v >= 1e3) {
-      return 'Vol: \$${(v / 1e3).toStringAsFixed(0)}K';
+      return '\$${(v / 1e3).toStringAsFixed(0)}K';
     } else {
-      return 'Vol: \$${v.toStringAsFixed(0)}';
+      return '\$${v.toStringAsFixed(0)}';
     }
   }
 

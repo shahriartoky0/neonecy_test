@@ -45,6 +45,18 @@ class AppValidation {
     return null;
   }
 
+  static String? validateEmailOrPhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Email/Phone number is required";
+    }
+    final String trimmed = value.trim();
+    final bool looksLikePhone = RegExp(r'^[\d\s+-]{6,15}$').hasMatch(trimmed);
+    if (trimmed.isValidEmail() || looksLikePhone) {
+      return null;
+    }
+    return "Enter a valid email or phone number";
+  }
+
   static String? validatePhoneNumber(String? phoneNumber) {
     if (phoneNumber == null || phoneNumber.isEmpty) {
       return "Phone number is required";

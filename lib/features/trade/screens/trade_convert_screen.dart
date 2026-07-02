@@ -77,7 +77,14 @@ class TradeConvertScreen extends GetView<TradeController> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                appbarIcon(assetPath: AppIcons.filter, onTap: () {}),
+                RotatedBox(
+                  quarterTurns: 3,
+                  child: CustomSvgImage(
+                    assetName: AppIcons.sliderFilter,
+                    color: AppColors.white,
+                    height: 30,
+                  ),
+                ),
                 const SizedBox(width: AppSizes.sm),
                 appbarIcon(
                   assetPath: AppIcons.assetHistory,

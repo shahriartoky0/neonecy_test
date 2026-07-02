@@ -12,8 +12,10 @@ class AppRoutes {
 
   // auth screen
   static const String loginScreen = "/login-screen";
-  static const String submitPassword = "/submit-password-screen";
-  static const String finalSignUp = "/final-signup-screen";
+  static const String loginPasswordScreen = "/login-password-screen";
+  static const String registerScreen = "/register-screen";
+  static const String registerPasswordScreen = "/register-password-screen";
+  static const String registerDetailsScreen = "/register-details-screen";
 
   // main screen
   static const String mainBottomScreen = "/main-bottom-screen";

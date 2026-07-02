@@ -13,58 +13,58 @@ import '../../../core/network/network_caller.dart';
 import '../../../core/network/network_response.dart';
 
 class LoginController extends GetxController {
-  ///=====> For login text form controller =====>
   RxBool isLoading = false.obs;
 
-  final TextEditingController userNameTEController = TextEditingController();
+  /// Step 1 - email/phone entry
+  final TextEditingController emailPhoneTEController = TextEditingController();
+  final GlobalKey<FormState> emailFormKey = GlobalKey<FormState>();
+
+  /// Step 2 - password entry
   final TextEditingController passwordTEController = TextEditingController();
+  final GlobalKey<FormState> passwordFormKey = GlobalKey<FormState>();
 
-  final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
+  String get maskedIdentifier {
+    final String value = emailPhoneTEController.text.trim();
+    final int atIndex = value.indexOf('@');
+    if (atIndex <= 0) {
+      return value;
+    }
+    final String local = value.substring(0, atIndex);
+    final String domain = value.substring(atIndex);
+    final int visible = local.length <= 4 ? 1 : local.length - 4;
+    return '${local.substring(0, visible)}****$domain';
+  }
 
-  /// =======> handle the logic of login ===========>
   Future<void> handleLogin() async {
     try {
-      if (!loginFormKey.currentState!.validate()) {
+      if (!passwordFormKey.currentState!.validate()) {
         return;
       }
 
       isLoading.value = true;
-      await Future<void>.delayed(const Duration(seconds: 2));
       final NetworkResponse response = await NetworkCaller().postFormData(
         AppUrl.login,
         formData: <String, String>{
-          'user_name': userNameTEController.text,
+          'email': emailPhoneTEController.text.trim(),
           'password': passwordTEController.text,
         },
+        isLogin: true,
       );
       if (response.isSuccess) {
-        if (response.jsonResponse?['status'] == 422) {
-          ToastManager.show(
-            backgroundColor: AppColors.darkRed,
-            textColor: AppColors.white,
-            message: response.jsonResponse?['message'] ?? 'Incorrect username or password !!',
-          );
-          passwordTEController.clear();
-        }
-        /// ===========> Successful Login =============>
-        ///
-        else if (response.jsonResponse?['success'] == 200) {
-         await GetStorageModel().save(AppConstants.token, response.jsonResponse?['token'] ?? '');
-          clearFields();
-          ToastManager.show(
-            icon: const Icon(CupertinoIcons.check_mark_circled, color: AppColors.white),
-            message: 'Login Successful',
-          );
-          // LoggerUtils.debug(GetStorageModel().exists(AppConstants.token));
-          // LoggerUtils.debug(GetStorageModel().read(AppConstants.token));
-          Get.offAllNamed(AppRoutes.mainBottomScreen);
-        }
+        await GetStorageModel().save(AppConstants.token, response.jsonResponse?['token'] ?? '');
+        clearFields();
+        ToastManager.show(
+          icon: const Icon(CupertinoIcons.check_mark_circled, color: AppColors.white),
+          message: 'Login Successful',
+        );
+        Get.offAllNamed(AppRoutes.mainBottomScreen);
       } else {
         ToastManager.show(
           backgroundColor: AppColors.darkRed,
           textColor: AppColors.white,
-          message: response.jsonResponse?['message'] ?? 'Error Occurred. Please try again !!',
+          message: response.jsonResponse?['message'] ?? 'Incorrect email/phone or password',
         );
+        passwordTEController.clear();
       }
     } catch (e) {
       LoggerUtils.error("Error is $e");
@@ -76,13 +76,6 @@ class LoginController extends GetxController {
   Future<void> logOut() async {
     try {
       isLoading.value = true;
-      // final NetworkResponse response = await NetworkCaller().postFormData(
-      //   AppUrl.login,
-      //   formData: <String, String>{
-      //     'user_name': userNameTEController.text,
-      //     'password': passwordTEController.text,
-      //   },
-      // );
       GetStorageModel().delete(AppConstants.token);
       ToastManager.show(message: 'Logout Successful');
       Get.offAllNamed(AppRoutes.loginScreen);
@@ -94,13 +87,13 @@ class LoginController extends GetxController {
   }
 
   void clearFields() {
-    userNameTEController.clear();
+    emailPhoneTEController.clear();
     passwordTEController.clear();
   }
 
   @override
   void dispose() {
-    userNameTEController.dispose();
+    emailPhoneTEController.dispose();
     passwordTEController.dispose();
     super.dispose();
   }

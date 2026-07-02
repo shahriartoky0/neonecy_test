@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 import 'package:neonecy_test/features/auth/bindings/auth_binding.dart';
+import 'package:neonecy_test/features/auth/screens/login_password_screen.dart';
 import 'package:neonecy_test/features/auth/screens/login_screen.dart';
-import 'package:neonecy_test/features/auth/screens/sign_up_final_screen.dart';
-import 'package:neonecy_test/features/auth/screens/submit_password_screen.dart';
+import 'package:neonecy_test/features/auth/screens/register_details_screen.dart';
+import 'package:neonecy_test/features/auth/screens/register_password_screen.dart';
+import 'package:neonecy_test/features/auth/screens/register_screen.dart';
 import 'package:neonecy_test/features/home/screens/home_screen.dart';
 import 'package:neonecy_test/features/mainBottomNav/bindings/mainbottomnav_binding.dart';
 import 'package:neonecy_test/features/mainBottomNav/screens/main_bottom_nav_screen.dart';
@@ -40,14 +42,26 @@ class AppNavigation {
       binding: AuthBinding(),
     ),
     GetPage<dynamic>(
-      name: AppRoutes.submitPassword,
-      page: () => const SubmitPasswordScreen(),
+      name: AppRoutes.loginPasswordScreen,
+      page: () => const LoginPasswordScreen(),
       transition: Transition.rightToLeft,
       binding: AuthBinding(),
     ),
     GetPage<dynamic>(
-      name: AppRoutes.finalSignUp,
-      page: () => const SignUpFinalPage(),
+      name: AppRoutes.registerScreen,
+      page: () => const RegisterScreen(),
+      transition: Transition.rightToLeft,
+      binding: AuthBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.registerPasswordScreen,
+      page: () => const RegisterPasswordScreen(),
+      transition: Transition.rightToLeft,
+      binding: AuthBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.registerDetailsScreen,
+      page: () => const RegisterDetailsScreen(),
       transition: Transition.rightToLeft,
       binding: AuthBinding(),
     ),

@@ -63,6 +63,7 @@ class AppIcons {
   // Search Icon
   static String search = "$baseUrl/search.svg";
   static String walletIcon = "$baseUrl/wallet_icon.svg";
+  static String sliderFilter = "$baseUrl/slider_filter_icon.svg";
 
   // Setting Icon
   static String setting = "$baseUrl/setting.svg";
