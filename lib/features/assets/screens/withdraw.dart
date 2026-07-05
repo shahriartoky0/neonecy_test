@@ -1,4 +1,6 @@
 // lib/features/assets/screens/withdraw.dart
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +14,7 @@ import 'package:neonecy_test/core/extensions/widget_extensions.dart';
 import 'package:neonecy_test/core/utils/address_storage_service.dart';
 import 'package:neonecy_test/core/utils/device/device_utility.dart';
 import 'package:neonecy_test/features/assets/screens/add_new_address_screen.dart';
+import 'package:neonecy_test/features/assets/screens/withdraw_slip_screen.dart';
 import 'package:neonecy_test/features/settings/model/crypto_address_model.dart';
 import 'package:neonecy_test/features/wallet/controllers/wallet_controller.dart';
 import 'package:neonecy_test/features/wallet/models/coin_wallet_model.dart';
@@ -125,11 +128,6 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   double get _fiatValue {
     final double amount = double.tryParse(_amountCtrl.text) ?? 0;
     return amount * widget.coin.coinDetails.price;
-  }
-
-  String _formatAddress(String addr) {
-    if (addr.length <= 12) return addr;
-    return '${addr.substring(0, 6)}...${addr.substring(addr.length - 6)}';
   }
 
   List<String> _getAvailableNetworks() {
@@ -441,7 +439,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                   Row(
                     children: <Widget>[
                       Text(
-                        '≈ ৳${_fiatValue.toStringAsFixed(2)}',
+                        '≈ ${_fiatValue.toStringAsFixed(2)}',
                         style: const TextStyle(color: AppColors.white, fontSize: 13),
                       ),
                       const SizedBox(width: 6),
@@ -627,7 +625,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                       }
                       return;
                     }
-                    _showWithdrawConfirmation();
+                    _executeWithdraw();
                   },
                   child: _isProcessing
                       ? const SizedBox(
@@ -700,59 +698,10 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     );
   }
 
-  void _showWithdrawConfirmation() {
-    final double amount = double.parse(_amountCtrl.text);
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.primaryColor,
-        title: const Text(
-          'Confirm Withdrawal',
-          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold, fontSize: 17),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _ConfirmRow(label: 'Coin', value: widget.coin.coinDetails.symbol),
-            const SizedBox(height: 10),
-            _ConfirmRow(label: 'Amount', value: '$amount ${widget.coin.coinDetails.symbol}'),
-            const SizedBox(height: 10),
-            _ConfirmRow(
-              label: 'Network Fee',
-              value: '$_networkFee ${widget.coin.coinDetails.symbol}',
-            ),
-            const SizedBox(height: 10),
-            _ConfirmRow(
-              label: 'You receive',
-              value: '${_receiveAmount.toStringAsFixed(8)} ${widget.coin.coinDetails.symbol}',
-              valueColor: AppColors.green,
-            ),
-            const Divider(color: AppColors.iconBackground, height: 24),
-            _ConfirmRow(label: 'To', value: _formatAddress(_address)),
-            const SizedBox(height: 10),
-            _ConfirmRow(label: 'Network', value: _selectedNetwork),
-          ],
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textGreyLight)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.yellow,
-              foregroundColor: AppColors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              _executeWithdraw();
-            },
-            child: const Text('Confirm', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
+  String _generateTxid() {
+    final Random random = Random();
+    const String chars = '0123456789abcdef';
+    return '0x${List<String>.generate(64, (_) => chars[random.nextInt(chars.length)]).join()}';
   }
 
   Future<void> _executeWithdraw() async {
@@ -760,15 +709,35 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
     try {
       final double withdrawAmount = double.parse(_amountCtrl.text);
       final String coinSymbol = widget.coin.coinDetails.symbol;
-      await _walletController.withdrawCoin(coinSymbol: coinSymbol, amount: withdrawAmount);
-      ToastManager.show(
-        message: 'Withdrawal successful! $withdrawAmount $coinSymbol sent',
-        backgroundColor: AppColors.greenContainer,
-        textColor: AppColors.white,
-        icon: const Icon(Icons.check_circle, color: AppColors.green),
+      final String network = _isAutoNetwork ? 'TRC20' : _selectedNetwork;
+      final String address = _address;
+      final String txid = _generateTxid();
+      final double networkFee = _networkFee;
+      final double receiveAmount = _receiveAmount;
+      await _walletController.withdrawCoin(
+        coinSymbol: coinSymbol,
+        amount: withdrawAmount,
+        network: network,
+        address: address,
+        txid: txid,
+        fee: networkFee,
+        receiveAmount: receiveAmount,
       );
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      if (mounted) Get.back();
+      if (mounted) {
+        // Show the Withdraw Payment Slip in place of this form.
+        Get.off(
+          () => WithdrawSlipScreen(
+            symbol: coinSymbol,
+            receiveAmount: receiveAmount,
+            amount: withdrawAmount,
+            networkFee: networkFee,
+            network: network,
+            address: address,
+            txid: txid,
+            date: DateTime.now(),
+          ),
+        );
+      }
     } catch (e) {
       ToastManager.show(
         message: 'Withdrawal failed: ${e.toString()}',
@@ -1052,11 +1021,7 @@ class _AddressListTab extends StatelessWidget {
                     color: AppColors.iconBackgroundLight,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.account_balance_wallet,
-                    color: AppColors.yellow,
-                    size: 18,
-                  ),
+                  child: CustomSvgImage(assetName: AppIcons.walletIcon),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1128,32 +1093,4 @@ class _PillButton extends StatelessWidget {
       ),
     );
   }
-}
-
-// ── Confirm row ────────────────────────────────────────────────────────────────
-class _ConfirmRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color? valueColor;
-
-  const _ConfirmRow({required this.label, required this.value, this.valueColor});
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: <Widget>[
-      Text(label, style: const TextStyle(color: AppColors.textGreyLight, fontSize: 13)),
-      Flexible(
-        child: Text(
-          value,
-          style: TextStyle(
-            color: valueColor ?? AppColors.white,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.right,
-        ),
-      ),
-    ],
-  );
 }

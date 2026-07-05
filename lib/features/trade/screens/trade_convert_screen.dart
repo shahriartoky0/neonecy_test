@@ -18,7 +18,7 @@ import '../../wallet/controllers/wallet_controller.dart';
 import '../controllers/trade_controller.dart';
 import '../widgets/coin_selection_modal.dart';
 import '../widgets/confirm_order_modal.dart';
-import '../widgets/conversion_details_screen.dart';
+import '../widgets/trade_order_views.dart';
 import '../widgets/trade_preview_loader.dart';
 
 class TradeConvertScreen extends GetView<TradeController> {
@@ -42,12 +42,25 @@ class TradeConvertScreen extends GetView<TradeController> {
               children: <Widget>[
                 _buildOrderTypeSelector(),
                 const SizedBox(height: 20),
-                _buildSwapContainer(context),
-                const SizedBox(height: 16),
-                _buildRateLine(),
-                const SizedBox(height: 16),
-                _buildPreviewButton(),
-                SizedBox(height: context.screenHeight * 0.3),
+                Obx(() {
+                  switch (controller.selectedOrderType.value) {
+                    case 1:
+                      return const RecurringOrderView();
+                    case 2:
+                      return const LimitOrderView();
+                    default:
+                      return Column(
+                        children: <Widget>[
+                          _buildSwapContainer(context),
+                          const SizedBox(height: 16),
+                          _buildRateLine(),
+                          const SizedBox(height: 16),
+                          _buildPreviewButton(),
+                          SizedBox(height: context.screenHeight * 0.3),
+                        ],
+                      );
+                  }
+                }),
               ],
             ),
           ),

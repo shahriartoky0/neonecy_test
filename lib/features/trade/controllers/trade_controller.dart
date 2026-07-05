@@ -273,8 +273,8 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
 
         Get.to(
           () => ConversionSuccessScreen(
-            fromCoin: fromCoin.value!,
-            toCoin: toCoin.value!,
+            fromSymbol: fromCoin.value!.symbol,
+            toSymbol: toCoin.value!.symbol,
             fromAmount: fromAmount.value,
             toAmount: toAmount.value,
           ),
@@ -391,7 +391,7 @@ class TradeController extends GetxController with GetSingleTickerProviderStateMi
   late TabController tabController;
   RxInt selectedIndex = 0.obs;
 
-  final List<String> homeTabTitles = <String>['Convert', 'Sport', 'Margin', 'Buy/Sell', 'P2'];
+  final List<String> homeTabTitles = <String>['Convert', 'Spot', 'Stocks', 'P2P', 'Alpha'];
 
   @override
   void onInit() {

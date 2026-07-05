@@ -10,21 +10,22 @@ import 'package:neonecy_test/core/routes/app_routes.dart';
 import 'package:neonecy_test/features/mainBottomNav/controllers/main_bottom_nav_controller.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
-import '../../assets/model/coin_model.dart';
 import 'boxy_switch.dart';
 
 class ConversionSuccessScreen extends StatefulWidget {
-  final CoinItem fromCoin;
-  final CoinItem toCoin;
+  final String fromSymbol;
+  final String toSymbol;
   final String fromAmount;
   final String toAmount;
+  final DateTime? tradeDate;
 
   const ConversionSuccessScreen({
     super.key,
-    required this.fromCoin,
-    required this.toCoin,
+    required this.fromSymbol,
+    required this.toSymbol,
     required this.fromAmount,
     required this.toAmount,
+    this.tradeDate,
   });
 
   @override
@@ -47,7 +48,8 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final String currentDate = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+    final String currentDate =
+        DateFormat('yyyy-MM-dd HH:mm').format(widget.tradeDate ?? DateTime.now());
     final double fromValue = _parseAmount(widget.fromAmount);
     final double toValue = _parseAmount(widget.toAmount);
     final double rate = fromValue > 0 ? toValue / fromValue : 0;
@@ -115,7 +117,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
 
             // ── Main received amount ───────────────────────────────
             Text(
-              '${widget.toAmount} ${widget.toCoin.symbol}',
+              '${widget.toAmount} ${widget.toSymbol}',
               style: const TextStyle(
                 color: AppColors.textWhite,
                 fontSize: 30,
@@ -181,7 +183,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                                 ),
                               ),
                               Text(
-                                '${widget.fromAmount} ${widget.fromCoin.symbol}',
+                                '${widget.fromAmount} ${widget.fromSymbol}',
                                 style: const TextStyle(
                                   color: AppColors.textWhite,
                                   fontSize: AppSizes.fontSizeBodyS,
@@ -194,7 +196,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              '1 ${widget.fromCoin.symbol} = ${_formatRate(rate)} ${widget.toCoin.symbol} ⇄',
+                              '1 ${widget.fromSymbol} = ${_formatRate(rate)} ${widget.toSymbol} ⇄',
                               style: const TextStyle(color: AppColors.textGreyLight, fontSize: 11),
                             ),
                           ),
@@ -206,7 +208,7 @@ class _ConversionSuccessScreenState extends State<ConversionSuccessScreen> {
                     const Divider(color: AppColors.iconBackground, height: 1),
                     const SizedBox(height: AppSizes.md),
 
-                    _buildDetailRow('Transaction Fees', '0.00 ${widget.toCoin.symbol}'),
+                    _buildDetailRow('Transaction Fees', '0.00 ${widget.toSymbol}'),
 
                     const SizedBox(height: AppSizes.md),
                     const Divider(color: AppColors.iconBackground, height: 1),

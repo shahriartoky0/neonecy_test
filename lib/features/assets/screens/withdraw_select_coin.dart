@@ -355,7 +355,7 @@ class _CoinListTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '≈ ৳${bdtValue.toStringAsFixed(2)}',
+                  '≈ ${bdtValue.toStringAsFixed(2)}',
                   style: const TextStyle(color: AppColors.textGreyLight, fontSize: 12),
                 ),
               ],

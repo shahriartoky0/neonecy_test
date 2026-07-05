@@ -261,6 +261,11 @@ class WalletController extends GetxController {
   Future<void> withdrawCoin({
     required String coinSymbol,
     required double amount,
+    String? network,
+    String? address,
+    String? txid,
+    double? fee,
+    double? receiveAmount,
   }) async {
     try {
       print('📤 Withdrawing $amount $coinSymbol...');
@@ -322,7 +327,15 @@ class WalletController extends GetxController {
       print('✅ Withdraw successful: $amount $coinSymbol');
 
       // Record the withdrawal in persistent history.
-      TransactionHistoryService.logWithdraw(symbol: coinSymbol, amount: amount);
+      TransactionHistoryService.logWithdraw(
+        symbol: coinSymbol,
+        amount: amount,
+        network: network,
+        address: address,
+        txid: txid,
+        fee: fee,
+        receiveAmount: receiveAmount,
+      );
 
     } catch (e) {
       print('❌ Withdraw error: $e');

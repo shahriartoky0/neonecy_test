@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:neonecy_test/core/common/widgets/custom_svg.dart';
 import 'package:neonecy_test/core/common/widgets/draggable_ai_button.dart';
 import 'package:neonecy_test/core/design/app_icons.dart';
+import 'package:neonecy_test/features/assets/screens/withdraw_slip_screen.dart';
+import 'package:neonecy_test/features/trade/widgets/conversion_details_screen.dart';
 import '../../../core/config/app_sizes.dart';
 import '../../../core/design/app_colors.dart';
 import '../models/transaction_history.dart';
@@ -119,6 +121,54 @@ class _TransactionTile extends StatelessWidget {
 
   static final DateFormat _fmt = DateFormat('yyyy-MM-dd HH:mm:ss');
 
+  /// Splits an amount string like '-23.99 USDT' or '+661.14 1000SATS'
+  /// into (amount, symbol). Returns null when it can't be parsed.
+  static List<String>? _splitAmount(String? raw) {
+    if (raw == null) return null;
+    final String cleaned = raw.replaceFirst(RegExp(r'^[+-]'), '').trim();
+    final List<String> parts = cleaned.split(' ');
+    if (parts.length < 2) return null;
+    return <String>[parts.first, parts.sublist(1).join(' ')];
+  }
+
+  void _openSlip() {
+    final Map<String, dynamic> details = tx.details ?? <String, dynamic>{};
+
+    if (tx.type == 'Withdraw') {
+      final List<String>? parsed = _splitAmount(tx.primaryAmount);
+      final String? symbol = details['symbol'] as String? ?? parsed?[1];
+      if (symbol == null) return;
+      final double? parsedAmount = parsed != null ? double.tryParse(parsed[0]) : null;
+      Get.to(
+        () => WithdrawSlipScreen(
+          symbol: symbol,
+          receiveAmount: (details['receiveAmount'] as num?)?.toDouble() ?? parsedAmount,
+          amount: (details['amount'] as num?)?.toDouble() ?? parsedAmount,
+          networkFee: (details['fee'] as num?)?.toDouble(),
+          network: details['network'] as String?,
+          address: details['address'] as String?,
+          txid: details['txid'] as String?,
+          date: tx.date,
+        ),
+      );
+    } else if (tx.type == 'Convert') {
+      final List<String>? to = _splitAmount(tx.primaryAmount);
+      final List<String>? from = _splitAmount(tx.subLine1);
+      final String toSymbol = details['toSymbol'] as String? ?? to?[1] ?? '';
+      final String fromSymbol = details['fromSymbol'] as String? ?? from?[1] ?? '';
+      if (toSymbol.isEmpty || fromSymbol.isEmpty) return;
+      Get.to(
+        () => ConversionSuccessScreen(
+          fromSymbol: fromSymbol,
+          toSymbol: toSymbol,
+          fromAmount: details['fromAmount'] as String? ?? from?[0] ?? '0',
+          toAmount: details['toAmount'] as String? ?? to?[0] ?? '0',
+          tradeDate: tx.date,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color amountColor = tx.isPositive == null
@@ -127,7 +177,10 @@ class _TransactionTile extends StatelessWidget {
         ? AppColors.green
         : AppColors.red;
 
-    return Padding(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _openSlip,
+      child: Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSizes.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,6 +254,7 @@ class _TransactionTile extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

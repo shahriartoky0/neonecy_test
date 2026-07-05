@@ -12,6 +12,7 @@ import '../../../core/design/app_colors.dart';
  import '../../assets/model/coin_model.dart';
 import '../controllers/wallet_controller.dart';
 import '../models/coin_wallet_model.dart';
+import '../models/transaction_history.dart';
 
 class WalletView extends StatelessWidget {
   final WalletController _walletController = Get.put(WalletController());
@@ -558,6 +559,12 @@ class WalletView extends StatelessWidget {
 
                 // Show toast
                 if (success) {
+                  // Record the wallet balance increase in history.
+                  TransactionHistoryService.logWalletChange(
+                    symbol: coin.symbol,
+                    amount: quantity,
+                    increased: true,
+                  );
                   ToastManager.show(
                     backgroundColor: AppColors.greenContainer,
                     textColor: AppColors.white,
@@ -895,6 +902,7 @@ class WalletView extends StatelessWidget {
                 if (quantity > 0) {
                   Navigator.of(bottomSheetContext).pop();
 
+                  final double oldQuantity = walletCoin.quantity;
                   final bool success = await _walletController.updateWalletCoin(
                     symbol: walletCoin.coinDetails.symbol,
                     newQuantity: quantity,
@@ -902,6 +910,15 @@ class WalletView extends StatelessWidget {
                   );
 
                   if (success) {
+                    // Record the balance increase/decrease in history.
+                    final double delta = quantity - oldQuantity;
+                    if (delta != 0) {
+                      TransactionHistoryService.logWalletChange(
+                        symbol: walletCoin.coinDetails.symbol,
+                        amount: delta.abs(),
+                        increased: delta > 0,
+                      );
+                    }
                     ToastManager.show(
                       backgroundColor: AppColors.greenContainer,
                       textColor: AppColors.white,
